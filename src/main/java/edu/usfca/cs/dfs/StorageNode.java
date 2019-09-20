@@ -30,9 +30,9 @@ public class StorageNode {
             .option(ChannelOption.SO_KEEPALIVE, true)
             .handler(pipeline);
 
-        ChannelFuture cf = bootstrap.connect("localhost", 4123);
+        ChannelFuture cf = bootstrap.connect("orion01", 4123);
         cf.syncUninterruptibly();
-        
+
         /*Get IP address and hostname*/
         InetAddress ip;
         String hostname = null;
@@ -43,7 +43,8 @@ public class StorageNode {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        
+
+
         /*Store hostname in a JoinRequest protobuf*/
         StorageMessages.JoinRequest joinRequest
             = StorageMessages.JoinRequest.newBuilder()

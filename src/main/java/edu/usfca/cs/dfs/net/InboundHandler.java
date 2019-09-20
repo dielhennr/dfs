@@ -41,14 +41,7 @@ extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
     public void channelRead0(
             ChannelHandlerContext ctx,
             StorageMessages.StorageMessageWrapper msg) {
-        if (msg.hasStoreChunkMsg()) {
-			StorageMessages.StoreChunk storeChunkMsg
-				= msg.getStoreChunkMsg();
-			System.out.println("Storing file name: "
-					+ storeChunkMsg.getFileName());
-        } else if (msg.hasJoinRequest()){
-        	Controller.OnMessage(msg);
-        }
+        Controller.OnMessage(msg);
     }
 
     @Override

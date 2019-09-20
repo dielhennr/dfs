@@ -30,7 +30,7 @@ public class StorageNode {
             .option(ChannelOption.SO_KEEPALIVE, true)
             .handler(pipeline);
 
-        ChannelFuture cf = bootstrap.connect("localhost", 4200);
+        ChannelFuture cf = bootstrap.connect("localhost", 4123);
         cf.syncUninterruptibly();
         
         /*Get IP address and hostname*/
@@ -66,8 +66,6 @@ public class StorageNode {
         /* Don't quit until we've disconnected: */
         System.out.println("Shutting down");
         workerGroup.shutdownGracefully();
-	
-	
 	
     }
 }

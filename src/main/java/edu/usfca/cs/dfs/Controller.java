@@ -14,14 +14,14 @@ public class Controller {
     public void start()
     throws IOException {
         messageRouter = new ServerMessageRouter();
-        messageRouter.listen(4200);
-        System.out.println("Listening for connections on port 7777");
+        messageRouter.listen(4123);
+        System.out.println("Listening for connections on port 4123");
     }
 
     public static void main(String[] args)
     throws IOException {
-        Server s = new Server();
-        s.start();
+        Controller controller = new Controller();
+        controller.start();
     }
     
     public static void OnMessage(StorageMessages.StorageMessageWrapper message) {

@@ -14,7 +14,7 @@ public class Controller {
     public void start()
     throws IOException {
         messageRouter = new ServerMessageRouter();
-        messageRouter.listen(7777);
+        messageRouter.listen(4200);
         System.out.println("Listening for connections on port 7777");
     }
 

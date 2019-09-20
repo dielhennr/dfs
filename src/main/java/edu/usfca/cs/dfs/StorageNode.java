@@ -30,7 +30,7 @@ public class StorageNode {
             .option(ChannelOption.SO_KEEPALIVE, true)
             .handler(pipeline);
 
-        ChannelFuture cf = bootstrap.connect("localhost", 7777);
+        ChannelFuture cf = bootstrap.connect("localhost", 4200);
         cf.syncUninterruptibly();
         
         /*Get IP address and hostname*/

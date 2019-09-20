@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
+import io.netty.channel.ChannelHandlerContext;
 
 public class Controller {
 
     ServerMessageRouter messageRouter;
-    static ArrayList<String> storageNodes = new ArrayList<String>();
+    static ArrayList<JoinContext> storageNodes = new ArrayList<JoinContext>();
     
 
     public void start()
@@ -24,13 +25,15 @@ public class Controller {
         controller.start();
     }
     
-    public static void OnMessage(StorageMessages.StorageMessageWrapper message) {
+    public static void OnMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
     	if (message.hasJoinRequest()) {
 			StorageMessages.JoinRequest joinRequest
 				= message.getJoinRequest();
-			storageNodes.add(joinRequest.getNodeName());
-			System.out.println(storageNodes.toString());
+			storageNodes.add(new JoinContext(ctx, joinRequest));
     	}
+    	for (JoinContext join : storageNodes) {
+    	    System.out.println(join.getJoinRequest().getNodeName());
+        }
     	
     }
 }

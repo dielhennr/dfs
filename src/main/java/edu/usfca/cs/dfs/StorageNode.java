@@ -55,7 +55,6 @@ public class StorageNode {
         StorageMessages.StorageMessageWrapper msgWrapper =
             StorageMessages.StorageMessageWrapper.newBuilder()
                 .setJoinRequest(joinRequest)
-                
                 .build();
         
         /*Send join request*/

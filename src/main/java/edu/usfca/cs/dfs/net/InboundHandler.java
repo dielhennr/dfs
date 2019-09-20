@@ -41,7 +41,7 @@ extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
     public void channelRead0(
             ChannelHandlerContext ctx,
             StorageMessages.StorageMessageWrapper msg) {
-        Controller.OnMessage(msg);
+        Controller.OnMessage(ctx, msg);
     }
 
     @Override

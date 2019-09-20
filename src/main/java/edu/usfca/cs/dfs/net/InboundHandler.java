@@ -41,10 +41,19 @@ extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
             ChannelHandlerContext ctx,
             StorageMessages.StorageMessageWrapper msg) {
 
-        StorageMessages.StoreChunk storeChunkMsg
-            = msg.getStoreChunkMsg();
-        System.out.println("Storing file name: "
-                + storeChunkMsg.getFileName());
+        System.out.println(msg.hasJoinRequest());
+        
+        if (msg.hasStoreChunkMsg()) {
+			StorageMessages.StoreChunk storeChunkMsg
+				= msg.getStoreChunkMsg();
+			System.out.println("Storing file name: "
+					+ storeChunkMsg.getFileName());
+        } else if (msg.hasJoinRequest()){
+			StorageMessages.JoinRequest joinRequest
+				= msg.getJoinRequest();
+			System.out.println("Request to join network from: "
+					+ joinRequest.getNodeName());
+        }
     }
 
     @Override

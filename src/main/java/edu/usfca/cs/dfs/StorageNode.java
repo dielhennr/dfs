@@ -13,13 +13,12 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import edu.usfca.cs.dfs.net.MessagePipeline;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-public class Client {
-
-    public Client() {
-
-    }
-
+public class StorageNode {
+	public StorageNode( ) { } ;
+	
     public static void main(String[] args)
     throws IOException {
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -33,22 +32,31 @@ public class Client {
 
         ChannelFuture cf = bootstrap.connect("localhost", 7777);
         cf.syncUninterruptibly();
-
-        ByteString data = ByteString.copyFromUtf8("Hello World!");
-        StorageMessages.StoreChunk storeChunkMsg
-            = StorageMessages.StoreChunk.newBuilder()
-                .setFileName("my_file.txt")
-                .setChunkId(3)
-                .setData(data)
+        
+        /*Get IP address and hostname*/
+        InetAddress ip;
+        String hostname = null;
+        try {
+            ip = InetAddress.getLocalHost();
+            hostname = ip.getHostName();
+ 
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        
+        /*Store hostname in a JoinRequest protobuf*/
+        StorageMessages.JoinRequest joinRequest
+            = StorageMessages.JoinRequest.newBuilder()
+                .setNodeName(hostname)
                 .build();
 
-        
+        /*Wrapper*/
         StorageMessages.StorageMessageWrapper msgWrapper =
             StorageMessages.StorageMessageWrapper.newBuilder()
-                .setStoreChunkMsg(storeChunkMsg)
+                .setJoinRequest(joinRequest)
                 .build();
         
-
+        /*Send join request*/
         Channel chan = cf.channel();
         ChannelFuture write = chan.write(msgWrapper);
         chan.flush();
@@ -57,5 +65,8 @@ public class Client {
         /* Don't quit until we've disconnected: */
         System.out.println("Shutting down");
         workerGroup.shutdownGracefully();
+	
+	
+	
     }
 }

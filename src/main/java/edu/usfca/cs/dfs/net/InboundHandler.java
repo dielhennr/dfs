@@ -2,6 +2,7 @@ package edu.usfca.cs.dfs.net;
 
 import java.net.InetSocketAddress;
 
+import edu.usfca.cs.dfs.Controller;
 import edu.usfca.cs.dfs.StorageMessages;
 
 import io.netty.channel.ChannelHandler;
@@ -40,19 +41,13 @@ extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
     public void channelRead0(
             ChannelHandlerContext ctx,
             StorageMessages.StorageMessageWrapper msg) {
-
-        System.out.println(msg.hasJoinRequest());
-        
         if (msg.hasStoreChunkMsg()) {
 			StorageMessages.StoreChunk storeChunkMsg
 				= msg.getStoreChunkMsg();
 			System.out.println("Storing file name: "
 					+ storeChunkMsg.getFileName());
         } else if (msg.hasJoinRequest()){
-			StorageMessages.JoinRequest joinRequest
-				= msg.getJoinRequest();
-			System.out.println("Request to join network from: "
-					+ joinRequest.getNodeName());
+        	Controller.OnMessage(msg);
         }
     }
 

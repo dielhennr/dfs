@@ -1,14 +1,15 @@
 package edu.usfca.cs.dfs;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
 
 public class Controller {
 
     ServerMessageRouter messageRouter;
-
-    public Controller() { }
+    static ArrayList<String> storageNodes = new ArrayList<String>();
+    
 
     public void start()
     throws IOException {
@@ -21,5 +22,15 @@ public class Controller {
     throws IOException {
         Server s = new Server();
         s.start();
+    }
+    
+    public static void OnMessage(StorageMessages.StorageMessageWrapper message) {
+    	if (message.hasJoinRequest()) {
+			StorageMessages.JoinRequest joinRequest
+				= message.getJoinRequest();
+			storageNodes.add(joinRequest.getNodeName());
+			System.out.println(storageNodes.toString());
+    	}
+    	
     }
 }

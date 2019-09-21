@@ -9,7 +9,7 @@ import io.netty.channel.ChannelHandlerContext;
 public class Controller {
 
     ServerMessageRouter messageRouter;
-    static ArrayList<JoinContext> storageNodes = new ArrayList<JoinContext>();
+    static ArrayList<RequestContext> storageNodes = new ArrayList<RequestContext>();
     
 
     public void start()
@@ -27,12 +27,10 @@ public class Controller {
     
     public static void OnMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
     	if (message.hasJoinRequest()) {
-			StorageMessages.JoinRequest joinRequest
-				= message.getJoinRequest();
-			storageNodes.add(new JoinContext(ctx, joinRequest));
+			storageNodes.add(new RequestContext(ctx, message));
     	}
-    	for (JoinContext join : storageNodes) {
-    	    System.out.println(join.getJoinRequest().getNodeName());
+    	for (RequestContext join : storageNodes) {
+    	    System.out.println(join.getRequest().getJoinRequest().getNodeName());
         }
     	
     }

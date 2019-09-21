@@ -33,30 +33,8 @@ public class StorageNode {
         ChannelFuture cf = bootstrap.connect("orion01", 4123);
         cf.syncUninterruptibly();
 
-        /*Get IP address and hostname*/
-        InetAddress ip;
-        String hostname = null;
-        try {
-            ip = InetAddress.getLocalHost();
-            hostname = ip.getHostName();
- 
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest();
 
-
-        /*Store hostname in a JoinRequest protobuf*/
-        StorageMessages.JoinRequest joinRequest
-            = StorageMessages.JoinRequest.newBuilder()
-                .setNodeName(hostname)
-                .build();
-
-        /*Wrapper*/
-        StorageMessages.StorageMessageWrapper msgWrapper =
-            StorageMessages.StorageMessageWrapper.newBuilder()
-                .setJoinRequest(joinRequest)
-                .build();
-        
         /*Send join request*/
         Channel chan = cf.channel();
         ChannelFuture write = chan.write(msgWrapper);
@@ -67,5 +45,34 @@ public class StorageNode {
         System.out.println("Shutting down");
         workerGroup.shutdownGracefully();
 	
+    }
+
+    private static StorageMessages.StorageMessageWrapper buildJoinRequest() {
+
+        /*Get IP address and hostname*/
+        InetAddress ip;
+        String hostname = null;
+        try {
+            ip = InetAddress.getLocalHost();
+            hostname = ip.getHostName();
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
+        /*Store hostname in a JoinRequest protobuf*/
+        StorageMessages.JoinRequest joinRequest
+                = StorageMessages.JoinRequest.newBuilder()
+                .setNodeName(hostname)
+                .build();
+
+        /*Wrapper*/
+        StorageMessages.StorageMessageWrapper msgWrapper =
+                StorageMessages.StorageMessageWrapper.newBuilder()
+                        .setJoinRequest(joinRequest)
+                        .build();
+
+
+        return msgWrapper;
     }
 }

@@ -2,6 +2,7 @@ package edu.usfca.cs.dfs;
 
 import java.io.IOException;
 
+
 import com.google.protobuf.ByteString;
 
 import io.netty.bootstrap.Bootstrap;
@@ -16,7 +17,12 @@ import edu.usfca.cs.dfs.net.MessagePipeline;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class StorageNode {
+	
+	private static final Logger logger = LogManager.getLogger(StorageNode.class);
 	public StorageNode( ) { } ;
 	
     public static void main(String[] args)
@@ -30,7 +36,8 @@ public class StorageNode {
             .option(ChannelOption.SO_KEEPALIVE, true)
             .handler(pipeline);
 
-        ChannelFuture cf = bootstrap.connect("orion01", 4123);
+        System.out.println(args.length);
+        ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
         cf.syncUninterruptibly();
 
         StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest();
@@ -38,6 +45,7 @@ public class StorageNode {
         /*Send join request*/
         Channel chan = cf.channel();
         ChannelFuture write = chan.write(msgWrapper);
+        logger.info("Sent join request to 10.10.35.8");
         chan.flush();
         write.syncUninterruptibly();
 

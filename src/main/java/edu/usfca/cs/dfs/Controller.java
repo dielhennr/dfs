@@ -26,32 +26,21 @@ public class Controller {
     public static void main(String[] args)
     throws IOException {
     	/** 
-    	 * Logging example -- logs will output to log/app.log in root project directory.
+    	 * Logs will output to log/app.log in root project directory.
     	 * Configuration currently only recognizes INFO+ so logger.trace/debug does nothing
     	 * Use logger.info for debugging and logger.error for logging exceptions
     	 * 
     	 * The reason I took out Debug level is because netty uses it and logs a 
     	 * ton of unnecessary shit
     	 */
-    	logger.error("ERROR");
-
-        logger.trace("Entering application...");
-        logger.debug("Entering application...");
-        logger.info("Hello Log4j2...");
-        logger.error("Something is wrong with this code", new Exception("Invalid message"));
-
-        logger.trace("Exiting application...");
         Controller controller = new Controller();
         controller.start();
     }
     
     public static void OnMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
     	if (message.hasJoinRequest()) {
+    		logger.info("Recieved join request from " + message.getJoinRequest().getNodeName());
 			storageNodes.add(new RequestContext(ctx, message));
     	}
-    	for (RequestContext join : storageNodes) {
-    	    System.out.println(join.getRequest().getJoinRequest().getNodeName());
-        }
-    	
     }
 }

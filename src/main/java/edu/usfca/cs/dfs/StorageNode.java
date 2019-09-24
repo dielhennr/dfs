@@ -71,7 +71,6 @@ public class StorageNode {
         /* Here is where we should start sending heartbeats to the Controller
          * And listening for incoming messages
          * */
-        
 
         /* Don't quit until we've disconnected: */
         System.out.println("Shutting down");

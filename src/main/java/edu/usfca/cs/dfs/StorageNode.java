@@ -86,7 +86,7 @@ public class StorageNode {
         try {
             ip = InetAddress.getLocalHost();
             hostname = ip.getHostName();
-
+            System.setProperty("hostName", hostname);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }

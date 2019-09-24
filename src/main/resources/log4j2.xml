@@ -9,7 +9,7 @@
     </Console>
 
     <!-- File Appender -->
-    <File name="File" fileName="log/app.log">
+    <File name="File" fileName="log/app_${hostName}.log">
       <PatternLayout
           pattern="[%sequenceNumber %level{TRACE=TR, DEBUG=DE, INFO=IN, WARN=WA, ERROR=ER, FATAL=FA}] %C.%M %M: %m %throwable{3}%n"/>
     </File>

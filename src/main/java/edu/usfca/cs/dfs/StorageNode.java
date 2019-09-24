@@ -48,6 +48,28 @@ public class StorageNode {
         logger.info("Sent join request to 10.10.35.8");
         chan.flush();
         write.syncUninterruptibly();
+        
+		/** 
+		 * Not sure what to do exactly if the write fails or is cancelled. 
+		 * For now I shutdown the worker group and exit but in the future 
+		 * we could have it keep sending join requests until it is successful.
+		 */
+        if (write.isDone() && write.isSuccess()) {
+        	logger.info("Join request to 10.10.35.8 successful.");
+        } else if(write.isDone() && (write.cause() != null)) {
+        	logger.warn("Join request to 10.10.35.8 failed.");
+        	workerGroup.shutdownGracefully();
+        	System.exit(1);
+        } else if (write.isDone() && write.isCancelled()) {
+        	logger.warn("Join request to 10.10.35.8 cancelled.");
+        	workerGroup.shutdownGracefully();
+        	System.exit(1);
+        }
+        
+        /* Here is where we should start sending heartbeats to the Controller
+         * And listening for incoming messages
+         * */
+        
 
         /* Don't quit until we've disconnected: */
         System.out.println("Shutting down");

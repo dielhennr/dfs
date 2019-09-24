@@ -41,6 +41,8 @@ public class StorageNode {
         cf.syncUninterruptibly();
 
         StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest();
+        
+        
 
         /*Send join request*/
         Channel chan = cf.channel();

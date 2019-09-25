@@ -1807,6 +1807,686 @@ public final class StorageMessages {
 
   }
 
+  public interface HeartBeatOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:HeartBeat)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string hostname = 1;</code>
+     */
+    java.lang.String getHostname();
+    /**
+     * <code>string hostname = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getHostnameBytes();
+
+    /**
+     * <code>int64 freeSpace = 2;</code>
+     */
+    long getFreeSpace();
+
+    /**
+     * <code>int32 requests = 3;</code>
+     */
+    int getRequests();
+  }
+  /**
+   * Protobuf type {@code HeartBeat}
+   */
+  public  static final class HeartBeat extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:HeartBeat)
+      HeartBeatOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use HeartBeat.newBuilder() to construct.
+    private HeartBeat(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private HeartBeat() {
+      hostname_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new HeartBeat();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private HeartBeat(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              hostname_ = s;
+              break;
+            }
+            case 16: {
+
+              freeSpace_ = input.readInt64();
+              break;
+            }
+            case 24: {
+
+              requests_ = input.readInt32();
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.usfca.cs.dfs.StorageMessages.internal_static_HeartBeat_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.usfca.cs.dfs.StorageMessages.internal_static_HeartBeat_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.usfca.cs.dfs.StorageMessages.HeartBeat.class, edu.usfca.cs.dfs.StorageMessages.HeartBeat.Builder.class);
+    }
+
+    public static final int HOSTNAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object hostname_;
+    /**
+     * <code>string hostname = 1;</code>
+     */
+    public java.lang.String getHostname() {
+      java.lang.Object ref = hostname_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        hostname_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string hostname = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getHostnameBytes() {
+      java.lang.Object ref = hostname_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        hostname_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FREESPACE_FIELD_NUMBER = 2;
+    private long freeSpace_;
+    /**
+     * <code>int64 freeSpace = 2;</code>
+     */
+    public long getFreeSpace() {
+      return freeSpace_;
+    }
+
+    public static final int REQUESTS_FIELD_NUMBER = 3;
+    private int requests_;
+    /**
+     * <code>int32 requests = 3;</code>
+     */
+    public int getRequests() {
+      return requests_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getHostnameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, hostname_);
+      }
+      if (freeSpace_ != 0L) {
+        output.writeInt64(2, freeSpace_);
+      }
+      if (requests_ != 0) {
+        output.writeInt32(3, requests_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getHostnameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, hostname_);
+      }
+      if (freeSpace_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(2, freeSpace_);
+      }
+      if (requests_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, requests_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.usfca.cs.dfs.StorageMessages.HeartBeat)) {
+        return super.equals(obj);
+      }
+      edu.usfca.cs.dfs.StorageMessages.HeartBeat other = (edu.usfca.cs.dfs.StorageMessages.HeartBeat) obj;
+
+      if (!getHostname()
+          .equals(other.getHostname())) return false;
+      if (getFreeSpace()
+          != other.getFreeSpace()) return false;
+      if (getRequests()
+          != other.getRequests()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + HOSTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getHostname().hashCode();
+      hash = (37 * hash) + FREESPACE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getFreeSpace());
+      hash = (37 * hash) + REQUESTS_FIELD_NUMBER;
+      hash = (53 * hash) + getRequests();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.usfca.cs.dfs.StorageMessages.HeartBeat prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code HeartBeat}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:HeartBeat)
+        edu.usfca.cs.dfs.StorageMessages.HeartBeatOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_HeartBeat_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_HeartBeat_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.usfca.cs.dfs.StorageMessages.HeartBeat.class, edu.usfca.cs.dfs.StorageMessages.HeartBeat.Builder.class);
+      }
+
+      // Construct using edu.usfca.cs.dfs.StorageMessages.HeartBeat.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        hostname_ = "";
+
+        freeSpace_ = 0L;
+
+        requests_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_HeartBeat_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.HeartBeat getDefaultInstanceForType() {
+        return edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.HeartBeat build() {
+        edu.usfca.cs.dfs.StorageMessages.HeartBeat result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.HeartBeat buildPartial() {
+        edu.usfca.cs.dfs.StorageMessages.HeartBeat result = new edu.usfca.cs.dfs.StorageMessages.HeartBeat(this);
+        result.hostname_ = hostname_;
+        result.freeSpace_ = freeSpace_;
+        result.requests_ = requests_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.usfca.cs.dfs.StorageMessages.HeartBeat) {
+          return mergeFrom((edu.usfca.cs.dfs.StorageMessages.HeartBeat)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.usfca.cs.dfs.StorageMessages.HeartBeat other) {
+        if (other == edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance()) return this;
+        if (!other.getHostname().isEmpty()) {
+          hostname_ = other.hostname_;
+          onChanged();
+        }
+        if (other.getFreeSpace() != 0L) {
+          setFreeSpace(other.getFreeSpace());
+        }
+        if (other.getRequests() != 0) {
+          setRequests(other.getRequests());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.usfca.cs.dfs.StorageMessages.HeartBeat parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.usfca.cs.dfs.StorageMessages.HeartBeat) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object hostname_ = "";
+      /**
+       * <code>string hostname = 1;</code>
+       */
+      public java.lang.String getHostname() {
+        java.lang.Object ref = hostname_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          hostname_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string hostname = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getHostnameBytes() {
+        java.lang.Object ref = hostname_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          hostname_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string hostname = 1;</code>
+       */
+      public Builder setHostname(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        hostname_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string hostname = 1;</code>
+       */
+      public Builder clearHostname() {
+        
+        hostname_ = getDefaultInstance().getHostname();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string hostname = 1;</code>
+       */
+      public Builder setHostnameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        hostname_ = value;
+        onChanged();
+        return this;
+      }
+
+      private long freeSpace_ ;
+      /**
+       * <code>int64 freeSpace = 2;</code>
+       */
+      public long getFreeSpace() {
+        return freeSpace_;
+      }
+      /**
+       * <code>int64 freeSpace = 2;</code>
+       */
+      public Builder setFreeSpace(long value) {
+        
+        freeSpace_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 freeSpace = 2;</code>
+       */
+      public Builder clearFreeSpace() {
+        
+        freeSpace_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private int requests_ ;
+      /**
+       * <code>int32 requests = 3;</code>
+       */
+      public int getRequests() {
+        return requests_;
+      }
+      /**
+       * <code>int32 requests = 3;</code>
+       */
+      public Builder setRequests(int value) {
+        
+        requests_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int32 requests = 3;</code>
+       */
+      public Builder clearRequests() {
+        
+        requests_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:HeartBeat)
+    }
+
+    // @@protoc_insertion_point(class_scope:HeartBeat)
+    private static final edu.usfca.cs.dfs.StorageMessages.HeartBeat DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.usfca.cs.dfs.StorageMessages.HeartBeat();
+    }
+
+    public static edu.usfca.cs.dfs.StorageMessages.HeartBeat getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<HeartBeat>
+        PARSER = new com.google.protobuf.AbstractParser<HeartBeat>() {
+      @java.lang.Override
+      public HeartBeat parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new HeartBeat(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<HeartBeat> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<HeartBeat> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.usfca.cs.dfs.StorageMessages.HeartBeat getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface StorageMessageWrapperOrBuilder extends
       // @@protoc_insertion_point(interface_extends:StorageMessageWrapper)
       com.google.protobuf.MessageOrBuilder {
@@ -1849,6 +2529,19 @@ public final class StorageMessages {
      * <code>.JoinRequest joinRequest = 3;</code>
      */
     edu.usfca.cs.dfs.StorageMessages.JoinRequestOrBuilder getJoinRequestOrBuilder();
+
+    /**
+     * <code>.HeartBeat heartbeat = 4;</code>
+     */
+    boolean hasHeartbeat();
+    /**
+     * <code>.HeartBeat heartbeat = 4;</code>
+     */
+    edu.usfca.cs.dfs.StorageMessages.HeartBeat getHeartbeat();
+    /**
+     * <code>.HeartBeat heartbeat = 4;</code>
+     */
+    edu.usfca.cs.dfs.StorageMessages.HeartBeatOrBuilder getHeartbeatOrBuilder();
 
     public edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper.MsgCase getMsgCase();
   }
@@ -1939,6 +2632,20 @@ public final class StorageMessages {
               msgCase_ = 3;
               break;
             }
+            case 34: {
+              edu.usfca.cs.dfs.StorageMessages.HeartBeat.Builder subBuilder = null;
+              if (msgCase_ == 4) {
+                subBuilder = ((edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_).toBuilder();
+              }
+              msg_ =
+                  input.readMessage(edu.usfca.cs.dfs.StorageMessages.HeartBeat.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_);
+                msg_ = subBuilder.buildPartial();
+              }
+              msgCase_ = 4;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -1978,6 +2685,7 @@ public final class StorageMessages {
       STORECHUNKMSG(1),
       RETRIEVEFILEMSG(2),
       JOINREQUEST(3),
+      HEARTBEAT(4),
       MSG_NOT_SET(0);
       private final int value;
       private MsgCase(int value) {
@@ -1996,6 +2704,7 @@ public final class StorageMessages {
           case 1: return STORECHUNKMSG;
           case 2: return RETRIEVEFILEMSG;
           case 3: return JOINREQUEST;
+          case 4: return HEARTBEAT;
           case 0: return MSG_NOT_SET;
           default: return null;
         }
@@ -2089,6 +2798,32 @@ public final class StorageMessages {
       return edu.usfca.cs.dfs.StorageMessages.JoinRequest.getDefaultInstance();
     }
 
+    public static final int HEARTBEAT_FIELD_NUMBER = 4;
+    /**
+     * <code>.HeartBeat heartbeat = 4;</code>
+     */
+    public boolean hasHeartbeat() {
+      return msgCase_ == 4;
+    }
+    /**
+     * <code>.HeartBeat heartbeat = 4;</code>
+     */
+    public edu.usfca.cs.dfs.StorageMessages.HeartBeat getHeartbeat() {
+      if (msgCase_ == 4) {
+         return (edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_;
+      }
+      return edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance();
+    }
+    /**
+     * <code>.HeartBeat heartbeat = 4;</code>
+     */
+    public edu.usfca.cs.dfs.StorageMessages.HeartBeatOrBuilder getHeartbeatOrBuilder() {
+      if (msgCase_ == 4) {
+         return (edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_;
+      }
+      return edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2112,6 +2847,9 @@ public final class StorageMessages {
       if (msgCase_ == 3) {
         output.writeMessage(3, (edu.usfca.cs.dfs.StorageMessages.JoinRequest) msg_);
       }
+      if (msgCase_ == 4) {
+        output.writeMessage(4, (edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2132,6 +2870,10 @@ public final class StorageMessages {
       if (msgCase_ == 3) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, (edu.usfca.cs.dfs.StorageMessages.JoinRequest) msg_);
+      }
+      if (msgCase_ == 4) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, (edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2162,6 +2904,10 @@ public final class StorageMessages {
           if (!getJoinRequest()
               .equals(other.getJoinRequest())) return false;
           break;
+        case 4:
+          if (!getHeartbeat()
+              .equals(other.getHeartbeat())) return false;
+          break;
         case 0:
         default:
       }
@@ -2188,6 +2934,10 @@ public final class StorageMessages {
         case 3:
           hash = (37 * hash) + JOINREQUEST_FIELD_NUMBER;
           hash = (53 * hash) + getJoinRequest().hashCode();
+          break;
+        case 4:
+          hash = (37 * hash) + HEARTBEAT_FIELD_NUMBER;
+          hash = (53 * hash) + getHeartbeat().hashCode();
           break;
         case 0:
         default:
@@ -2374,6 +3124,13 @@ public final class StorageMessages {
             result.msg_ = joinRequestBuilder_.build();
           }
         }
+        if (msgCase_ == 4) {
+          if (heartbeatBuilder_ == null) {
+            result.msg_ = msg_;
+          } else {
+            result.msg_ = heartbeatBuilder_.build();
+          }
+        }
         result.msgCase_ = msgCase_;
         onBuilt();
         return result;
@@ -2434,6 +3191,10 @@ public final class StorageMessages {
           }
           case JOINREQUEST: {
             mergeJoinRequest(other.getJoinRequest());
+            break;
+          }
+          case HEARTBEAT: {
+            mergeHeartbeat(other.getHeartbeat());
             break;
           }
           case MSG_NOT_SET: {
@@ -2891,6 +3652,142 @@ public final class StorageMessages {
         onChanged();;
         return joinRequestBuilder_;
       }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.usfca.cs.dfs.StorageMessages.HeartBeat, edu.usfca.cs.dfs.StorageMessages.HeartBeat.Builder, edu.usfca.cs.dfs.StorageMessages.HeartBeatOrBuilder> heartbeatBuilder_;
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      public boolean hasHeartbeat() {
+        return msgCase_ == 4;
+      }
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.HeartBeat getHeartbeat() {
+        if (heartbeatBuilder_ == null) {
+          if (msgCase_ == 4) {
+            return (edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_;
+          }
+          return edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance();
+        } else {
+          if (msgCase_ == 4) {
+            return heartbeatBuilder_.getMessage();
+          }
+          return edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      public Builder setHeartbeat(edu.usfca.cs.dfs.StorageMessages.HeartBeat value) {
+        if (heartbeatBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          msg_ = value;
+          onChanged();
+        } else {
+          heartbeatBuilder_.setMessage(value);
+        }
+        msgCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      public Builder setHeartbeat(
+          edu.usfca.cs.dfs.StorageMessages.HeartBeat.Builder builderForValue) {
+        if (heartbeatBuilder_ == null) {
+          msg_ = builderForValue.build();
+          onChanged();
+        } else {
+          heartbeatBuilder_.setMessage(builderForValue.build());
+        }
+        msgCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      public Builder mergeHeartbeat(edu.usfca.cs.dfs.StorageMessages.HeartBeat value) {
+        if (heartbeatBuilder_ == null) {
+          if (msgCase_ == 4 &&
+              msg_ != edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance()) {
+            msg_ = edu.usfca.cs.dfs.StorageMessages.HeartBeat.newBuilder((edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            msg_ = value;
+          }
+          onChanged();
+        } else {
+          if (msgCase_ == 4) {
+            heartbeatBuilder_.mergeFrom(value);
+          }
+          heartbeatBuilder_.setMessage(value);
+        }
+        msgCase_ = 4;
+        return this;
+      }
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      public Builder clearHeartbeat() {
+        if (heartbeatBuilder_ == null) {
+          if (msgCase_ == 4) {
+            msgCase_ = 0;
+            msg_ = null;
+            onChanged();
+          }
+        } else {
+          if (msgCase_ == 4) {
+            msgCase_ = 0;
+            msg_ = null;
+          }
+          heartbeatBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.HeartBeat.Builder getHeartbeatBuilder() {
+        return getHeartbeatFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.HeartBeatOrBuilder getHeartbeatOrBuilder() {
+        if ((msgCase_ == 4) && (heartbeatBuilder_ != null)) {
+          return heartbeatBuilder_.getMessageOrBuilder();
+        } else {
+          if (msgCase_ == 4) {
+            return (edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_;
+          }
+          return edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.HeartBeat heartbeat = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.usfca.cs.dfs.StorageMessages.HeartBeat, edu.usfca.cs.dfs.StorageMessages.HeartBeat.Builder, edu.usfca.cs.dfs.StorageMessages.HeartBeatOrBuilder> 
+          getHeartbeatFieldBuilder() {
+        if (heartbeatBuilder_ == null) {
+          if (!(msgCase_ == 4)) {
+            msg_ = edu.usfca.cs.dfs.StorageMessages.HeartBeat.getDefaultInstance();
+          }
+          heartbeatBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.usfca.cs.dfs.StorageMessages.HeartBeat, edu.usfca.cs.dfs.StorageMessages.HeartBeat.Builder, edu.usfca.cs.dfs.StorageMessages.HeartBeatOrBuilder>(
+                  (edu.usfca.cs.dfs.StorageMessages.HeartBeat) msg_,
+                  getParentForChildren(),
+                  isClean());
+          msg_ = null;
+        }
+        msgCase_ = 4;
+        onChanged();;
+        return heartbeatBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -2960,6 +3857,11 @@ public final class StorageMessages {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_JoinRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_HeartBeat_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_HeartBeat_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_StorageMessageWrapper_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -2976,12 +3878,14 @@ public final class StorageMessages {
       "\n\026storage_messages.proto\"=\n\nStoreChunk\022\020" +
       "\n\010fileName\030\001 \001(\t\022\017\n\007chunkId\030\002 \001(\005\022\014\n\004dat" +
       "a\030\003 \001(\014\" \n\014RetrieveFile\022\020\n\010fileName\030\001 \001(" +
-      "\t\"\037\n\013JoinRequest\022\020\n\010nodeName\030\001 \001(\t\"\223\001\n\025S" +
-      "torageMessageWrapper\022$\n\rstoreChunkMsg\030\001 " +
-      "\001(\0132\013.StoreChunkH\000\022(\n\017retrieveFileMsg\030\002 " +
-      "\001(\0132\r.RetrieveFileH\000\022#\n\013joinRequest\030\003 \001(" +
-      "\0132\014.JoinRequestH\000B\005\n\003msgB\022\n\020edu.usfca.cs" +
-      ".dfsb\006proto3"
+      "\t\"\037\n\013JoinRequest\022\020\n\010nodeName\030\001 \001(\t\"B\n\tHe" +
+      "artBeat\022\020\n\010hostname\030\001 \001(\t\022\021\n\tfreeSpace\030\002" +
+      " \001(\003\022\020\n\010requests\030\003 \001(\005\"\264\001\n\025StorageMessag" +
+      "eWrapper\022$\n\rstoreChunkMsg\030\001 \001(\0132\013.StoreC" +
+      "hunkH\000\022(\n\017retrieveFileMsg\030\002 \001(\0132\r.Retrie" +
+      "veFileH\000\022#\n\013joinRequest\030\003 \001(\0132\014.JoinRequ" +
+      "estH\000\022\037\n\theartbeat\030\004 \001(\0132\n.HeartBeatH\000B\005" +
+      "\n\003msgB\022\n\020edu.usfca.cs.dfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -3005,12 +3909,18 @@ public final class StorageMessages {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_JoinRequest_descriptor,
         new java.lang.String[] { "NodeName", });
-    internal_static_StorageMessageWrapper_descriptor =
+    internal_static_HeartBeat_descriptor =
       getDescriptor().getMessageTypes().get(3);
+    internal_static_HeartBeat_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_HeartBeat_descriptor,
+        new java.lang.String[] { "Hostname", "FreeSpace", "Requests", });
+    internal_static_StorageMessageWrapper_descriptor =
+      getDescriptor().getMessageTypes().get(4);
     internal_static_StorageMessageWrapper_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_StorageMessageWrapper_descriptor,
-        new java.lang.String[] { "StoreChunkMsg", "RetrieveFileMsg", "JoinRequest", "Msg", });
+        new java.lang.String[] { "StoreChunkMsg", "RetrieveFileMsg", "JoinRequest", "Heartbeat", "Msg", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

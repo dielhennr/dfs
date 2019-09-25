@@ -15,10 +15,17 @@ message JoinRequest {
     string nodeName = 1;
 }
 
+message HeartBeat {
+	string hostname = 1;
+	int64 freeSpace = 2;
+	int32 requests = 3;
+}
+
 message StorageMessageWrapper {
     oneof msg {
         StoreChunk storeChunkMsg = 1;
         RetrieveFile retrieveFileMsg = 2;
         JoinRequest joinRequest = 3;
+        HeartBeat heartbeat = 4;
     }
 }

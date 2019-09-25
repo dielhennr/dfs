@@ -1,5 +1,6 @@
 package edu.usfca.cs.dfs;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.google.protobuf.ByteString;
@@ -67,6 +68,11 @@ public class StorageNode {
 		 * Here is where we should start sending heartbeats to the Controller And
 		 * listening for incoming messages
 		 */
+		
+		HeartBeatRunner heartBeat = new HeartBeatRunner("test", chan);
+		
+		heartBeat.run();
+		
 
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");
@@ -96,5 +102,64 @@ public class StorageNode {
 				.setJoinRequest(joinRequest).build();
 
 		return msgWrapper;
+	}
+	
+	private static class HeartBeatRunner implements Runnable {
+
+		String hostname;
+		int requests;
+		File f;
+		Channel chan;
+		ChannelFuture write;
+		
+		public HeartBeatRunner(String hostname, Channel chan) {
+			f = new File("/bigdata");
+			this.hostname = hostname;
+			this.requests = 0;
+			this.chan = chan;
+		}
+				
+		@Override
+		public void run() {
+			
+			while(true) {
+				
+				long freeSpace =  f.getFreeSpace();
+				
+				
+				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(hostname, freeSpace, requests);
+				
+				write = chan.write(msgWrapper);
+				
+				chan.flush();
+				write.syncUninterruptibly();
+				
+				
+				
+				
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				 
+			}
+			
+		}
+		
+		private StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
+			
+			StorageMessages.HeartBeat heartbeat = StorageMessages.HeartBeat.newBuilder().
+					setFreeSpace(freeSpace).setHostname(hostname).setRequests(0).build();
+			
+			
+			StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.
+					newBuilder().setHeartbeat(heartbeat).build();
+			
+				return msgWrapper;
+		}
+		
+		
+		
 	}
 }

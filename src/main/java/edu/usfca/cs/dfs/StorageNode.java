@@ -99,6 +99,10 @@ public class StorageNode {
 		try {
 			storageNode = new StorageNode();
 		} catch (UnknownHostException e) {
+			storageNode = null;
+		}
+		
+		if (storageNode == null) {
 			logger.error("Could not retrieve hostname.");
 			workerGroup.shutdownGracefully();
 			System.exit(1);

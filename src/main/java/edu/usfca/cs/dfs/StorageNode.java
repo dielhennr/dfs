@@ -21,66 +21,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class StorageNode {
-	
-	/** Logger to use */
+
 	private static final Logger logger = LogManager.getLogger(StorageNode.class);
 
-	/* Get IP address and hostname */
-	private InetAddress ip;
-	private String hostname;
-	/* This SN's channel for comms with Controller*/
-	private Channel chan;
-	
-	/* Big dick 5-head constructor */
-	public StorageNode() throws UnknownHostException {		
-		ip = InetAddress.getLocalHost();
-		hostname = ip.getHostName();
-		System.setProperty("hostName", hostname);
-		chan = null;
+	public StorageNode() {
 	};
-	
-	/**
-	 * Get this SN's channel
-	 * 
-	 * @return this SN's channel
-	 */
-	public Channel getChan() {
-		return chan;
-	}
 
-	/**
-	 * Set this SN's communication channel
-	 * 
-	 */
-	public void setChan(Channel chan) {
-		this.chan = chan;
-	}
-
-	/**
-	 * Get this SN's IP addrress
-	 * 
-	 * @return ip
-	 */
-	public InetAddress getIp() {
-		return ip;
-	}
-	
-	/**
-	 * Get this SN's hostname
-	 * 
-	 * @return hostname
-	 */
-	public String getHostname() {
-		return hostname;
-	}
-	
-	/**
-	 * Start up a new SN by bootstrapping netty and getting basic information like hostname and ip
-	 * Sends join request and subsequent heartbeats to the Controller while listening for incoming queries
-	 * 
-	 * @param args
-	 * @throws IOException
-	 */
 	public static void main(String[] args) throws IOException {
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline();
@@ -94,22 +40,23 @@ public class StorageNode {
 		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
 		cf.syncUninterruptibly();
 
-		StorageNode newSNode = null;
 		
+		/* Get IP address and hostname */
+		InetAddress ip;
+		String hostname = null;
 		try {
-			newSNode = new StorageNode();
+			ip = InetAddress.getLocalHost();
+			hostname = ip.getHostName();
+			System.setProperty("hostName", hostname);
 		} catch (UnknownHostException e) {
-			logger.error("Could not retrieve hostname.");
-			workerGroup.shutdownGracefully();
-			System.exit(1);
+			e.printStackTrace();
 		}
 		
 		
-		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(newSNode.getHostname());
+		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(hostname);
 
 		/* Send join request */
 		Channel chan = cf.channel();
-		newSNode.setChan(chan);
 		ChannelFuture write = chan.write(msgWrapper);
 		logger.info("Sent join request to 10.10.35.8");
 		chan.flush();
@@ -135,7 +82,7 @@ public class StorageNode {
 		 * listening for incoming messages
 		 */
 		
-		HeartBeatRunner heartBeat = new HeartBeatRunner(newSNode);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(hostname, chan);
 		
 		heartBeat.run();
 		
@@ -146,12 +93,6 @@ public class StorageNode {
 
 	}
 
-	/**
-	 * Builds a join request protobuf and returns it
-	 * 
-	 * @param hostname
-	 * @return msgWrapper
-	 */
 	private static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 
 
@@ -167,19 +108,19 @@ public class StorageNode {
 		return msgWrapper;
 	}
 	
-	/**
-	 * HeartBeatRunner thread
-	 */
 	private static class HeartBeatRunner implements Runnable {
 
-		File f;
+		String hostname;
 		int requests;
-		StorageNode storageNode;
+		File f;
+		Channel chan;
 		
 		
-		public HeartBeatRunner(StorageNode storageNode) {
+		public HeartBeatRunner(String hostname, Channel chan) {
 			f = new File("/bigdata");
+			this.hostname = hostname;
 			this.requests = 0;
+			this.chan = chan;
 		}
 				
 		@Override
@@ -189,33 +130,28 @@ public class StorageNode {
 				
 				long freeSpace =  f.getFreeSpace();
 				
-				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(storageNode.getHostname(), freeSpace, requests);
 				
-				ChannelFuture write = storageNode.getChan().write(msgWrapper);
+				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(hostname, freeSpace, requests);
 				
-				storageNode.getChan().flush();
-				logger.info("Sent heartbeat from " + storageNode.getHostname());
+				ChannelFuture write = chan.write(msgWrapper);
+				logger.info("Recieved heartbeat from " + hostname);
+				
+				chan.flush();
 				write.syncUninterruptibly();
 				
 				
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				
+				
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				 
 			}
 			
 		}
 		
-		/**
-		 * Builds a heartbeat protobuf and returns it
-		 * 
-		 * @param hostname
-		 * @param freeSpace
-		 * @param requests
-		 * @return msgWrapper
-		 */
 		private StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
 			
 			StorageMessages.HeartBeat heartbeat = StorageMessages.HeartBeat.newBuilder().

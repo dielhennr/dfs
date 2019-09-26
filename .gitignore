@@ -7,7 +7,15 @@
 /.classpath
 /.settings
 /.build
-
+.*
+*.py.*
+*.py.*
+*.py.*
+*.py.*
+*.py.*
+*.py.*
+*.py.*
+*.py
 # javadoc-generated documentation
 /docs/api
 

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.usfca.cs.dfs.DFSNode;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -20,11 +21,11 @@ public class ServerMessageRouter {
 
     private Map<Integer, ChannelFuture> ports = new HashMap<>();
 
-    public ServerMessageRouter() {
+    public ServerMessageRouter(DFSNode node) {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup(4);
 
-        pipeline = new MessagePipeline();
+        pipeline = new MessagePipeline(node);
 
         bootstrap = new ServerBootstrap()
             .group(bossGroup, workerGroup)
@@ -34,9 +35,9 @@ public class ServerMessageRouter {
             .childOption(ChannelOption.SO_KEEPALIVE, true);
     }
 
-    public ServerMessageRouter(int readBufferSize, int maxWriteQueueSize) {
+    public ServerMessageRouter(DFSNode node, int readBufferSize, int maxWriteQueueSize) {
         /* Ignoring parameters ... */
-        this();
+        this(node);
     }
 
     /**

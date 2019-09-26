@@ -38,7 +38,20 @@ public class StorageNode {
 		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
 		cf.syncUninterruptibly();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest();
+		
+		/* Get IP address and hostname */
+		InetAddress ip;
+		String hostname = null;
+		try {
+			ip = InetAddress.getLocalHost();
+			hostname = ip.getHostName();
+			System.setProperty("hostName", hostname);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+		
+		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(hostname);
 
 		/* Send join request */
 		Channel chan = cf.channel();
@@ -69,7 +82,7 @@ public class StorageNode {
 		 * listening for incoming messages
 		 */
 		
-		HeartBeatRunner heartBeat = new HeartBeatRunner("test", chan);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(hostname, chan);
 		
 		heartBeat.run();
 		
@@ -80,18 +93,9 @@ public class StorageNode {
 
 	}
 
-	private static StorageMessages.StorageMessageWrapper buildJoinRequest() {
+	private static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 
-		/* Get IP address and hostname */
-		InetAddress ip;
-		String hostname = null;
-		try {
-			ip = InetAddress.getLocalHost();
-			hostname = ip.getHostName();
-			System.setProperty("hostName", hostname);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+
 
 		/* Store hostname in a JoinRequest protobuf */
 		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest.newBuilder().setNodeName(hostname)
@@ -110,7 +114,7 @@ public class StorageNode {
 		int requests;
 		File f;
 		Channel chan;
-		ChannelFuture write;
+		
 		
 		public HeartBeatRunner(String hostname, Channel chan) {
 			f = new File("/bigdata");
@@ -129,7 +133,8 @@ public class StorageNode {
 				
 				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(hostname, freeSpace, requests);
 				
-				write = chan.write(msgWrapper);
+				ChannelFuture write = chan.write(msgWrapper);
+				logger.info("Recieved heartbeat from " + hostname);
 				
 				chan.flush();
 				write.syncUninterruptibly();

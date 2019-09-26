@@ -1,5 +1,6 @@
 package edu.usfca.cs.dfs;
 
+import java.io.File;
 import java.io.IOException;
 
 import com.google.protobuf.ByteString;
@@ -39,7 +40,20 @@ public class StorageNode {
 		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
 		cf.syncUninterruptibly();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest();
+		
+		/* Get IP address and hostname */
+		InetAddress ip;
+		String hostname = null;
+		try {
+			ip = InetAddress.getLocalHost();
+			hostname = ip.getHostName();
+			System.setProperty("hostName", hostname);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		
+		
+		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(hostname);
 
 		/* Send join request */
 		Channel chan = cf.channel();
@@ -67,6 +81,11 @@ public class StorageNode {
 		 * Here is where we should start sending heartbeats to the Controller And
 		 * listening for incoming messages
 		 */
+		
+		HeartBeatRunner heartBeat = new HeartBeatRunner(hostname, chan);
+		
+		heartBeat.run();
+		
 
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");
@@ -74,18 +93,9 @@ public class StorageNode {
 
 	}
 
-	private static StorageMessages.StorageMessageWrapper buildJoinRequest() {
+	private static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 
-		/* Get IP address and hostname */
-		InetAddress ip;
-		String hostname = null;
-		try {
-			ip = InetAddress.getLocalHost();
-			hostname = ip.getHostName();
-			System.setProperty("hostName", hostname);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+
 
 		/* Store hostname in a JoinRequest protobuf */
 		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest.newBuilder().setNodeName(hostname)
@@ -96,5 +106,65 @@ public class StorageNode {
 				.setJoinRequest(joinRequest).build();
 
 		return msgWrapper;
+	}
+	
+	private static class HeartBeatRunner implements Runnable {
+
+		String hostname;
+		int requests;
+		File f;
+		Channel chan;
+		
+		
+		public HeartBeatRunner(String hostname, Channel chan) {
+			f = new File("/bigdata");
+			this.hostname = hostname;
+			this.requests = 0;
+			this.chan = chan;
+		}
+				
+		@Override
+		public void run() {
+			
+			while(true) {
+				
+				long freeSpace =  f.getFreeSpace();
+				
+				
+				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(hostname, freeSpace, requests);
+				
+				ChannelFuture write = chan.write(msgWrapper);
+				logger.info("Recieved heartbeat from " + hostname);
+				
+				chan.flush();
+				write.syncUninterruptibly();
+				
+				
+				
+				
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				 
+			}
+			
+		}
+		
+		private StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
+			
+			StorageMessages.HeartBeat heartbeat = StorageMessages.HeartBeat.newBuilder().
+					setFreeSpace(freeSpace).setHostname(hostname).setRequests(0).build();
+			
+			
+			StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.
+					newBuilder().setHeartbeat(heartbeat).build();
+			
+				return msgWrapper;
+		}
+		
+		
+		
 	}
 }

@@ -41,6 +41,10 @@ public class Controller {
     	if (message.hasJoinRequest()) {
     		logger.info("Recieved join request from " + message.getJoinRequest().getNodeName());
 			storageNodes.add(new RequestContext(ctx, message));
+    	} 
+    	
+    	if (message.hasHeartbeat()) {
+    		logger.info("Recieved heartbeat from " + message.getHeartbeat().getHostname());
     	}
     }
 }

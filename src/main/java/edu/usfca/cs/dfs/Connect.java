@@ -25,7 +25,7 @@ public class Connect {
 		this.host = host;
 	}
 	
-	public Channel connect(String host) {
+	public Channel connect() {
 		
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline();
@@ -36,7 +36,7 @@ public class Connect {
 								.option(ChannelOption.SO_KEEPALIVE, true)
 								.handler(pipeline);
 
-		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
+		ChannelFuture cf = bootstrap.connect(host, 4123);
 		cf.syncUninterruptibly();
 		
 		Channel chan = cf.channel();

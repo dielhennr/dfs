@@ -44,17 +44,17 @@ public class StorageNode {
 		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(hostname);
 		
 		Connect conn = new Connect("10.10.35.8");
+		Channel chan = conn.connect();
 		
 		
-		
-		ChannelFuture write = conn.chan.write(msgWrapper);
+		ChannelFuture write = chan.write(msgWrapper);
 		logger.info("Sent join request to 10.10.35.8");
-		conn.chan.flush();
+		chan.flush();
 		write.syncUninterruptibly();
 
 		/**
-		 * Shutdown the worker group and exit if join request was not successful
-		 */
+ * 		 * Shutdown the worker group and exit if join request was not successful
+ * 		 		 */
 		if (write.isDone() && write.isSuccess()) {
 			logger.info("Join request to 10.10.35.8 successful.");
 		} else if (write.isDone() && (write.cause() != null)) {
@@ -68,9 +68,9 @@ public class StorageNode {
 		}
 
 		/*
-		 * Here is where we should start sending heartbeats to the Controller And
-		 * listening for incoming messages
-		 */
+ * 		 * Here is where we should start sending heartbeats to the Controller And
+ * 		 		 * listening for incoming messages
+ * 		 		 		 */
 		
 		HeartBeatRunner heartBeat = new HeartBeatRunner(hostname);
 		Thread thread = new Thread(heartBeat);
@@ -123,13 +123,14 @@ public class StorageNode {
 				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(hostname, freeSpace, requests);
 				
 				
-				Connect conn = new Connect(hostname);
+				Connect conn = new Connect("10.10.35.8");
+				Channel chan = conn.connect();
+						
 				
-				
-				ChannelFuture write = conn.chan.write(msgWrapper);
+				ChannelFuture write = chan.write(msgWrapper);
 				logger.info("Recieved heartbeat from " + hostname);
 				
-				conn.chan.flush();
+				chan.flush();
 				write.syncUninterruptibly();
 				conn.workerGroup.shutdownGracefully();
 				
@@ -161,3 +162,4 @@ public class StorageNode {
 		
 	}
 }
+

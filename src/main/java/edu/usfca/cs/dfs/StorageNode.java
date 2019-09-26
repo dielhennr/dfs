@@ -30,10 +30,12 @@ public class StorageNode {
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline();
 
-		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
-				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
+		Bootstrap bootstrap = new Bootstrap()
+								.group(workerGroup)
+								.channel(NioSocketChannel.class)
+								.option(ChannelOption.SO_KEEPALIVE, true)
+								.handler(pipeline);
 
-		System.out.println(args.length);
 		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
 		cf.syncUninterruptibly();
 
@@ -47,9 +49,7 @@ public class StorageNode {
 		write.syncUninterruptibly();
 
 		/**
-		 * Not sure what to do exactly if the write fails or is cancelled. For now I
-		 * shutdown the worker group and exit but in the future we could have it keep
-		 * sending join requests until it is successful.
+		 * Shutdown the worker group and exit if join request was not successful
 		 */
 		if (write.isDone() && write.isSuccess()) {
 			logger.info("Join request to 10.10.35.8 successful.");

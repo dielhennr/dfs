@@ -28,6 +28,7 @@ extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
         /* A channel has been disconnected */
         InetSocketAddress addr
             = (InetSocketAddress) ctx.channel().remoteAddress();
+        String host = addr.getHostName();
         System.out.println("Connection lost: " + addr);
     }
 

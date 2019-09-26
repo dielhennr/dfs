@@ -132,7 +132,7 @@ public class StorageNode {
 				
 				chan.flush();
 				write.syncUninterruptibly();
-				conn.workerGroup.shutdownGracefully();
+				conn.shutdown();
 				
 				
 				

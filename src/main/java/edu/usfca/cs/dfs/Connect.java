@@ -45,4 +45,8 @@ public class Connect {
 		
 	}
 	
+	public void shutdown() {
+		this.workerGroup.shutdownGracefully();
+	}
+	
 }

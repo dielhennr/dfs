@@ -44,6 +44,7 @@ public class Controller {
     	} 
     	
     	if (message.hasHeartbeat()) {
+    		System.out.println("Recieved heartbeat from " + message.getHeartbeat().getHostname());
     		logger.info("Recieved heartbeat from " + message.getHeartbeat().getHostname());
     	}
     }

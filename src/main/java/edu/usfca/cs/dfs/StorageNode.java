@@ -83,8 +83,8 @@ public class StorageNode {
 		 */
 		
 		HeartBeatRunner heartBeat = new HeartBeatRunner(hostname, chan);
-		
-		heartBeat.run();
+		Thread thread = new Thread(heartBeat);
+		thread.run();
 		
 
 		/* Don't quit until we've disconnected: */

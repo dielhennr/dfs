@@ -10,12 +10,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 @ChannelHandler.Sharable
-public class InboundHandler
+public class ControllerInboundHandler
 extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
 	
 	public Controller controller;
-    public InboundHandler() { }
-    public InboundHandler(Controller controller) { this.controller = controller; }
+    public ControllerInboundHandler() { }
+    public ControllerInboundHandler(Controller controller) { this.controller = controller; }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {

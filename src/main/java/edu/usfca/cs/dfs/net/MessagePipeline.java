@@ -1,5 +1,6 @@
 package edu.usfca.cs.dfs.net;
 
+import edu.usfca.cs.dfs.Controller;
 import edu.usfca.cs.dfs.StorageMessages;
 
 import io.netty.channel.ChannelInitializer;
@@ -14,8 +15,12 @@ public class MessagePipeline extends ChannelInitializer<SocketChannel> {
 
     private InboundHandler inboundHandler;
 
+    
     public MessagePipeline() {
         inboundHandler = new InboundHandler();
+    }
+    public MessagePipeline(Controller controller) {
+    	inboundHandler = new InboundHandler(controller);
     }
 
     @Override

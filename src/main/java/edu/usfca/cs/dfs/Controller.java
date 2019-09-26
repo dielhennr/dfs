@@ -6,19 +6,20 @@ import java.util.ArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.usfca.cs.dfs.net.ControllerRouter;
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
 import io.netty.channel.ChannelHandlerContext;
 
 public class Controller {
 
-    ServerMessageRouter messageRouter;
-    static ArrayList<RequestContext> storageNodes = new ArrayList<RequestContext>();
+    ControllerRouter messageRouter;
+    ArrayList<RequestContext> storageNodes = new ArrayList<RequestContext>();
     private static final Logger logger = LogManager.getLogger(Controller.class);
-    
+    Controller controller;
 
     public void start()
     throws IOException {
-        messageRouter = new ServerMessageRouter();
+        messageRouter = new ControllerRouter(controller);
         messageRouter.listen(4123);
         System.out.println("Listening for connections on port 4123");
     }
@@ -37,10 +38,10 @@ public class Controller {
         controller.start();
     }
     
-    public static void OnMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
+    public void OnMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
     	if (message.hasJoinRequest()) {
     		logger.info("Recieved join request from " + message.getJoinRequest().getNodeName());
-			storageNodes.add(new RequestContext(ctx, message));
+			controller.storageNodes.add(new RequestContext(ctx, message));
     	} 
     	
     	if (message.hasHeartbeat()) {

@@ -94,10 +94,10 @@ public class StorageNode {
 		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
 		cf.syncUninterruptibly();
 
-		StorageNode newSNode = null;
+		StorageNode sNode = null;
 		
 		try {
-			newSNode = new StorageNode();
+			sNode = new StorageNode();
 		} catch (UnknownHostException e) {
 			logger.error("Could not retrieve hostname.");
 			workerGroup.shutdownGracefully();
@@ -105,11 +105,11 @@ public class StorageNode {
 		}
 		
 		
-		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(newSNode.getHostname());
+		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(sNode.getHostname());
 
 		/* Send join request */
 		Channel chan = cf.channel();
-		newSNode.setChan(chan);
+		sNode.setChan(chan);
 		ChannelFuture write = chan.write(msgWrapper);
 		logger.info("Sent join request to 10.10.35.8");
 		chan.flush();
@@ -135,7 +135,7 @@ public class StorageNode {
 		 * listening for incoming messages
 		 */
 		
-		HeartBeatRunner heartBeat = new HeartBeatRunner(newSNode);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(sNode);
 		
 		heartBeat.run();
 		

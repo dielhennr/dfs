@@ -43,8 +43,20 @@ public class StorageNode {
 		
 		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(hostname);
 		
-		Connect conn = new Connect("10.10.35.8");
-		Channel chan = conn.connect();
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		MessagePipeline pipeline = new MessagePipeline();
+
+		Bootstrap bootstrap = new Bootstrap()
+								.group(workerGroup)
+								.channel(NioSocketChannel.class)
+								.option(ChannelOption.SO_KEEPALIVE, true)
+								.handler(pipeline);
+
+		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
+		cf.syncUninterruptibly();
+		
+		Channel chan = cf.channel();
+		
 		
 		
 		ChannelFuture write = chan.write(msgWrapper);
@@ -59,11 +71,11 @@ public class StorageNode {
 			logger.info("Join request to 10.10.35.8 successful.");
 		} else if (write.isDone() && (write.cause() != null)) {
 			logger.warn("Join request to 10.10.35.8 failed.");
-			conn.workerGroup.shutdownGracefully();
+			workerGroup.shutdownGracefully();
 			System.exit(1);
 		} else if (write.isDone() && write.isCancelled()) {
 			logger.warn("Join request to 10.10.35.8 cancelled.");
-			conn.workerGroup.shutdownGracefully();
+			workerGroup.shutdownGracefully();
 			System.exit(1);
 		}
 
@@ -79,7 +91,7 @@ public class StorageNode {
 
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");
-		conn.workerGroup.shutdownGracefully();
+		workerGroup.shutdownGracefully();
 
 	}
 	
@@ -123,17 +135,26 @@ public class StorageNode {
 				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(hostname, freeSpace, requests);
 				
 				
-				Connect conn = new Connect("10.10.35.8");
-				Channel chan = conn.connect();
+				EventLoopGroup workerGroup = new NioEventLoopGroup();
+				MessagePipeline pipeline = new MessagePipeline();
+
+				Bootstrap bootstrap = new Bootstrap()
+										.group(workerGroup)
+										.channel(NioSocketChannel.class)
+										.option(ChannelOption.SO_KEEPALIVE, true)
+										.handler(pipeline);
+
+				ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
+				cf.syncUninterruptibly();
+				
+				Channel chan = cf.channel();
 						
 				
 				ChannelFuture write = chan.write(msgWrapper);
-				logger.info("Recieved heartbeat from " + hostname);
 				
 				chan.flush();
 				write.syncUninterruptibly();
-				conn.shutdown();
-				
+				cf.channel().disconnect().syncUninterruptibly();
 				
 				
 					try {

@@ -27,19 +27,19 @@ public class Connect {
 	
 	public Channel connect() {
 		
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline();
+		this.workerGroup = new NioEventLoopGroup();
+		this.pipeline = new MessagePipeline();
 
-		Bootstrap bootstrap = new Bootstrap()
+		this.bootstrap = new Bootstrap()
 								.group(workerGroup)
 								.channel(NioSocketChannel.class)
 								.option(ChannelOption.SO_KEEPALIVE, true)
 								.handler(pipeline);
 
-		ChannelFuture cf = bootstrap.connect(host, 4123);
-		cf.syncUninterruptibly();
+		this.cf = bootstrap.connect(host, 4123);
+		this.cf.syncUninterruptibly();
 		
-		Channel chan = cf.channel();
+		this.chan = cf.channel();
 		
 		return chan;
 		

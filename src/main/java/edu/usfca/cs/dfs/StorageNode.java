@@ -3,8 +3,6 @@ package edu.usfca.cs.dfs;
 import java.io.File;
 import java.io.IOException;
 
-import com.google.protobuf.ByteString;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -29,8 +27,7 @@ public class StorageNode {
 
 	public static void main(String[] args) throws IOException {
 
-		
-		InetAddress ip;
+		InetAddress ip = null;
 		String hostname = null;
 		try {
 			ip = InetAddress.getLocalHost();
@@ -39,34 +36,28 @@ public class StorageNode {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		
-		
+
 		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(hostname);
-		
+
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline();
 
-		Bootstrap bootstrap = new Bootstrap()
-								.group(workerGroup)
-								.channel(NioSocketChannel.class)
-								.option(ChannelOption.SO_KEEPALIVE, true)
-								.handler(pipeline);
+		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
-		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
+		ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
 		cf.syncUninterruptibly();
-		
+
 		Channel chan = cf.channel();
-		
-		
-		
+
 		ChannelFuture write = chan.write(msgWrapper);
 		logger.info("Sent join request to 10.10.35.8");
 		chan.flush();
 		write.syncUninterruptibly();
 
 		/**
- * 		 * Shutdown the worker group and exit if join request was not successful
- * 		 		 */
+		 * Shutdown the worker group and exit if join request was not successful
+		 */
 		if (write.isDone() && write.isSuccess()) {
 			logger.info("Join request to 10.10.35.8 successful.");
 		} else if (write.isDone() && (write.cause() != null)) {
@@ -78,28 +69,26 @@ public class StorageNode {
 			workerGroup.shutdownGracefully();
 			System.exit(1);
 		}
-
-		/*
- * 		 * Here is where we should start sending heartbeats to the Controller And
- * 		 		 * listening for incoming messages
- * 		 		 		 */
 		
+		/* Have a thread start sending heartbeats to controller */
 		HeartBeatRunner heartBeat = new HeartBeatRunner(hostname);
 		Thread thread = new Thread(heartBeat);
 		thread.run();
-		
 
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");
 		workerGroup.shutdownGracefully();
 
 	}
-	
 
-	private static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
-
-
-
+	/**
+	 * Build a join request protobuf with hostname/ip
+	 * 
+	 * @param hostname
+	 * @param ip
+	 * @return the protobuf
+	 */
+	static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 		/* Store hostname in a JoinRequest protobuf */
 		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest.newBuilder().setNodeName(hostname)
 				.build();
@@ -110,77 +99,75 @@ public class StorageNode {
 
 		return msgWrapper;
 	}
+	/**
+	 * Build a heartbeat protobuf
+	 * 
+	 * @param hostname
+	 * @param freeSpace
+	 * @param requests
+	 * @return the protobuf
+	 */
+	private static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
+
+		StorageMessages.HeartBeat heartbeat = StorageMessages.HeartBeat.newBuilder().setFreeSpace(freeSpace)
+				.setHostname(hostname).setRequests(0).build();
+
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
+				.setHeartbeat(heartbeat).build();
+
+		return msgWrapper;
+	}
 	
+	/**
+	 * Runnable object that sends heartbeats to the Controller every 5 seconds
+	 */
 	private static class HeartBeatRunner implements Runnable {
 
 		String hostname;
 		int requests;
 		File f;
-		
-		
+
 		public HeartBeatRunner(String hostname) {
 			f = new File("/bigdata");
 			this.hostname = hostname;
 			this.requests = 0;
 		}
-				
+
 		@Override
 		public void run() {
-			
-			while(true) {
-				
-				long freeSpace =  f.getFreeSpace();
-				
-				
-				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(hostname, freeSpace, requests);
-				
-				
+
+			while (true) {
+
+				long freeSpace = f.getFreeSpace();
+
+				StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace, requests);
+
 				EventLoopGroup workerGroup = new NioEventLoopGroup();
 				MessagePipeline pipeline = new MessagePipeline();
 
-				Bootstrap bootstrap = new Bootstrap()
-										.group(workerGroup)
-										.channel(NioSocketChannel.class)
-										.option(ChannelOption.SO_KEEPALIVE, true)
-										.handler(pipeline);
+				Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+						.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
-				ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
+				ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
 				cf.syncUninterruptibly();
-				
+
 				Channel chan = cf.channel();
-						
-				
+
 				ChannelFuture write = chan.write(msgWrapper);
-				
+
 				chan.flush();
 				write.syncUninterruptibly();
 				cf.channel().disconnect().syncUninterruptibly();
-				
-				
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				 
+
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
 			}
-			
+
 		}
-		
-		private StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
-			
-			StorageMessages.HeartBeat heartbeat = StorageMessages.HeartBeat.newBuilder().
-					setFreeSpace(freeSpace).setHostname(hostname).setRequests(0).build();
-			
-			
-			StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.
-					newBuilder().setHeartbeat(heartbeat).build();
-			
-				return msgWrapper;
-		}
-		
-		
-		
+
 	}
 }
-

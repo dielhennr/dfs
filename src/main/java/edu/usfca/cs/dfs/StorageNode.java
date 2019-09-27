@@ -28,20 +28,8 @@ public class StorageNode {
 	};
 
 	public static void main(String[] args) throws IOException {
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline();
-
-		Bootstrap bootstrap = new Bootstrap()
-								.group(workerGroup)
-								.channel(NioSocketChannel.class)
-								.option(ChannelOption.SO_KEEPALIVE, true)
-								.handler(pipeline);
-
-		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
-		cf.syncUninterruptibly();
 
 		
-		/* Get IP address and hostname */
 		InetAddress ip;
 		String hostname = null;
 		try {
@@ -54,17 +42,31 @@ public class StorageNode {
 		
 		
 		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(hostname);
+		
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		MessagePipeline pipeline = new MessagePipeline();
 
-		/* Send join request */
+		Bootstrap bootstrap = new Bootstrap()
+								.group(workerGroup)
+								.channel(NioSocketChannel.class)
+								.option(ChannelOption.SO_KEEPALIVE, true)
+								.handler(pipeline);
+
+		ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
+		cf.syncUninterruptibly();
+		
 		Channel chan = cf.channel();
+		
+		
+		
 		ChannelFuture write = chan.write(msgWrapper);
 		logger.info("Sent join request to 10.10.35.8");
 		chan.flush();
 		write.syncUninterruptibly();
 
 		/**
-		 * Shutdown the worker group and exit if join request was not successful
-		 */
+ * 		 * Shutdown the worker group and exit if join request was not successful
+ * 		 		 */
 		if (write.isDone() && write.isSuccess()) {
 			logger.info("Join request to 10.10.35.8 successful.");
 		} else if (write.isDone() && (write.cause() != null)) {
@@ -78,11 +80,11 @@ public class StorageNode {
 		}
 
 		/*
-		 * Here is where we should start sending heartbeats to the Controller And
-		 * listening for incoming messages
-		 */
+ * 		 * Here is where we should start sending heartbeats to the Controller And
+ * 		 		 * listening for incoming messages
+ * 		 		 		 */
 		
-		HeartBeatRunner heartBeat = new HeartBeatRunner(hostname, chan);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(hostname);
 		Thread thread = new Thread(heartBeat);
 		thread.run();
 		
@@ -92,6 +94,7 @@ public class StorageNode {
 		workerGroup.shutdownGracefully();
 
 	}
+	
 
 	private static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 
@@ -113,14 +116,12 @@ public class StorageNode {
 		String hostname;
 		int requests;
 		File f;
-		Channel chan;
 		
 		
-		public HeartBeatRunner(String hostname, Channel chan) {
+		public HeartBeatRunner(String hostname) {
 			f = new File("/bigdata");
 			this.hostname = hostname;
 			this.requests = 0;
-			this.chan = chan;
 		}
 				
 		@Override
@@ -133,13 +134,27 @@ public class StorageNode {
 				
 				StorageMessages.StorageMessageWrapper msgWrapper = buildHeartBeat(hostname, freeSpace, requests);
 				
+				
+				EventLoopGroup workerGroup = new NioEventLoopGroup();
+				MessagePipeline pipeline = new MessagePipeline();
+
+				Bootstrap bootstrap = new Bootstrap()
+										.group(workerGroup)
+										.channel(NioSocketChannel.class)
+										.option(ChannelOption.SO_KEEPALIVE, true)
+										.handler(pipeline);
+
+				ChannelFuture cf = bootstrap.connect("10.10.35.8", 4123);
+				cf.syncUninterruptibly();
+				
+				Channel chan = cf.channel();
+						
+				
 				ChannelFuture write = chan.write(msgWrapper);
-				logger.info("Recieved heartbeat from " + hostname);
 				
 				chan.flush();
 				write.syncUninterruptibly();
-				
-				
+				cf.channel().disconnect().syncUninterruptibly();
 				
 				
 					try {
@@ -168,3 +183,4 @@ public class StorageNode {
 		
 	}
 }
+

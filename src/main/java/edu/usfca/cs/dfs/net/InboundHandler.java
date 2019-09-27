@@ -3,6 +3,7 @@ package edu.usfca.cs.dfs.net;
 import java.net.InetSocketAddress;
 
 import edu.usfca.cs.dfs.Controller;
+import edu.usfca.cs.dfs.DFSNode;
 import edu.usfca.cs.dfs.StorageMessages;
 
 import io.netty.channel.ChannelHandler;
@@ -12,8 +13,10 @@ import io.netty.channel.SimpleChannelInboundHandler;
 @ChannelHandler.Sharable
 public class InboundHandler
 extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
-
+	
+	public DFSNode node;
     public InboundHandler() { }
+    public InboundHandler(DFSNode node) { this.node = node; }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
@@ -42,7 +45,7 @@ extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
     public void channelRead0(
             ChannelHandlerContext ctx,
             StorageMessages.StorageMessageWrapper msg) {
-        Controller.OnMessage(ctx, msg);
+        node.onMessage(ctx, msg);
     }
 
     @Override

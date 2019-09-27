@@ -47,7 +47,7 @@ public class Controller implements DFSNode {
     	else if (message.hasSendToNode()) {
     		/* Remove next node from the queue*/
     		StorageNodeContext storageNode = storageNodes.poll();
-    		
+    		logger.info("Recieved request to put file on " + storageNode.getHostname() + " from client.");
     		/* Write back a join request to client with hostname of the node to send chunks to*/ 
     		ChannelFuture write = ctx.writeAndFlush(StorageNode.buildJoinRequest(storageNode.getHostname()));
 			write.syncUninterruptibly();

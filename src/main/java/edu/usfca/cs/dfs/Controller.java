@@ -49,8 +49,7 @@ public class Controller implements DFSNode {
     		StorageNodeContext storageNode = storageNodes.poll();
     		logger.info("Recieved request to put file on " + storageNode.getHostname() + " from client.");
     		/* Write back a join request to client with hostname of the node to send chunks to*/ 
-    		ChannelFuture write = ctx.writeAndFlush(StorageNode.buildJoinRequest(storageNode.getHostname()));
-			write.syncUninterruptibly();
+    		
 			/* Put that file in this nodes bloom filter */
 			storageNode.put(message.getSendToNode().getFileName().getBytes());
     		

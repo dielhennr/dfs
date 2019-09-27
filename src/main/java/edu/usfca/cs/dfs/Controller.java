@@ -42,7 +42,7 @@ public class Controller implements DFSNode {
 			storageNodes.add(new StorageNodeContext(ctx, storageHost));
     	} 
     	else if (message.hasHeartbeat()) {
-    		logger.info("Recieved heartbeat from " + message.getHeartbeat().getHostname());
+    		logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
     	}
     	else if (message.hasSendToNode()) {
     		/* Remove next node from the queue*/

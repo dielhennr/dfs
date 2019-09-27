@@ -11,6 +11,10 @@ message RetrieveFile {
     string fileName = 1;
 }
 
+message SendToNode {
+	string fileName = 1;
+}
+
 message JoinRequest {
     string nodeName = 1;
 }
@@ -23,9 +27,10 @@ message HeartBeat {
 
 message StorageMessageWrapper {
     oneof msg {
-        StoreChunk storeChunkMsg = 1;
-        RetrieveFile retrieveFileMsg = 2;
+        StoreChunk storeChunk = 1;
+        RetrieveFile retrieveFile = 2;
         JoinRequest joinRequest = 3;
         HeartBeat heartbeat = 4;
+        SendToNode sendToNode = 5;
     }
 }

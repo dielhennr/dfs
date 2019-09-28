@@ -51,6 +51,7 @@ public class Controller implements DFSNode {
     		
 			/* Put that file in this nodes bloom filter */
 			storageNode.put(message.getStoreQuery().getFileName().getBytes());
+			storageNodes.add(storageNode);
     		
     	} 
     	else if (message.hasRetrieveFile()) {

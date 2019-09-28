@@ -1,5 +1,6 @@
 package edu.usfca.cs.dfs;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
@@ -38,16 +39,19 @@ public class Client implements DFSNode{
 
         ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
         cf.syncUninterruptibly();
+        
+        File f = new File(args[1]);
 
-        StorageMessages.SendToNode sendToNode
-            = StorageMessages.SendToNode.newBuilder()
-                .setFileName("my_file.txt")
+        StorageMessages.StoreQuery storeQuery
+            = StorageMessages.StoreQuery.newBuilder()
+                .setFileName(f.getName())
+                .setFileSize(f.getTotalSpace())
                 .build();
 
         
         StorageMessages.StorageMessageWrapper msgWrapper =
             StorageMessages.StorageMessageWrapper.newBuilder()
-                .setSendToNode(sendToNode)
+                .setStoreQuery(storeQuery)
                 .build();
         
 

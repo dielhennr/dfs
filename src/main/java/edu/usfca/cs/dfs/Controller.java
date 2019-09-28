@@ -8,9 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
 
 public class Controller implements DFSNode {
 
@@ -24,9 +22,10 @@ public class Controller implements DFSNode {
 
     public void start()
     throws IOException {
+    	/* Pass a reference of the controller to our message router */
         messageRouter = new ServerMessageRouter(this);
         messageRouter.listen(13100);
-        System.out.println("Listening for connections on port 4123");
+        System.out.println("Listening for connections on port 13100");
     }
 
     public static void main(String[] args)
@@ -44,14 +43,14 @@ public class Controller implements DFSNode {
     	else if (message.hasHeartbeat()) {
     		logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
     	}
-    	else if (message.hasSendToNode()) {
+    	else if (message.hasStoreQuery()) {
     		/* Remove next node from the queue*/
     		StorageNodeContext storageNode = storageNodes.poll();
     		logger.info("Recieved request to put file on " + storageNode.getHostname() + " from client.");
     		/* Write back a join request to client with hostname of the node to send chunks to*/ 
     		
 			/* Put that file in this nodes bloom filter */
-			storageNode.put(message.getSendToNode().getFileName().getBytes());
+			storageNode.put(message.getStoreQuery().getFileName().getBytes());
     		
     	} 
     	else if (message.hasRetrieveFile()) {

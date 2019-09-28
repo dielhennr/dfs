@@ -20,6 +20,7 @@ public class MessagePipeline extends ChannelInitializer<SocketChannel> {
         inboundHandler = new InboundHandler();
     }
     public MessagePipeline(DFSNode node) {
+    	/* Finally, pass the node to the inbound handler */
     	inboundHandler = new InboundHandler(node);
     }
 

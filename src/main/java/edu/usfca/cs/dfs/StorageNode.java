@@ -109,7 +109,7 @@ public class StorageNode {
 	 */
 	private static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
 
-		StorageMessages.HeartBeat heartbeat = StorageMessages.HeartBeat.newBuilder().setFreeSpace(freeSpace)
+		StorageMessages.Heartbeat heartbeat = StorageMessages.Heartbeat.newBuilder().setFreeSpace(freeSpace)
 				.setHostname(hostname).setRequests(0).build();
 
 		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()

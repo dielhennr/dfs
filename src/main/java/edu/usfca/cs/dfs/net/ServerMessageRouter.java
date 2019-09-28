@@ -24,7 +24,8 @@ public class ServerMessageRouter {
     public ServerMessageRouter(DFSNode node) {
         bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup(4);
-
+        
+        /* Pass the node to the pipeline as well */
         pipeline = new MessagePipeline(node);
 
         bootstrap = new ServerBootstrap()

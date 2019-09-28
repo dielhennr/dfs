@@ -42,8 +42,8 @@ public class Client implements DFSNode{
         
         File f = new File(args[1]);
 
-        StorageMessages.StoreQuery storeQuery
-            = StorageMessages.StoreQuery.newBuilder()
+        StorageMessages.StoreRequest storeRequest
+            = StorageMessages.StoreRequest.newBuilder()
                 .setFileName(f.getName())
                 .setFileSize(f.getTotalSpace())
                 .build();
@@ -51,7 +51,7 @@ public class Client implements DFSNode{
         
         StorageMessages.StorageMessageWrapper msgWrapper =
             StorageMessages.StorageMessageWrapper.newBuilder()
-                .setStoreQuery(storeQuery)
+                .setStoreRequest(storeRequest)
                 .build();
         
 
@@ -79,7 +79,7 @@ public class Client implements DFSNode{
 	
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
-		logger.info("Recieved permission to put file on " + message.getJoinRequest().getNodeName());
+		logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
 		
 	}
 }

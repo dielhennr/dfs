@@ -43,14 +43,14 @@ public class Controller implements DFSNode {
     	else if (message.hasHeartbeat()) {
     		logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
     	}
-    	else if (message.hasStoreQuery()) {
+    	else if (message.hasStoreRequest()) {
     		/* Remove next node from the queue*/
     		StorageNodeContext storageNode = storageNodes.poll();
     		logger.info("Recieved request to put file on " + storageNode.getHostname() + " from client.");
     		/* Write back a join request to client with hostname of the node to send chunks to*/ 
     		
 			/* Put that file in this nodes bloom filter */
-			storageNode.put(message.getStoreQuery().getFileName().getBytes());
+			storageNode.put(message.getStoreRequest().getFileName().getBytes());
 			storageNodes.add(storageNode);
     		
     	} 

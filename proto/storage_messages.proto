@@ -21,10 +21,13 @@ message Heartbeat {
 	int32 requests = 3;
 }
 
-message StoreQuery {
+message StoreRequest {
 	string fileName = 1;
     int64 fileSize = 2;
-    string responseHost = 3;
+}
+
+message StoreResponse {
+    string hostname = 1;
 }
 
 message StorageMessageWrapper {
@@ -33,6 +36,7 @@ message StorageMessageWrapper {
         RetrieveFile retrieveFile = 2;
         JoinRequest joinRequest = 3;
         Heartbeat heartbeat = 4;
-        StoreQuery storeQuery = 5;
+        StoreRequest storeRequest = 5;
+        StoreResponse storeResponse = 6;
     }
 }

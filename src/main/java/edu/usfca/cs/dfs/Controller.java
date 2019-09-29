@@ -12,8 +12,8 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class Controller implements DFSNode {
 
-	ServerMessageRouter messageRouter;
-	static ArrayList<String> storageNodes;
+	private ServerMessageRouter messageRouter;
+	ArrayList<String> storageNodes;
 	HashMap<String, StorageNodeContext> nodeMap;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 
@@ -32,7 +32,7 @@ public class Controller implements DFSNode {
 	public static void main(String[] args) throws IOException {
 		Controller controller = new Controller();
 
-		HeartBeatChecker checker = new HeartBeatChecker(storageNodes, controller.nodeMap);
+		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
 		System.out.println("Thread working");

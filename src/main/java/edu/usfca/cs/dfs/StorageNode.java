@@ -91,7 +91,7 @@ public class StorageNode implements DFSNode {
 		}
 
 		/* Have a thread start sending heartbeats to controller */
-		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname());
+		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), cf);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.run();
 
@@ -173,24 +173,26 @@ public class StorageNode implements DFSNode {
 		String hostname;
 		int requests;
 		File f;
+		ChannelFuture cf;
 
-		public HeartBeatRunner(String hostname) {
+		public HeartBeatRunner(String hostname, ChannelFuture cf) {
 			f = new File("/bigdata");
 			this.hostname = hostname;
 			this.requests = 0;
+			this.cf = cf;
 		}
 
 		@Override
 		public void run() {
 
-			EventLoopGroup workerGroup = new NioEventLoopGroup();
-			MessagePipeline pipeline = new MessagePipeline();
+			//EventLoopGroup workerGroup = new NioEventLoopGroup();
+			//MessagePipeline pipeline = new MessagePipeline();
 
-			Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
-					.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
+			//Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+			//		.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
-			ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
-			cf.syncUninterruptibly();
+			//ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
+			//cf.syncUninterruptibly();
 			while (true) {
 
 				long freeSpace = f.getFreeSpace();

@@ -155,7 +155,7 @@ public class StorageNode implements DFSNode {
 	private static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
 
 		StorageMessages.Heartbeat heartbeat = StorageMessages.Heartbeat.newBuilder().setFreeSpace(freeSpace)
-				.setHostname(hostname).setRequests(0).build();
+				.setHostname(hostname).setRequests(0).setTimestamp(System.currentTimeMillis()).build();
 
 		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
 				.setHeartbeat(heartbeat).build();

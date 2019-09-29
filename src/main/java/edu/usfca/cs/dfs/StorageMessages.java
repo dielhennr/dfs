@@ -1830,6 +1830,11 @@ public final class StorageMessages {
      * <code>int32 requests = 3;</code>
      */
     int getRequests();
+
+    /**
+     * <code>int64 timestamp = 4;</code>
+     */
+    long getTimestamp();
   }
   /**
    * Protobuf type {@code Heartbeat}
@@ -1891,6 +1896,11 @@ public final class StorageMessages {
             case 24: {
 
               requests_ = input.readInt32();
+              break;
+            }
+            case 32: {
+
+              timestamp_ = input.readInt64();
               break;
             }
             default: {
@@ -1977,6 +1987,15 @@ public final class StorageMessages {
       return requests_;
     }
 
+    public static final int TIMESTAMP_FIELD_NUMBER = 4;
+    private long timestamp_;
+    /**
+     * <code>int64 timestamp = 4;</code>
+     */
+    public long getTimestamp() {
+      return timestamp_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2000,6 +2019,9 @@ public final class StorageMessages {
       if (requests_ != 0) {
         output.writeInt32(3, requests_);
       }
+      if (timestamp_ != 0L) {
+        output.writeInt64(4, timestamp_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2019,6 +2041,10 @@ public final class StorageMessages {
       if (requests_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, requests_);
+      }
+      if (timestamp_ != 0L) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(4, timestamp_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2041,6 +2067,8 @@ public final class StorageMessages {
           != other.getFreeSpace()) return false;
       if (getRequests()
           != other.getRequests()) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -2059,6 +2087,9 @@ public final class StorageMessages {
           getFreeSpace());
       hash = (37 * hash) + REQUESTS_FIELD_NUMBER;
       hash = (53 * hash) + getRequests();
+      hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+          getTimestamp());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2198,6 +2229,8 @@ public final class StorageMessages {
 
         requests_ = 0;
 
+        timestamp_ = 0L;
+
         return this;
       }
 
@@ -2227,6 +2260,7 @@ public final class StorageMessages {
         result.hostname_ = hostname_;
         result.freeSpace_ = freeSpace_;
         result.requests_ = requests_;
+        result.timestamp_ = timestamp_;
         onBuilt();
         return result;
       }
@@ -2284,6 +2318,9 @@ public final class StorageMessages {
         }
         if (other.getRequests() != 0) {
           setRequests(other.getRequests());
+        }
+        if (other.getTimestamp() != 0L) {
+          setTimestamp(other.getTimestamp());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -2431,6 +2468,32 @@ public final class StorageMessages {
       public Builder clearRequests() {
         
         requests_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long timestamp_ ;
+      /**
+       * <code>int64 timestamp = 4;</code>
+       */
+      public long getTimestamp() {
+        return timestamp_;
+      }
+      /**
+       * <code>int64 timestamp = 4;</code>
+       */
+      public Builder setTimestamp(long value) {
+        
+        timestamp_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>int64 timestamp = 4;</code>
+       */
+      public Builder clearTimestamp() {
+        
+        timestamp_ = 0L;
         onChanged();
         return this;
       }
@@ -5495,18 +5558,19 @@ public final class StorageMessages {
       "\n\026storage_messages.proto\"=\n\nStoreChunk\022\020" +
       "\n\010fileName\030\001 \001(\t\022\017\n\007chunkId\030\002 \001(\005\022\014\n\004dat" +
       "a\030\003 \001(\014\" \n\014RetrieveFile\022\020\n\010fileName\030\001 \001(" +
-      "\t\"\037\n\013JoinRequest\022\020\n\010nodeName\030\001 \001(\t\"B\n\tHe" +
+      "\t\"\037\n\013JoinRequest\022\020\n\010nodeName\030\001 \001(\t\"U\n\tHe" +
       "artbeat\022\020\n\010hostname\030\001 \001(\t\022\021\n\tfreeSpace\030\002" +
-      " \001(\003\022\020\n\010requests\030\003 \001(\005\"2\n\014StoreRequest\022\020" +
-      "\n\010fileName\030\001 \001(\t\022\020\n\010fileSize\030\002 \001(\003\"!\n\rSt" +
-      "oreResponse\022\020\n\010hostname\030\001 \001(\t\"\376\001\n\025Storag" +
-      "eMessageWrapper\022!\n\nstoreChunk\030\001 \001(\0132\013.St" +
-      "oreChunkH\000\022%\n\014retrieveFile\030\002 \001(\0132\r.Retri" +
-      "eveFileH\000\022#\n\013joinRequest\030\003 \001(\0132\014.JoinReq" +
-      "uestH\000\022\037\n\theartbeat\030\004 \001(\0132\n.HeartbeatH\000\022" +
-      "%\n\014storeRequest\030\005 \001(\0132\r.StoreRequestH\000\022\'" +
-      "\n\rstoreResponse\030\006 \001(\0132\016.StoreResponseH\000B" +
-      "\005\n\003msgB\022\n\020edu.usfca.cs.dfsb\006proto3"
+      " \001(\003\022\020\n\010requests\030\003 \001(\005\022\021\n\ttimestamp\030\004 \001(" +
+      "\003\"2\n\014StoreRequest\022\020\n\010fileName\030\001 \001(\t\022\020\n\010f" +
+      "ileSize\030\002 \001(\003\"!\n\rStoreResponse\022\020\n\010hostna" +
+      "me\030\001 \001(\t\"\376\001\n\025StorageMessageWrapper\022!\n\nst" +
+      "oreChunk\030\001 \001(\0132\013.StoreChunkH\000\022%\n\014retriev" +
+      "eFile\030\002 \001(\0132\r.RetrieveFileH\000\022#\n\013joinRequ" +
+      "est\030\003 \001(\0132\014.JoinRequestH\000\022\037\n\theartbeat\030\004" +
+      " \001(\0132\n.HeartbeatH\000\022%\n\014storeRequest\030\005 \001(\013" +
+      "2\r.StoreRequestH\000\022\'\n\rstoreResponse\030\006 \001(\013" +
+      "2\016.StoreResponseH\000B\005\n\003msgB\022\n\020edu.usfca.c" +
+      "s.dfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -5535,7 +5599,7 @@ public final class StorageMessages {
     internal_static_Heartbeat_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_Heartbeat_descriptor,
-        new java.lang.String[] { "Hostname", "FreeSpace", "Requests", });
+        new java.lang.String[] { "Hostname", "FreeSpace", "Requests", "Timestamp", });
     internal_static_StoreRequest_descriptor =
       getDescriptor().getMessageTypes().get(4);
     internal_static_StoreRequest_fieldAccessorTable = new

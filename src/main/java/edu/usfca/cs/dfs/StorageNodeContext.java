@@ -7,11 +7,13 @@ public class StorageNodeContext {
 	private String hostname;
     private ChannelHandlerContext ctx;
     private BloomFilter filter;
+    private long timestamp;
 
     public StorageNodeContext(ChannelHandlerContext ctx, String hostname) {
         this.ctx = ctx;
         this.hostname = hostname;
         this.filter = new BloomFilter(10000, 3);
+        this.timestamp = 0;
     }
 
 	public String getHostname() {
@@ -30,4 +32,10 @@ public class StorageNodeContext {
 		this.filter.put(data);
 	}
     
+	public void updateTimestamp(long timestamp) {
+		this.timestamp = timestamp;
+	}
+	public long getTimestamp() {
+		return this.timestamp;
+	}
 }

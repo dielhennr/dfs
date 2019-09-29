@@ -19,6 +19,7 @@ message Heartbeat {
 	string hostname = 1;
 	int64 freeSpace = 2;
 	int32 requests = 3;
+	int64 timestamp = 4;
 }
 
 message StoreRequest {

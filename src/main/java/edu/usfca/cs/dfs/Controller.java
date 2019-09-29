@@ -1,7 +1,10 @@
 package edu.usfca.cs.dfs;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import org.apache.logging.log4j.LogManager;
@@ -13,11 +16,13 @@ import io.netty.channel.ChannelHandlerContext;
 public class Controller implements DFSNode {
 
     ServerMessageRouter messageRouter;
-    Queue<StorageNodeContext> storageNodes; 
+    static ArrayList<StorageNodeContext> storageNodes; 
+    static HashMap<String, StorageNodeContext> nodeMap;
     private static final Logger logger = LogManager.getLogger(Controller.class);
     
     public Controller() {
-    	storageNodes = new LinkedList<StorageNodeContext>();
+    	storageNodes = new ArrayList<StorageNodeContext>();
+    	nodeMap = new HashMap<>();
     }
 
     public void start()
@@ -32,6 +37,11 @@ public class Controller implements DFSNode {
     throws IOException {
         Controller controller = new Controller();
         controller.start();
+        
+        
+        HeartBeatChecker checker = new HeartBeatChecker(storageNodes, nodeMap);
+        
+        
     }
     
     public void onMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
@@ -39,13 +49,18 @@ public class Controller implements DFSNode {
     		String storageHost = message.getJoinRequest().getNodeName();
     		logger.info("Recieved join request from " + storageHost);
 			storageNodes.add(new StorageNodeContext(ctx, storageHost));
+			nodeMap.put(storageHost, new StorageNodeContext(ctx, storageHost));
     	} 
     	else if (message.hasHeartbeat()) {
     		logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
+    		// Update timestamp
+    		nodeMap.get(message.getHeartbeat().getHostname()).updateTimestamp(message.getHeartbeat().getTimestamp());
     	}
     	else if (message.hasStoreRequest()) {
     		/* Remove next node from the queue*/
-    		StorageNodeContext storageNode = storageNodes.poll();
+    		StorageNodeContext storageNode = storageNodes.get(0);
+    		storageNodes.add(storageNode);
+    		storageNodes.remove(0);
     		logger.info("Recieved request to put file on " + storageNode.getHostname() + " from client.");
     		/* Write back a join request to client with hostname of the node to send chunks to*/ 
     		
@@ -61,4 +76,44 @@ public class Controller implements DFSNode {
     		
     	}
     }
+    
+    
+    private static class HeartBeatChecker implements Runnable{
+
+    	ArrayList<StorageNodeContext> storageNodes;
+    	static HashMap<String, StorageNodeContext> nodeMap;
+    	public HeartBeatChecker(ArrayList<StorageNodeContext> storageNodes, HashMap<String, StorageNodeContext> nodeMap) {
+    		this.storageNodes = storageNodes;
+    		this.nodeMap = nodeMap;
+    	}
+    	
+    	
+		@Override
+		public void run() {
+			
+			long currentTime = System.currentTimeMillis();
+			
+			for (Map.Entry node : nodeMap.entrySet()) {
+				
+				StorageNodeContext storageNode = (StorageNodeContext) node.getKey();
+				long nodeTime = storageNode.getTimestamp();
+				
+				
+				if (currentTime - nodeTime > 7000) {
+					logger.info("Detected failure on node: " + storageNode.getHostname());
+				}
+				
+				
+				
+				
+				
+			}
+			
+			
+			
+		}
+    	
+    }
 }
+
+

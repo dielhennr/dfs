@@ -47,13 +47,17 @@ public class Controller implements DFSNode {
     public void onMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
     	if (message.hasJoinRequest()) {
     		String storageHost = message.getJoinRequest().getNodeName();
+    		
     		logger.info("Recieved join request from " + storageHost);
 			storageNodes.add(new StorageNodeContext(ctx, storageHost));
+			System.err.println("Join request host: " + storageHost);
 			nodeMap.put(storageHost, new StorageNodeContext(ctx, storageHost));
     	} 
     	else if (message.hasHeartbeat()) {
     		logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
     		// Update timestamp
+    		System.err.println(nodeMap.toString());
+    		System.err.println("HeartBeat Host: " + message.getHeartbeat().getHostname());
     		nodeMap.get(message.getHeartbeat().getHostname()).updateTimestamp(message.getHeartbeat().getTimestamp());
     	}
     	else if (message.hasStoreRequest()) {
@@ -65,6 +69,7 @@ public class Controller implements DFSNode {
     		/* Write back a join request to client with hostname of the node to send chunks to*/ 
     		
 			/* Put that file in this nodes bloom filter */
+    		System.err.println(nodeMap.toString());
 			storageNode.put(message.getStoreRequest().getFileName().getBytes());
 			storageNodes.add(storageNode);
     		

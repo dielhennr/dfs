@@ -90,7 +90,7 @@ public class StorageNode implements DFSNode {
 			System.exit(1);
 		}
 
-		/*
+		/* 
 		 * Have a thread start sending heartbeats to controller. Use the Channel Future
 		 * from bootstrap.connect
 		 **/
@@ -201,6 +201,12 @@ public class StorageNode implements DFSNode {
 				chan.flush();
 				write.syncUninterruptibly();
 				cf.syncUninterruptibly();
+
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					logger.error("Interrupted when sleeping after heartbeat.");
+				}
 
 			}
 

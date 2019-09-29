@@ -38,6 +38,7 @@ public class Controller implements DFSNode {
 		HeartBeatChecker checker = new HeartBeatChecker(storageNodes, controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
+		System.out.println("Thread working");
 		controller.start();
 	}
 

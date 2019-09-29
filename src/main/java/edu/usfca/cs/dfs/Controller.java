@@ -48,11 +48,11 @@ public class Controller implements DFSNode {
 		} else if (message.hasHeartbeat()) {
 			logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
 			// Update timestamp
-			System.err.println("HeartBeat Host: " + message.getHeartbeat().getHostname());
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
 			if (nodeMap.containsKey(heartbeat.getHostname())) {
 				nodeMap.get(heartbeat.getHostname()).updateTimestamp(heartbeat.getTimestamp());
 				nodeMap.get(heartbeat.getHostname()).setFreeSpace(heartbeat.getFreeSpace());
+				logger.info("Recieved heartbeat from " + message.getHeartbeat().getHostname());
 			} /* Otherwise ignore if join request not processed yet? */
 		} else if (message.hasStoreRequest()) {
 			/* Remove next node from the queue */

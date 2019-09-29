@@ -49,10 +49,17 @@ public class Controller implements DFSNode {
 			System.err.println("Join request host: " + storageHost);
 			nodeMap.put(storageHost, new StorageNodeContext(ctx, storageHost));
 		} else if (message.hasHeartbeat()) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
 			// Update timestamp
 			System.err.println(nodeMap.toString());
 			System.err.println("HeartBeat Host: " + message.getHeartbeat().getHostname());
+	
 			nodeMap.get(message.getHeartbeat().getHostname()).updateTimestamp(message.getHeartbeat().getTimestamp());
 		} else if (message.hasStoreRequest()) {
 			/* Remove next node from the queue */

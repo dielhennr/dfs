@@ -183,6 +183,14 @@ public class StorageNode implements DFSNode {
 		@Override
 		public void run() {
 
+			EventLoopGroup workerGroup = new NioEventLoopGroup();
+			MessagePipeline pipeline = new MessagePipeline();
+
+			Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+					.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
+
+			ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
+			cf.syncUninterruptibly();
 			while (true) {
 
 				long freeSpace = f.getFreeSpace();
@@ -190,17 +198,7 @@ public class StorageNode implements DFSNode {
 				StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace,
 						requests);
 
-				EventLoopGroup workerGroup = new NioEventLoopGroup();
-				MessagePipeline pipeline = new MessagePipeline();
-
-				Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
-						.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
-
-				ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
-				cf.syncUninterruptibly();
-
 				Channel chan = cf.channel();
-
 				ChannelFuture write = chan.write(msgWrapper);
 
 				chan.flush();

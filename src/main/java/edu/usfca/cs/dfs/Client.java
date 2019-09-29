@@ -82,4 +82,23 @@ public class Client implements DFSNode{
 		logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
 		
 	}
+	
+	
+	
+	
+	public void sendStorgeRequest(String filename, long fileSize) {
+		
+	}
+	
+	
+	public StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
+		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().
+				setFileName(filename).setFileSize(fileSize).build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder().
+				setStoreRequest(storeRequest).build();
+		
+		return msgWrapper;
+	}
+	
+	
 }

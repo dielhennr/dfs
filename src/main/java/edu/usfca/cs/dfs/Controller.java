@@ -34,11 +34,11 @@ public class Controller implements DFSNode {
 
 	public static void main(String[] args) throws IOException {
 		Controller controller = new Controller();
-		controller.start();
 
 		HeartBeatChecker checker = new HeartBeatChecker(storageNodes, controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
-		heartbeatThread.start();
+		heartbeatThread.run();
+		controller.start();
 	}
 
 	public void onMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
@@ -89,29 +89,28 @@ public class Controller implements DFSNode {
 	}
 
 	private static class HeartBeatChecker implements Runnable {
-
-		HashMap<String, StorageNodeContext> nodeMap;
-
-		public HeartBeatChecker(ArrayList<StorageNodeContext> storageNodes,
+HashMap<String, StorageNodeContext> nodeMap; public HeartBeatChecker(ArrayList<StorageNodeContext> storageNodes,
 				HashMap<String, StorageNodeContext> nodeMap) {
 			this.nodeMap = nodeMap;
 		}
 
 		@Override
 		public void run() {
+            System.out.println("asdffasdfasdfasdfasdfasdfasdfsdfdasf");
+            while (true) {
+                long currentTime = System.currentTimeMillis();
+                for (Map.Entry node : nodeMap.entrySet()) {
+                    System.out.println("in loop curr time is: " + currentTime);
+                    StorageNodeContext storageNode = (StorageNodeContext) node.getValue();
+                    long nodeTime = storageNode.getTimestamp();
 
-			long currentTime = System.currentTimeMillis();
+                    if (currentTime - nodeTime > 7000) {
+                        logger.info("Detected failure on node: " + storageNode.getHostname());
+                    } 
 
-			for (Map.Entry node : nodeMap.entrySet()) {
 
-				StorageNodeContext storageNode = (StorageNodeContext) node.getValue();
-				long nodeTime = storageNode.getTimestamp();
-
-				if (currentTime - nodeTime > 7000) {
-					logger.info("Detected failure on node: " + storageNode.getHostname());
-				}
-
-			}
+                }
+            }
 
 		}
 

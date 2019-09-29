@@ -3,6 +3,7 @@ package edu.usfca.cs.dfs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +15,7 @@ public class Controller implements DFSNode {
 
 	private ServerMessageRouter messageRouter;
 	ArrayList<String> storageNodes;
-	HashMap<String, StorageNodeContext> nodeMap;
+	ConcurrentHashMap<String, StorageNodeContext> nodeMap;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 
 	/**
@@ -23,7 +24,7 @@ public class Controller implements DFSNode {
 	 */
 	public Controller() {
 		storageNodes = new ArrayList<String>();
-		nodeMap = new HashMap<String, StorageNodeContext>();
+		nodeMap = new ConcurrentHashMap<String, StorageNodeContext>();
 	}
 
 	public void start() throws IOException {
@@ -81,9 +82,9 @@ public class Controller implements DFSNode {
 	}
 
 	private static class HeartBeatChecker implements Runnable {
-		HashMap<String, StorageNodeContext> nodeMap;
+		ConcurrentHashMap<String, StorageNodeContext> nodeMap;
 
-		public HeartBeatChecker(ArrayList<String> storageNodes, HashMap<String, StorageNodeContext> nodeMap) {
+		public HeartBeatChecker(ArrayList<String> storageNodes, ConcurrentHashMap<String, StorageNodeContext> nodeMap) {
 			this.nodeMap = nodeMap;
 		}
 
@@ -92,10 +93,7 @@ public class Controller implements DFSNode {
 			while (true) {
 				long currentTime = System.currentTimeMillis();
 				for (String node : nodeMap.keySet()) {
-					StorageNodeContext storageNode = null;
-					synchronized(nodeMap) {
-						storageNode = nodeMap.get(node);
-					}
+					StorageNodeContext storageNode = nodeMap.get(node);
 					long nodeTime = storageNode.getTimestamp();
 
 					if (currentTime - nodeTime > 7000) {

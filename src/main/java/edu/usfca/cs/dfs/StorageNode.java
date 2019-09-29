@@ -31,7 +31,7 @@ public class StorageNode implements DFSNode {
 	ServerMessageRouter messageRouter;
 	private InetAddress ip = null;
 	private String hostname = null;
-		
+
 	public StorageNode() throws UnknownHostException {
 		ip = InetAddress.getLocalHost();
 		hostname = ip.getHostName();
@@ -46,7 +46,7 @@ public class StorageNode implements DFSNode {
 	}
 
 	public static void main(String[] args) throws IOException {
-		
+
 		StorageNode storageNode = null;
 		try {
 			storageNode = new StorageNode();
@@ -54,7 +54,7 @@ public class StorageNode implements DFSNode {
 			logger.error("Could not start storage node.");
 			System.exit(1);
 		}
-		
+
 		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(storageNode.getHostname());
 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -87,12 +87,12 @@ public class StorageNode implements DFSNode {
 			workerGroup.shutdownGracefully();
 			System.exit(1);
 		}
-		
+
 		/* Have a thread start sending heartbeats to controller */
 		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname());
 		Thread thread = new Thread(heartBeat);
 		thread.run();
-		
+
 		storageNode.start();
 
 		/* Don't quit until we've disconnected: */
@@ -101,14 +101,13 @@ public class StorageNode implements DFSNode {
 
 	}
 
-    public void start()
-    throws IOException {
-    	/* Pass a reference of the controller to our message router */
-        messageRouter = new ServerMessageRouter(this);
-        messageRouter.listen(13100);
-        System.out.println("Listening for connections on port 13100");
-    }
-    
+	public void start() throws IOException {
+		/* Pass a reference of the controller to our message router */
+		messageRouter = new ServerMessageRouter(this);
+		messageRouter.listen(13100);
+		System.out.println("Listening for connections on port 13100");
+	}
+
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreChunk()) {
@@ -123,9 +122,9 @@ public class StorageNode implements DFSNode {
 				logger.error("Could not write " + chunk.getFileName() + "_chunk" + chunk.getChunkId() + " to disk.");
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Build a join request protobuf with hostname/ip
 	 * 
@@ -144,6 +143,7 @@ public class StorageNode implements DFSNode {
 
 		return msgWrapper;
 	}
+
 	/**
 	 * Build a heartbeat protobuf
 	 * 
@@ -162,7 +162,7 @@ public class StorageNode implements DFSNode {
 
 		return msgWrapper;
 	}
-	
+
 	/**
 	 * Runnable object that sends heartbeats to the Controller every 5 seconds
 	 */
@@ -185,7 +185,8 @@ public class StorageNode implements DFSNode {
 
 				long freeSpace = f.getFreeSpace();
 
-				StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace, requests);
+				StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace,
+						requests);
 
 				EventLoopGroup workerGroup = new NioEventLoopGroup();
 				MessagePipeline pipeline = new MessagePipeline();

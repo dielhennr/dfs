@@ -90,6 +90,7 @@ public class Controller implements DFSNode {
 					StorageNodeContext storageNode = nodeMap.get(node);
 					long nodeTime = storageNode.getTimestamp();
 
+					System.out.println("in loop node time is: " + nodeTime);
 					if (currentTime - nodeTime > 7000) {
 						logger.info("Detected failure on node: " + node);
 					}

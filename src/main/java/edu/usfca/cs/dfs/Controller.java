@@ -93,9 +93,16 @@ public class Controller implements DFSNode {
 
 					System.out.println("in loop node time is: " + nodeTime);
 					if (currentTime - nodeTime > 7000) {
-						logger.info("Detected failure on node: " + node);
+						logger.info("Detected failure on node: " + node + " with " + ((currentTime-nodeTime)/1000000) + 
+								" seconds past last heartbeat");
 					}
 
+				}
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
 		}

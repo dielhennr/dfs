@@ -1,0 +1,43 @@
+syntax = "proto3";
+option java_package = "edu.usfca.cs.dfs";
+
+message StoreChunk {
+    string fileName = 1;
+    int32 chunkId = 2;
+    bytes data = 3;
+}
+
+message RetrieveFile {
+    string fileName = 1;
+}
+
+message JoinRequest {
+    string nodeName = 1;
+}
+
+message Heartbeat {
+	string hostname = 1;
+	int64 freeSpace = 2;
+	int32 requests = 3;
+	int64 timestamp = 4;
+}
+
+message StoreRequest {
+	string fileName = 1;
+    int64 fileSize = 2;
+}
+
+message StoreResponse {
+    string hostname = 1;
+}
+
+message StorageMessageWrapper {
+    oneof msg {
+        StoreChunk storeChunk = 1;
+        RetrieveFile retrieveFile = 2;
+        JoinRequest joinRequest = 3;
+        Heartbeat heartbeat = 4;
+        StoreRequest storeRequest = 5;
+        StoreResponse storeResponse = 6;
+    }
+}

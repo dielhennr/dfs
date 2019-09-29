@@ -35,6 +35,8 @@ public class StorageNode implements DFSNode {
 	public StorageNode() throws UnknownHostException {
 		ip = InetAddress.getLocalHost();
 		hostname = ip.getHostName();
+		/* For log4j2 */
+		System.setProperty("hostName", hostname);
 	};
 
 	private InetAddress getIp() {

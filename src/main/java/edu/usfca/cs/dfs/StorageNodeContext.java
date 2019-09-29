@@ -4,26 +4,30 @@ import io.netty.channel.ChannelHandlerContext;
 
 public class StorageNodeContext {
 
-	private String hostname;
     private ChannelHandlerContext ctx;
     private BloomFilter filter;
     private long timestamp;
+    private long freeSpace;
 
     public StorageNodeContext(ChannelHandlerContext ctx, String hostname) {
         this.ctx = ctx;
-        this.hostname = hostname;
         this.filter = new BloomFilter(10000, 3);
         this.timestamp = 0;
+        this.freeSpace = 0;
     }
-
-	public String getHostname() {
-		return hostname;
-	}
 
 	public ChannelHandlerContext getCtx() {
 		return ctx;
 	}
 	
+	public long getFreeSpace() {
+		return freeSpace;
+	}
+
+	public void setFreeSpace(long freeSpace) {
+		this.freeSpace = freeSpace;
+	}
+
 	public boolean mightBeThere(byte[] data) {
 		return this.filter.get(data);
 	}

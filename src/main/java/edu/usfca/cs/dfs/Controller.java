@@ -3,9 +3,6 @@ package edu.usfca.cs.dfs;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,12 +13,12 @@ import io.netty.channel.ChannelHandlerContext;
 public class Controller implements DFSNode {
 
 	ServerMessageRouter messageRouter;
-	static ArrayList<StorageNodeContext> storageNodes;
+	static ArrayList<String> storageNodes;
 	HashMap<String, StorageNodeContext> nodeMap;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 
 	public Controller() {
-		storageNodes = new ArrayList<StorageNodeContext>();
+		storageNodes = new ArrayList<String>();
 		nodeMap = new HashMap<>();
 	}
 
@@ -45,39 +42,28 @@ public class Controller implements DFSNode {
 	public void onMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
 		if (message.hasJoinRequest()) {
 			String storageHost = message.getJoinRequest().getNodeName();
-			
 
 			logger.info("Recieved join request from " + storageHost);
-			storageNodes.add(new StorageNodeContext(ctx, storageHost));
+			storageNodes.add(storageHost);
 			System.err.println("Join request host: " + storageHost);
 			nodeMap.put(storageHost, new StorageNodeContext(ctx, storageHost));
 		} else if (message.hasHeartbeat()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
 			// Update timestamp
-			System.err.println(nodeMap.toString());
 			System.err.println("HeartBeat Host: " + message.getHeartbeat().getHostname());
-	
-			nodeMap.get(message.getHeartbeat().getHostname()).updateTimestamp(message.getHeartbeat().getTimestamp());
+			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
+			nodeMap.get(heartbeat.getHostname()).updateTimestamp(heartbeat.getTimestamp());
+			nodeMap.get(heartbeat.getHostname()).setFreeSpace(heartbeat.getFreeSpace());
 		} else if (message.hasStoreRequest()) {
 			/* Remove next node from the queue */
-			StorageNodeContext storageNode = storageNodes.get(0);
-			storageNodes.add(storageNode);
-			storageNodes.remove(0);
-			logger.info("Recieved request to put file on " + storageNode.getHostname() + " from client.");
+			String storageNode = storageNodes.remove(0);
+			logger.info("Recieved request to put file on " + storageNode + " from client.");
 			/*
 			 * Write back a join request to client with hostname of the node to send chunks
 			 * to
 			 */
-
 			/* Put that file in this nodes bloom filter */
-			System.err.println(nodeMap.toString());
-			storageNode.put(message.getStoreRequest().getFileName().getBytes());
+			nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());
 			storageNodes.add(storageNode);
 
 		} else if (message.hasRetrieveFile()) {
@@ -90,28 +76,33 @@ public class Controller implements DFSNode {
 	}
 
 	private static class HeartBeatChecker implements Runnable {
-HashMap<String, StorageNodeContext> nodeMap; public HeartBeatChecker(ArrayList<StorageNodeContext> storageNodes,
-				HashMap<String, StorageNodeContext> nodeMap) {
+		HashMap<String, StorageNodeContext> nodeMap;
+
+		public HeartBeatChecker(ArrayList<String> storageNodes, HashMap<String, StorageNodeContext> nodeMap) {
 			this.nodeMap = nodeMap;
 		}
 
 		@Override
 		public void run() {
-            System.out.println("asdffasdfasdfasdfasdfasdfasdfsdfdasf");
-            while (true) {
-                long currentTime = System.currentTimeMillis();
-                for (Map.Entry node : nodeMap.entrySet()) {
-                    System.out.println("in loop curr time is: " + currentTime);
-                    StorageNodeContext storageNode = (StorageNodeContext) node.getValue();
-                    long nodeTime = storageNode.getTimestamp();
+			while (true) {
+				long currentTime = System.currentTimeMillis();
+				for (String node : nodeMap.keySet()) {
+					System.out.println("in loop curr time is: " + currentTime);
+					StorageNodeContext storageNode = nodeMap.get(node);
+					long nodeTime = storageNode.getTimestamp();
 
-                    if (currentTime - nodeTime > 7000) {
-                        logger.info("Detected failure on node: " + storageNode.getHostname());
-                    } 
+					if (currentTime - nodeTime > 7000) {
+						logger.info("Detected failure on node: " + node);
+					}
 
-
-                }
-            }
+				}
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 
 		}
 

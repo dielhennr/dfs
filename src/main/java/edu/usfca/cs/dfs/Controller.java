@@ -31,12 +31,11 @@ public class Controller implements DFSNode {
 
 	public static void main(String[] args) throws IOException {
 		Controller controller = new Controller();
-
+		System.out.println("Thread working");
+		controller.start();
 		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
-		System.out.println("Thread working");
-		controller.start();
 	}
 
 	public void onMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {

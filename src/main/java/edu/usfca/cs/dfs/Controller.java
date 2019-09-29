@@ -19,7 +19,7 @@ public class Controller implements DFSNode {
 
 	public Controller() {
 		storageNodes = new ArrayList<String>();
-		nodeMap = new HashMap<>();
+		nodeMap = new HashMap<String, StorageNodeContext>();
 	}
 
 	public void start() throws IOException {
@@ -30,8 +30,8 @@ public class Controller implements DFSNode {
 	}
 
 	public static void main(String[] args) throws IOException {
+		/* Start controller to listen for message */
 		Controller controller = new Controller();
-		System.out.println("Thread working");
 		controller.start();
 		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
@@ -44,15 +44,16 @@ public class Controller implements DFSNode {
 
 			logger.info("Recieved join request from " + storageHost);
 			storageNodes.add(storageHost);
-			System.err.println("Join request host: " + storageHost);
-			nodeMap.put(storageHost, new StorageNodeContext(ctx, storageHost));
+			nodeMap.put(storageHost, new StorageNodeContext(ctx));
 		} else if (message.hasHeartbeat()) {
 			logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
 			// Update timestamp
 			System.err.println("HeartBeat Host: " + message.getHeartbeat().getHostname());
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
-			nodeMap.get(heartbeat.getHostname()).updateTimestamp(heartbeat.getTimestamp());
-			nodeMap.get(heartbeat.getHostname()).setFreeSpace(heartbeat.getFreeSpace());
+			if (nodeMap.containsKey(heartbeat.getHostname())) {
+				nodeMap.get(heartbeat.getHostname()).updateTimestamp(heartbeat.getTimestamp());
+				nodeMap.get(heartbeat.getHostname()).setFreeSpace(heartbeat.getFreeSpace());
+			} /* Otherwise ignore if join request not processed yet? */
 		} else if (message.hasStoreRequest()) {
 			/* Remove next node from the queue */
 			String storageNode = storageNodes.remove(0);
@@ -96,15 +97,7 @@ public class Controller implements DFSNode {
 					}
 
 				}
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
-
 		}
-
 	}
 }

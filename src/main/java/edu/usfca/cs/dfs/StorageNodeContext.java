@@ -9,7 +9,7 @@ public class StorageNodeContext {
     private long timestamp;
     private long freeSpace;
 
-    public StorageNodeContext(ChannelHandlerContext ctx, String hostname) {
+    public StorageNodeContext(ChannelHandlerContext ctx) {
         this.ctx = ctx;
         this.filter = new BloomFilter(10000, 3);
         this.timestamp = 0;

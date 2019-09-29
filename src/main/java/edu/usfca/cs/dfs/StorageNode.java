@@ -92,8 +92,8 @@ public class StorageNode implements DFSNode {
 
 		/* Have a thread start sending heartbeats to controller */
 		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname());
-		Thread thread = new Thread(heartBeat);
-		thread.run();
+		Thread heartThread = new Thread(heartBeat);
+		heartThread.run();
 
 		storageNode.start();
 

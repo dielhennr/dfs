@@ -205,7 +205,7 @@ public class StorageNode implements DFSNode {
 
 				chan.flush();
 				write.syncUninterruptibly();
-				cf.channel().disconnect().syncUninterruptibly();
+				cf.syncUninterruptibly();
 
 				try {
 					Thread.sleep(5000);

@@ -17,6 +17,10 @@ public class Controller implements DFSNode {
 	HashMap<String, StorageNodeContext> nodeMap;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 
+	/**
+	 * Constructor
+	 * 
+	 */
 	public Controller() {
 		storageNodes = new ArrayList<String>();
 		nodeMap = new HashMap<String, StorageNodeContext>();
@@ -43,20 +47,21 @@ public class Controller implements DFSNode {
 			String storageHost = message.getJoinRequest().getNodeName();
 
 			logger.info("Recieved join request from " + storageHost);
-			storageNodes.add(storageHost);
 			nodeMap.put(storageHost, new StorageNodeContext(ctx));
+			storageNodes.add(storageHost);
 		} else if (message.hasHeartbeat()) {
 			logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
-			// Update timestamp
+			String hostName = message.getHeartbeat().getHostname();
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
-			if (nodeMap.containsKey(heartbeat.getHostname())) {
-				nodeMap.get(heartbeat.getHostname()).updateTimestamp(heartbeat.getTimestamp());
-				nodeMap.get(heartbeat.getHostname()).setFreeSpace(heartbeat.getFreeSpace());
-				logger.info("Recieved heartbeat from " + message.getHeartbeat().getHostname());
+			if (nodeMap.containsKey(hostName)) {
+				nodeMap.get(hostName).updateTimestamp(heartbeat.getTimestamp());
+				nodeMap.get(hostName).setFreeSpace(heartbeat.getFreeSpace());
+				logger.info("Recieved heartbeat from " + hostName);
 			} /* Otherwise ignore if join request not processed yet? */
 		} else if (message.hasStoreRequest()) {
 			/* Remove next node from the queue */
 			String storageNode = storageNodes.remove(0);
+
 			logger.info("Recieved request to put file on " + storageNode + " from client.");
 			/*
 			 * Write back a join request to client with hostname of the node to send chunks
@@ -91,8 +96,8 @@ public class Controller implements DFSNode {
 					long nodeTime = storageNode.getTimestamp();
 
 					if (currentTime - nodeTime > 7000) {
-						logger.info("Detected failure on node: " + node + " with " + ((currentTime-nodeTime)/1000000) + 
-								" seconds past last heartbeat");
+						logger.info("Detected failure on node: " + node);
+						nodeMap.remove(node);
 					}
 
 				}

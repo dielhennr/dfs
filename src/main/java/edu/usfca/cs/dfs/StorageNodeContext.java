@@ -12,7 +12,7 @@ public class StorageNodeContext {
     public StorageNodeContext(ChannelHandlerContext ctx) {
         this.ctx = ctx;
         this.filter = new BloomFilter(10000, 3);
-        this.timestamp = 0;
+        this.timestamp = System.currentTimeMillis();
         this.freeSpace = 0;
     }
 

@@ -87,11 +87,9 @@ public class Controller implements DFSNode {
 			while (true) {
 				long currentTime = System.currentTimeMillis();
 				for (String node : nodeMap.keySet()) {
-					System.out.println("in loop curr time is: " + currentTime);
 					StorageNodeContext storageNode = nodeMap.get(node);
 					long nodeTime = storageNode.getTimestamp();
 
-					System.out.println("in loop node time is: " + nodeTime);
 					if (currentTime - nodeTime > 7000) {
 						logger.info("Detected failure on node: " + node + " with " + ((currentTime-nodeTime)/1000000) + 
 								" seconds past last heartbeat");

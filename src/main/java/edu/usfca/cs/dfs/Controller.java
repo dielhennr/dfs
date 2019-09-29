@@ -92,7 +92,10 @@ public class Controller implements DFSNode {
 			while (true) {
 				long currentTime = System.currentTimeMillis();
 				for (String node : nodeMap.keySet()) {
-					StorageNodeContext storageNode = nodeMap.get(node);
+					StorageNodeContext storageNode = null;
+					synchronized(nodeMap) {
+						storageNode = nodeMap.get(node);
+					}
 					long nodeTime = storageNode.getTimestamp();
 
 					if (currentTime - nodeTime > 7000) {

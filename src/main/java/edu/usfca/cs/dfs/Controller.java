@@ -37,12 +37,14 @@ public class Controller implements DFSNode {
 		controller.start();
 
 		HeartBeatChecker checker = new HeartBeatChecker(storageNodes, controller.nodeMap);
-
+		Thread heartbeatThread = new Thread(checker);
+		heartbeatThread.start();
 	}
 
 	public void onMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
 		if (message.hasJoinRequest()) {
 			String storageHost = message.getJoinRequest().getNodeName();
+			
 
 			logger.info("Recieved join request from " + storageHost);
 			storageNodes.add(new StorageNodeContext(ctx, storageHost));

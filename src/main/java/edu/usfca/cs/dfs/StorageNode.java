@@ -90,7 +90,10 @@ public class StorageNode implements DFSNode {
 			System.exit(1);
 		}
 
-		/* Have a thread start sending heartbeats to controller */
+		/*
+		 * Have a thread start sending heartbeats to controller. Use the Channel Future
+		 * from bootstrap.connect
+		 **/
 		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), cf);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.run();
@@ -185,14 +188,6 @@ public class StorageNode implements DFSNode {
 		@Override
 		public void run() {
 
-			//EventLoopGroup workerGroup = new NioEventLoopGroup();
-			//MessagePipeline pipeline = new MessagePipeline();
-
-			//Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
-			//		.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
-
-			//ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
-			//cf.syncUninterruptibly();
 			while (true) {
 
 				long freeSpace = f.getFreeSpace();
@@ -206,12 +201,6 @@ public class StorageNode implements DFSNode {
 				chan.flush();
 				write.syncUninterruptibly();
 				cf.syncUninterruptibly();
-
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
 
 			}
 

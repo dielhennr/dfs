@@ -201,7 +201,7 @@ public class StorageNode implements DFSNode {
         Channel chan = cf.channel();
 
         ChannelFuture write = chan.write(msgWrapper);
-        logger.info("Sent heartbeat to 10.10.35.8");
+        logger.debug("Sent heartbeat to 10.10.35.8");
         chan.flush();
         write.syncUninterruptibly();
 		
@@ -211,7 +211,7 @@ public class StorageNode implements DFSNode {
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
-					logger.error("Interrupted when sleeping after heartbeat.");
+					logger.debug("Interrupted when sleeping after heartbeat.");
 				}
 
 			}

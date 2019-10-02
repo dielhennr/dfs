@@ -19,8 +19,6 @@ import edu.usfca.cs.dfs.net.ServerMessageRouter;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -89,12 +87,14 @@ public class StorageNode implements DFSNode {
 			workerGroup.shutdownGracefully();
 			System.exit(1);
 		}
+		
+		ChannelFuture closing = chan.close();
+		closing.syncUninterruptibly();
 
 		/* 
-		 * Have a thread start sending heartbeats to controller. Use the Channel Future
-		 * from bootstrap.connect
+		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make connections
 		 **/
-		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), cf);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), bootstrap);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.run();
 
@@ -176,13 +176,13 @@ public class StorageNode implements DFSNode {
 		String hostname;
 		int requests;
 		File f;
-		ChannelFuture cf;
+		Bootstrap bootstrap;
 
-		public HeartBeatRunner(String hostname, ChannelFuture cf) {
+		public HeartBeatRunner(String hostname, Bootstrap bootstrap) {
 			f = new File("/bigdata");
 			this.hostname = hostname;
 			this.requests = 0;
-			this.cf = cf;
+			this.bootstrap = bootstrap;
 		}
 
 		@Override
@@ -194,13 +194,31 @@ public class StorageNode implements DFSNode {
 
 				StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace,
 						requests);
+        
+        ChannelFuture cf = this.bootstrap.connect("10.10.35.8", 13100);
+        cf.syncUninterruptibly();
 
-				Channel chan = cf.channel();
-				ChannelFuture write = chan.write(msgWrapper);
+        Channel chan = cf.channel();
 
-				chan.flush();
-				write.syncUninterruptibly();
-				cf.syncUninterruptibly();
+        ChannelFuture write = chan.write(msgWrapper);
+        logger.info("Sent heartbeat to 10.10.35.8");
+        chan.flush();
+        write.syncUninterruptibly();
+
+        /**
+         * Shutdown the worker group and exit if join request was not successful
+         */
+        if (write.isDone() && write.isSuccess()) {
+          logger.info("Heartbeat to 10.10.35.8 successful.");
+        } else if (write.isDone() && (write.cause() != null)) {
+          logger.warn("Heartbeat to 10.10.35.8 failed.");
+        } else if (write.isDone() && write.isCancelled()) {
+          logger.warn("Heartbeat to 10.10.35.8 cancelled.");
+          System.exit(1);
+        }
+		
+        ChannelFuture closing = chan.close();
+        closing.syncUninterruptibly();
 
 				try {
 					Thread.sleep(5000);

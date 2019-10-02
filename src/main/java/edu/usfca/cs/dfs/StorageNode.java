@@ -157,7 +157,7 @@ public class StorageNode implements DFSNode {
 	 * @param requests
 	 * @return the protobuf
 	 */
-	private static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
+	public static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
 
 		StorageMessages.Heartbeat heartbeat = StorageMessages.Heartbeat.newBuilder().setFreeSpace(freeSpace)
 				.setHostname(hostname).setRequests(0).setTimestamp(System.currentTimeMillis()).build();
@@ -166,58 +166,6 @@ public class StorageNode implements DFSNode {
 				.setHeartbeat(heartbeat).build();
 
 		return msgWrapper;
-	}
-
-	/**
-	 * Runnable object that sends heartbeats to the Controller every 5 seconds
-	 */
-	private static class HeartBeatRunner implements Runnable {
-
-		String hostname;
-		int requests;
-		File f;
-		Bootstrap bootstrap;
-
-		public HeartBeatRunner(String hostname, Bootstrap bootstrap) {
-			f = new File("/bigdata");
-			this.hostname = hostname;
-			this.requests = 0;
-			this.bootstrap = bootstrap;
-		}
-
-		@Override
-		public void run() {
-
-			while (true) {
-
-				long freeSpace = f.getFreeSpace();
-
-				StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace,
-						requests);
-        
-        ChannelFuture cf = this.bootstrap.connect("10.10.35.8", 13100);
-        cf.syncUninterruptibly();
-
-        Channel chan = cf.channel();
-
-        ChannelFuture write = chan.write(msgWrapper);
-        logger.debug("Sent heartbeat to 10.10.35.8");
-        chan.flush();
-        write.syncUninterruptibly();
-		
-        ChannelFuture closing = chan.close();
-        closing.syncUninterruptibly();
-
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					logger.debug("Interrupted when sleeping after heartbeat.");
-				}
-
-			}
-
-		}
-
 	}
 
 }

@@ -204,18 +204,6 @@ public class StorageNode implements DFSNode {
         logger.info("Sent heartbeat to 10.10.35.8");
         chan.flush();
         write.syncUninterruptibly();
-
-        /**
-         * Shutdown the worker group and exit if join request was not successful
-         */
-        if (write.isDone() && write.isSuccess()) {
-          logger.info("Heartbeat to 10.10.35.8 successful.");
-        } else if (write.isDone() && (write.cause() != null)) {
-          logger.warn("Heartbeat to 10.10.35.8 failed.");
-        } else if (write.isDone() && write.isCancelled()) {
-          logger.warn("Heartbeat to 10.10.35.8 cancelled.");
-          System.exit(1);
-        }
 		
         ChannelFuture closing = chan.close();
         closing.syncUninterruptibly();

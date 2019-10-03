@@ -2,29 +2,36 @@ package edu.usfca.cs.dfs;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.usfca.cs.dfs.net.MessagePipeline;
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
 public class Controller implements DFSNode {
 
 	private ServerMessageRouter messageRouter;
 	ArrayList<String> storageNodes;
 	ConcurrentHashMap<String, StorageNodeContext> nodeMap;
+	Bootstrap bootstrap;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 
 	/**
 	 * Constructor
 	 * 
 	 */
-	public Controller() {
+	public Controller(Bootstrap bootstrap) {
 		storageNodes = new ArrayList<String>();
 		nodeMap = new ConcurrentHashMap<String, StorageNodeContext>();
+		this.bootstrap = bootstrap;
 	}
 
 	public void start() throws IOException {
@@ -36,7 +43,13 @@ public class Controller implements DFSNode {
 
 	public static void main(String[] args) throws IOException {
 		/* Start controller to listen for message */
-		Controller controller = new Controller();
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		MessagePipeline pipeline = new MessagePipeline();
+
+		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
+
+		Controller controller = new Controller(bootstrap);
 		controller.start();
 		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
@@ -51,7 +64,6 @@ public class Controller implements DFSNode {
 			nodeMap.put(storageHost, new StorageNodeContext(ctx));
 			storageNodes.add(storageHost);
 		} else if (message.hasHeartbeat()) {
-			logger.debug("Recieved heartbeat from " + message.getHeartbeat().getHostname());
 			String hostName = message.getHeartbeat().getHostname();
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
 			if (nodeMap.containsKey(hostName)) {
@@ -68,6 +80,11 @@ public class Controller implements DFSNode {
 			 * Write back a join request to client with hostname of the node to send chunks
 			 * to
 			 */
+			ChannelFuture write = ctx.connect(ctx.channel().remoteAddress());
+			write.syncUninterruptibly();
+			write.channel().writeAndFlush(StorageNode.buildJoinRequest(storageNode));
+			write.syncUninterruptibly();
+			
 			/* Put that file in this nodes bloom filter */
 			nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());
 			storageNodes.add(storageNode);
@@ -98,6 +115,8 @@ public class Controller implements DFSNode {
 
 					if (currentTime - nodeTime > 7000) {
 						logger.info("Detected failure on node: " + node);
+						/* Also need to rereplicate data here. */
+						/* We have to rereplicate this nodes replicas as well as its primarys */
 						nodeMap.remove(node);
 					}
 
@@ -105,9 +124,9 @@ public class Controller implements DFSNode {
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				/* Also need to rereplicate data here. */
 			}
 		}
 	}

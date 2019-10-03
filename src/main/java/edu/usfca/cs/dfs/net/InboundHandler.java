@@ -15,7 +15,7 @@ public class InboundHandler
 extends SimpleChannelInboundHandler<StorageMessages.StorageMessageWrapper> {
 	
 	/* Now we can interface with the nodes when different channel events occur */
-	public DFSNode node;
+	  public DFSNode node;
     public InboundHandler() { }
     public InboundHandler(DFSNode node) { this.node = node; }
 

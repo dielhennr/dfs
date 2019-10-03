@@ -1,4 +1,5 @@
 package edu.usfca.cs.dfs;
+
 import java.io.File;
 
 import org.apache.logging.log4j.LogManager;
@@ -9,55 +10,54 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 
 /**
-* Runnable object that sends heartbeats to the Controller every 5 seconds
-* Uses the bootstrap to open a channel, write to it, and then close it
-*/
+ * Runnable object that sends heartbeats to the Controller every 5 seconds Uses
+ * the bootstrap to open a channel, write to it, and then close it
+ */
 public class HeartBeatRunner implements Runnable {
-  /*Heartbeat MetaData*/
-  String hostname;
-  int requests;
-  File f;
-  Bootstrap bootstrap;
-  
-  private static final Logger logger = LogManager.getLogger(StorageNode.class);
+	/* Heartbeat MetaData */
+	String hostname;
+	int requests;
+	File f;
+	Bootstrap bootstrap;
 
-  public HeartBeatRunner(String hostname, Bootstrap bootstrap) {
-    f = new File("/bigdata");
-    this.hostname = hostname;
-    this.requests = 0;
-    this.bootstrap = bootstrap;
-  }
+	private static final Logger logger = LogManager.getLogger(StorageNode.class);
 
-  @Override
-  public void run() {
+	public HeartBeatRunner(String hostname, Bootstrap bootstrap) {
+		f = new File("/bigdata");
+		this.hostname = hostname;
+		this.requests = 0;
+		this.bootstrap = bootstrap;
+	}
 
-    while (true) {
+	@Override
+	public void run() {
 
-      long freeSpace = f.getFreeSpace();
+		while (true) {
 
-      StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace,
-          requests);
-      
-      ChannelFuture cf = this.bootstrap.connect("10.10.35.8", 13100);
-      cf.syncUninterruptibly();
+			long freeSpace = f.getFreeSpace();
 
-      Channel chan = cf.channel();
+			StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace,
+					requests);
 
-      ChannelFuture write = chan.write(msgWrapper);
-      logger.debug("Sent heartbeat to 10.10.35.8");
-      chan.flush();
-      write.syncUninterruptibly();
+			ChannelFuture cf = this.bootstrap.connect("10.10.35.8", 13100);
+			cf.syncUninterruptibly();
 
-      ChannelFuture closing = chan.close();
-      closing.syncUninterruptibly();
+			Channel chan = cf.channel();
 
-      try {
-        Thread.sleep(5000);
-      } catch (InterruptedException e) {
-        logger.debug("Interrupted when sleeping after heartbeat.");
-      }
+			ChannelFuture write = chan.write(msgWrapper);
+			logger.debug("Sent heartbeat to 10.10.35.8");
+			chan.flush();
+			write.syncUninterruptibly();
 
-    }
-  }
+			ChannelFuture closing = chan.close();
+			closing.syncUninterruptibly();
+
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				logger.debug("Interrupted when sleeping after heartbeat.");
+			}
+
+		}
+	}
 }
-

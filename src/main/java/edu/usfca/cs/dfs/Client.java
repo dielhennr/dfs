@@ -30,7 +30,9 @@ public class Client implements DFSNode{
     	
     	
         EventLoopGroup workerGroup = new NioEventLoopGroup();
-        MessagePipeline pipeline = new MessagePipeline();
+        Client client = new Client();
+        MessagePipeline pipeline = new MessagePipeline(client);
+        
 
         Bootstrap bootstrap = new Bootstrap()
             .group(workerGroup)

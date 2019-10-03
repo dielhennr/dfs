@@ -47,6 +47,13 @@ public class StorageNode implements DFSNode {
 
 	public static void main(String[] args) throws IOException {
 
+		
+		ArgumentParser parser = new ArgumentParser();
+		
+		String controllerHost = parser.getString("-c");
+		
+		
+		
 		StorageNode storageNode = null;
 		try {
 			storageNode = new StorageNode();
@@ -63,26 +70,26 @@ public class StorageNode implements DFSNode {
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
-		ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
+		ChannelFuture cf = bootstrap.connect(controllerHost, 13100);
 		cf.syncUninterruptibly();
 
 		Channel chan = cf.channel();
 
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
-		logger.info("Sent join request to 10.10.35.8");
+		logger.info("Sent join request to " + controllerHost);
 		write.syncUninterruptibly();
 
 		/**
 		 * Shutdown the worker group and exit if join request was not successful
 		 */
 		if (write.isDone() && write.isSuccess()) {
-			logger.info("Join request to 10.10.35.8 successful.");
+			logger.info("Join request to " + controllerHost + " successful");
 		} else if (write.isDone() && (write.cause() != null)) {
-			logger.warn("Join request to 10.10.35.8 failed.");
+			logger.warn("Join request to " + controllerHost + " failed.");
 			workerGroup.shutdownGracefully();
 			System.exit(1);
 		} else if (write.isDone() && write.isCancelled()) {
-			logger.warn("Join request to 10.10.35.8 cancelled.");
+			logger.warn("Join request to " + controllerHost + " cancelled.");
 			workerGroup.shutdownGracefully();
 			System.exit(1);
 		}

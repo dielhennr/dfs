@@ -30,6 +30,11 @@ public class Client implements DFSNode{
 
     public static void main(String[] args)
     throws IOException {
+    	
+    	ArgumentParser parser = new ArgumentParser();
+    	String controllerHost = parser.getString("-c");
+    	
+    	
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         MessagePipeline pipeline = new MessagePipeline();
 
@@ -39,7 +44,7 @@ public class Client implements DFSNode{
             .option(ChannelOption.SO_KEEPALIVE, true)
             .handler(pipeline);
 
-        ChannelFuture cf = bootstrap.connect("10.10.35.8", 13100);
+        ChannelFuture cf = bootstrap.connect(controllerHost, 13100);
         cf.syncUninterruptibly();
         
         File f = new File("/bigdata/rdielhenn/testfile");

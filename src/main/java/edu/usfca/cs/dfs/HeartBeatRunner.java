@@ -16,15 +16,17 @@ import io.netty.channel.ChannelFuture;
 public class HeartBeatRunner implements Runnable {
 	/* Heartbeat MetaData */
 	String hostname;
+	String controllerHost;
 	int requests;
 	File f;
 	Bootstrap bootstrap;
 
 	private static final Logger logger = LogManager.getLogger(StorageNode.class);
 
-	public HeartBeatRunner(String hostname, Bootstrap bootstrap) {
+	public HeartBeatRunner(String hostname, String controllerHost, Bootstrap bootstrap) {
 		f = new File("/bigdata");
 		this.hostname = hostname;
+		this.controllerHost = controllerHost;
 		this.requests = 0;
 		this.bootstrap = bootstrap;
 	}
@@ -39,13 +41,13 @@ public class HeartBeatRunner implements Runnable {
 			StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace,
 					requests);
 
-			ChannelFuture cf = this.bootstrap.connect("10.10.35.8", 13100);
+			ChannelFuture cf = this.bootstrap.connect(controllerHost, 13100);
 			cf.syncUninterruptibly();
 
 			Channel chan = cf.channel();
 
 			ChannelFuture write = chan.write(msgWrapper);
-			logger.debug("Sent heartbeat to 10.10.35.8");
+			logger.debug("Sent heartbeat to " + controllerHost);
 			chan.flush();
 			write.syncUninterruptibly();
 

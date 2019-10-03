@@ -80,10 +80,11 @@ public class Controller implements DFSNode {
 			 * Write back a join request to client with hostname of the node to send chunks
 			 * to
 			 */
-			ChannelFuture cf = bootstrap.connect(ctx.channel().remoteAddress());
+			//ChannelFuture cf = bootstrap.connect();
+			System.out.println(ctx.channel().remoteAddress().toString());
 			
-			ChannelFuture write = cf.channel().writeAndFlush(StorageNode.buildJoinRequest(storageNode));
-			write.syncUninterruptibly();
+			//ChannelFuture write = cf.channel().writeAndFlush(StorageNode.buildJoinRequest(storageNode));
+			//write.syncUninterruptibly();
 			
 			/* Put that file in this nodes bloom filter */
 			nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());

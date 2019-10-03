@@ -61,7 +61,7 @@ public class Client implements DFSNode{
         Channel chan = cf.channel();
         ChannelFuture write = chan.writeAndFlush(msgWrapper);
         write.syncUninterruptibly();
-        
+        chan.close().syncUninterruptibly();
         
         /* Don't quit until we've disconnected: */
         System.out.println("Shutting down");

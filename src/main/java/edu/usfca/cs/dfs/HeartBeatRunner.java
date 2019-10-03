@@ -46,14 +46,12 @@ public class HeartBeatRunner implements Runnable {
 
 			Channel chan = cf.channel();
 
-			ChannelFuture write = chan.write(msgWrapper);
-			logger.debug("Sent heartbeat to " + controllerHost);
-			chan.flush();
+			ChannelFuture write = chan.writeAndFlush(msgWrapper);
 			write.syncUninterruptibly();
 
-			ChannelFuture closing = chan.close();
-			closing.syncUninterruptibly();
+			chan.close().syncUninterruptibly();
 
+			logger.debug("Sent heartbeat to " + controllerHost);
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {

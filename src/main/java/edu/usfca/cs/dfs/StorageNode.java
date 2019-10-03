@@ -78,11 +78,12 @@ public class StorageNode implements DFSNode {
 			logger.info("Sent join request to " + controllerHost);
 		} else {
 			logger.info("Failed join request to " + controllerHost);
+			chan.close().syncUninterruptibly();
+			workerGroup.shutdownGracefully();
 			System.exit(1);
 		}
 		
-		ChannelFuture closing = chan.close();
-		closing.syncUninterruptibly();
+		chan.close().syncUninterruptibly();
 
 		/* 
 		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make connections

@@ -8,6 +8,7 @@ import java.io.IOException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -68,9 +69,8 @@ public class StorageNode implements DFSNode {
 
 		Channel chan = cf.channel();
 
-		ChannelFuture write = chan.write(msgWrapper);
+		ChannelFuture write = chan.writeAndFlush(msgWrapper);
 		logger.info("Sent join request to 10.10.35.8");
-		chan.flush();
 		write.syncUninterruptibly();
 
 		/**
@@ -137,7 +137,7 @@ public class StorageNode implements DFSNode {
 	 * @param ip
 	 * @return the protobuf
 	 */
-	static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
+	public static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 		/* Store hostname in a JoinRequest protobuf */
 		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest.newBuilder().setNodeName(hostname)
 				.build();

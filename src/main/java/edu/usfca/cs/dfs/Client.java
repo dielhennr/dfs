@@ -85,9 +85,6 @@ public class Client implements DFSNode{
 		
 	}
 	
-	
-	
-	
 	public void sendStorgeRequest(String filename, long fileSize) {
 		
 	}

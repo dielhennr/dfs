@@ -1,6 +1,8 @@
 package edu.usfca.cs.dfs;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -74,17 +76,14 @@ public class Controller implements DFSNode {
 		} else if (message.hasStoreRequest()) {
 			/* Remove next node from the queue */
 			String storageNode = storageNodes.remove(0);
-
+			ChannelFuture write = ctx.writeAndFlush(StorageNode.buildJoinRequest(storageNode));
 			logger.info("Recieved request to put file on " + storageNode + " from client.");
 			/*
 			 * Write back a join request to client with hostname of the node to send chunks
 			 * to
 			 */
-			//ChannelFuture cf = bootstrap.connect();
-			System.out.println(ctx.channel().remoteAddress().toString());
 			
-			//ChannelFuture write = cf.channel().writeAndFlush(StorageNode.buildJoinRequest(storageNode));
-			//write.syncUninterruptibly();
+			write.syncUninterruptibly();
 			
 			/* Put that file in this nodes bloom filter */
 			nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());

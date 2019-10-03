@@ -91,8 +91,13 @@ public class StorageNode implements DFSNode {
 		} else if (write.isDone() && write.isCancelled()) {
 			logger.warn("Join request to " + controllerHost + " cancelled.");
 			workerGroup.shutdownGracefully();
+		if (write.syncUninterruptibly().isSuccess()) {
+			logger.info("Sent join request to 10.10.35.8");
+		} else {
+			logger.info("Could not join network");
 			System.exit(1);
 		}
+		
 		
 		ChannelFuture closing = chan.close();
 		closing.syncUninterruptibly();
@@ -109,6 +114,7 @@ public class StorageNode implements DFSNode {
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");
 		workerGroup.shutdownGracefully();
+		}
 
 	}
 

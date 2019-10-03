@@ -68,7 +68,6 @@ public class Client implements DFSNode{
 
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
-		ctx.channel().close().syncUninterruptibly();
 		logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
 	}
 	

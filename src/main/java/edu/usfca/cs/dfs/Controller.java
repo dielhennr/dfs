@@ -71,12 +71,12 @@ public class Controller implements DFSNode {
 		} else if (message.hasStoreRequest()) {
 			/* Remove next node from the queue */
 			String storageNode = storageNodes.remove(0);
-			ChannelFuture write = ctx.writeAndFlush(StorageNode.buildJoinRequest(storageNode));
 			logger.info("Recieved request to put file on " + storageNode + " from client.");
 			/*
 			 * Write back a join request to client with hostname of the node to send chunks
 			 * to
 			 */
+			ChannelFuture write = ctx.writeAndFlush(StorageNode.buildJoinRequest(storageNode));
 			write.syncUninterruptibly();
 			
 			/* Put that file in this nodes bloom filter */

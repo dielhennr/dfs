@@ -58,11 +58,8 @@ public class Client implements DFSNode{
 
         Channel chan = cf.channel();
         ChannelFuture write = chan.writeAndFlush(msgWrapper);
-        	
+        write.syncUninterruptibly();
         
-        if (write.syncUninterruptibly().isSuccess()) {
-        	chan.read();
-        }
         
         /* Don't quit until we've disconnected: */
         System.out.println("Shutting down");
@@ -71,6 +68,7 @@ public class Client implements DFSNode{
 
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
+		ctx.channel().close().syncUninterruptibly();
 		logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
 	}
 	

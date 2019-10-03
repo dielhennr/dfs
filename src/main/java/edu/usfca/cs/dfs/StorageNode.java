@@ -46,13 +46,10 @@ public class StorageNode implements DFSNode {
 	}
 
 	public static void main(String[] args) throws IOException {
-
 		
 		ArgumentParser parser = new ArgumentParser(args);
 		
 		String controllerHost = parser.getString("-h");
-		
-		
 		
 		StorageNode storageNode = null;
 		try {
@@ -76,28 +73,13 @@ public class StorageNode implements DFSNode {
 		Channel chan = cf.channel();
 
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
-		logger.info("Sent join request to " + controllerHost);
-		write.syncUninterruptibly();
-
-		/**
-		 * Shutdown the worker group and exit if join request was not successful
-		 */
-		if (write.isDone() && write.isSuccess()) {
-			logger.info("Join request to " + controllerHost + " successful");
-		} else if (write.isDone() && (write.cause() != null)) {
-			logger.warn("Join request to " + controllerHost + " failed.");
-			workerGroup.shutdownGracefully();
-			System.exit(1);
-		} else if (write.isDone() && write.isCancelled()) {
-			logger.warn("Join request to " + controllerHost + " cancelled.");
-			workerGroup.shutdownGracefully();
+		
 		if (write.syncUninterruptibly().isSuccess()) {
-			logger.info("Sent join request to 10.10.35.8");
+			logger.info("Sent join request to " + controllerHost);
 		} else {
-			logger.info("Could not join network");
+			logger.info("Failed join request to " + controllerHost);
 			System.exit(1);
 		}
-		
 		
 		ChannelFuture closing = chan.close();
 		closing.syncUninterruptibly();
@@ -114,8 +96,6 @@ public class StorageNode implements DFSNode {
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");
 		workerGroup.shutdownGracefully();
-		}
-
 	}
 
 	public void start() throws IOException {

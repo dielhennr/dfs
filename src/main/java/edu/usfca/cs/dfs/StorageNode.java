@@ -50,7 +50,7 @@ public class StorageNode implements DFSNode {
 		
 		ArgumentParser parser = new ArgumentParser();
 		
-		String controllerHost = parser.getString("-c");
+		String controllerHost = parser.getString("-h");
 		
 		
 		

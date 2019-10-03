@@ -32,7 +32,7 @@ public class Client implements DFSNode{
     throws IOException {
     	
     	ArgumentParser parser = new ArgumentParser();
-    	String controllerHost = parser.getString("-c");
+    	String controllerHost = parser.getString("-h");
     	
     	
         EventLoopGroup workerGroup = new NioEventLoopGroup();

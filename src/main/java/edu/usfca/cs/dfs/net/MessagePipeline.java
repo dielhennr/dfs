@@ -40,10 +40,10 @@ public class MessagePipeline extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(
                 new ProtobufDecoder(
                     StorageMessages.StorageMessageWrapper.getDefaultInstance()));
-        pipeline.addLast(inboundHandler);
 
         /* Outbound: */
         pipeline.addLast(new LengthFieldPrepender(4));
         pipeline.addLast(new ProtobufEncoder());
+        pipeline.addLast(inboundHandler);
     }
 }

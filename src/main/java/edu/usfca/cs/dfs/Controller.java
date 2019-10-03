@@ -1,8 +1,6 @@
 package edu.usfca.cs.dfs;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,17 +21,14 @@ public class Controller implements DFSNode {
 	private ServerMessageRouter messageRouter;
 	ArrayList<String> storageNodes;
 	ConcurrentHashMap<String, StorageNodeContext> nodeMap;
-	Bootstrap bootstrap;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 
 	/**
 	 * Constructor
-	 * 
 	 */
 	public Controller(Bootstrap bootstrap) {
 		storageNodes = new ArrayList<String>();
 		nodeMap = new ConcurrentHashMap<String, StorageNodeContext>();
-		this.bootstrap = bootstrap;
 	}
 
 	public void start() throws IOException {
@@ -82,7 +77,6 @@ public class Controller implements DFSNode {
 			 * Write back a join request to client with hostname of the node to send chunks
 			 * to
 			 */
-			
 			write.syncUninterruptibly();
 			
 			/* Put that file in this nodes bloom filter */

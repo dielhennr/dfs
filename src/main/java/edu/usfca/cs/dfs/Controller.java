@@ -60,7 +60,10 @@ public class Controller implements DFSNode {
 
 			logger.info("Recieved join request from " + storageHost);
 			nodeMap.put(storageHost, new StorageNodeContext(ctx));
-			storageNodes.add(storageHost);
+			synchronized (storageNodes) {
+				storageNodes.add(storageHost);
+				storageNodes.notifyAll();
+			}
 		} else if (message.hasHeartbeat()) {
 			String hostName = message.getHeartbeat().getHostname();
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
@@ -71,7 +74,19 @@ public class Controller implements DFSNode {
 			} /* Otherwise ignore if join request not processed yet? */
 		} else if (message.hasStoreRequest()) {
 			/* Remove next node from the queue */
-			String storageNode = storageNodes.remove(0);
+			while (storageNodes.isEmpty()) {
+				try {
+					storageNodes.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			String storageNode = "";
+			synchronized (storageNodes) {
+				storageNode = storageNodes.remove(0);
+				storageNodes.add(storageNode);
+			}
 			logger.info("Recieved request to put file on " + storageNode + " from client.");
 			/*
 			 * Write back a join request to client with hostname of the node to send chunks
@@ -82,7 +97,6 @@ public class Controller implements DFSNode {
 
 			/* Put that file in this nodes bloom filter */
 			nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());
-			storageNodes.add(storageNode);
 
 		} else if (message.hasRetrieveFile()) {
 			/*

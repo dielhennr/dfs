@@ -1,21 +1,28 @@
 package edu.usfca.cs.dfs;
 
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
-public class ArgumentParser {
+/**
+ * Parses and stores command-line arguments into simple key = value pairs.
+ *
+ * @author Ryan Dielhenn
+ */
 
+public class ArgumentMap {
+
+	/**
+	 * Stores command-line arguments in key = value pairs.
+	 */
 	private final Map<String, String> map;
 
 	/**
 	 * Initializes this argument map.
 	 */
-	public ArgumentParser() {
-		this.map = new TreeMap<String, String>();
-
+	public ArgumentMap() {
+		this.map = new HashMap<String, String>();
 	}
 
 	/**
@@ -25,7 +32,7 @@ public class ArgumentParser {
 	 *
 	 * @param args
 	 */
-	public ArgumentParser(String[] args) {
+	public ArgumentMap(String[] args) {
 		this();
 		parse(args);
 	}
@@ -37,25 +44,15 @@ public class ArgumentParser {
 	 * @param args the command line arguments to parse
 	 */
 	public void parse(String[] args) {
-
-		int length = args.length;
-		if (length == 0)
-			return;
-
-		int i = 0;
-		for (i = 0; i < length - 1; i++) {
-			if (args[i].startsWith("-") && !args[i + 1].startsWith("-")) {
-				if (!map.containsKey(args[i]))
+		for (int i = 0; i < args.length; i++) {
+			if (isFlag(args[i])) {
+				if (i != args.length - 1 && isValue(args[i + 1])) {
 					map.put(args[i], args[i + 1]);
-			} else if (args[i].startsWith("-") && args[i].startsWith("-")) {
-				if (!map.containsKey(args[i]))
+				} else {
 					map.put(args[i], null);
-			}
-		}
+				}
 
-		if (args[i].startsWith("-")) {
-			if (!map.containsKey(args[i]))
-				map.put(args[i], null);
+			}
 		}
 	}
 
@@ -69,18 +66,16 @@ public class ArgumentParser {
 	 * @see String#startsWith(String)
 	 * @see String#trim()
 	 * @see String#isEmpty()
+	 * @see String#isBlank()
 	 * @see String#length()
 	 */
 	public static boolean isFlag(String arg) {
-
 		if (arg == null) {
 			return false;
 		}
 
-		arg = arg.trim();
-
+		arg = arg.strip();
 		return arg.length() > 1 && arg.startsWith("-");
-
 	}
 
 	/**
@@ -93,18 +88,16 @@ public class ArgumentParser {
 	 * @see String#startsWith(String)
 	 * @see String#trim()
 	 * @see String#isEmpty()
+	 * @see String#isBlank()
 	 * @see String#length()
 	 */
 	public static boolean isValue(String arg) {
-
 		if (arg == null) {
 			return false;
 		}
 
-		arg = arg.trim();
-
-		return (!arg.startsWith("-") && arg.length() > 1);
-
+		arg = arg.strip();
+		return !(arg.isEmpty() || arg.startsWith("-"));
 	}
 
 	/**
@@ -113,14 +106,7 @@ public class ArgumentParser {
 	 * @return number of unique flags
 	 */
 	public int numFlags() {
-
 		return map.size();
-
-	}
-
-	public int parseInt() {
-
-		return 0;
 	}
 
 	/**
@@ -130,9 +116,7 @@ public class ArgumentParser {
 	 * @return {@code true} if the flag exists
 	 */
 	public boolean hasFlag(String flag) {
-
 		return map.containsKey(flag);
-
 	}
 
 	/**
@@ -142,9 +126,16 @@ public class ArgumentParser {
 	 * @return {@code true} if the flag is mapped to a non-null value
 	 */
 	public boolean hasValue(String flag) {
-
 		return map.get(flag) != null;
+	}
 
+	/**
+	 * Determines if the argument map is empty
+	 *
+	 * @return true if the map is empty
+	 */
+	public boolean isEmpty() {
+		return this.map.isEmpty();
 	}
 
 	/**
@@ -156,9 +147,7 @@ public class ArgumentParser {
 	 *         there is no mapping for the flag
 	 */
 	public String getString(String flag) {
-
-		return (map.get(flag));
-
+		return map.get(flag);
 	}
 
 	/**
@@ -172,9 +161,27 @@ public class ArgumentParser {
 	 *         if there is no mapping for the flag
 	 */
 	public String getString(String flag, String defaultValue) {
+		String value = getString(flag);
+		return value == null ? defaultValue : value;
+	}
 
-		return (map.get(flag) == null ? defaultValue : map.get(flag));
-
+	/**
+	 * Returns the value to which the specified flag is mapped as a {@link Integer},
+	 * or the default value if there is no mapping for the flag.
+	 * 
+	 * @param flag         - The flag to lookup
+	 * @param defaultValue - The value to default to if flag maps to invalid value
+	 * @return output - Output as an integer
+	 */
+	public Integer getInteger(String flag, int defaultValue) {
+		int output;
+		try {
+			output = Integer.parseInt(this.getString(flag));
+		} catch (NumberFormatException nfe) {
+			System.err.println("Defaulting to " + defaultValue + ", " + this.getString(flag) + " is invalid.");
+			output = defaultValue;
+		}
+		return output;
 	}
 
 	/**
@@ -192,58 +199,36 @@ public class ArgumentParser {
 	 * @see Paths#get(String, String...)
 	 */
 	public Path getPath(String flag) {
-
-		try {
-
-			return Paths.get(map.get(flag));
-
-		} catch (InvalidPathException | NullPointerException np) {
-			System.out.println("error: " + np.getMessage());
-			return null;
+		Path path = null;
+		String flagValue = map.get(flag);
+		if (flagValue != null) {
+			path = Paths.get(flagValue);
 		}
-
+		return path;
 	}
 
 	/**
-	 * Returns the value to which the specified flag is mapped as a {@link Path}, or
-	 * the default value if unable to retrieve this mapping for any reason
-	 * (including being unable to convert the value to a {@link Path} or no value
-	 * existing for this flag).
+	 * Returns the value the specified flag is mapped as a {@link Path}, or the
+	 * default value if unable to retrieve this mapping for any reason (including
+	 * being unable to convert the value to a {@link Path} or if no value exists for
+	 * this flag).
 	 *
 	 * This method should not throw any exceptions!
 	 *
-	 * @param flag         the flag whose associated value is to be returned
-	 * @param defaultValue the default value to return if there is no mapping for
-	 *                     the flag
-	 * @return the value to which the specified flag is mapped as a {@link Path}, or
-	 *         the default value if there is no mapping for the flag
+	 * @param flag         the flag whose associated value will be returned
+	 * @param defaultValue the default value to return if there is no valid mapping
+	 *                     for the flag
+	 * @return the value the specified flag is mapped as a {@link Path}, or the
+	 *         default value if there is no valid mapping for the flag
 	 */
 	public Path getPath(String flag, Path defaultValue) {
-
-		try {
-
-			return Paths.get(map.get(flag));
-
-		} catch (NullPointerException e) {
-			return defaultValue;
-		}
-	}
-
-	/**
-	 * Returns the flag value if it contains a value
-	 * 
-	 * @param flag
-	 * @return
-	 */
-	public String getValue(String flag) {
-		if (map.containsKey(flag) && map.get(flag) != null && hasValue(flag) == true) {
-			return map.get(flag);
-		}
-		return null;
+		Path value = getPath(flag);
+		return value == null ? defaultValue : value;
 	}
 
 	@Override
 	public String toString() {
 		return this.map.toString();
 	}
+
 }

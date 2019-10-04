@@ -47,9 +47,9 @@ public class StorageNode implements DFSNode {
 
 	public static void main(String[] args) throws IOException {
 
-		ArgumentParser parser = new ArgumentParser(args);
+		ArgumentMap arguments = new ArgumentMap(args);
 
-		String controllerHost = parser.getString("-h");
+		String controllerHost = arguments.getString("-h");
 
 		StorageNode storageNode = null;
 		try {

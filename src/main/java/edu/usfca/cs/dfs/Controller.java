@@ -92,7 +92,7 @@ public class Controller implements DFSNode {
 			 * Write back a join request to client with hostname of the node to send chunks
 			 * to
 			 */
-			ChannelFuture write = ctx.writeAndFlush(Controller.buildStoreResponse(storageNode));
+			ChannelFuture write = ctx.channel().writeAndFlush(Controller.buildStoreResponse(storageNode));
 			write.syncUninterruptibly();
 
 			/* Put that file in this nodes bloom filter */

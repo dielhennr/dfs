@@ -7,8 +7,6 @@ import io.netty.channel.ChannelHandlerContext;
  * 
  * Allows the inbound handler of a node to process messages regardless of
  * the Nodes job in the network
- * 
- *
  */
 public interface DFSNode {
 	

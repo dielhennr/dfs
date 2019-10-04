@@ -29,13 +29,13 @@ public class StorageNode implements DFSNode {
 	
 	ServerMessageRouter messageRouter;
 	
-	private InetAddress ip = null;
+	private InetAddress ip;
 	
-	private String hostname = null;
+	private String hostname;
 	
-	String controllerHostName = null;
+	String controllerHostName;
 	
-	ArgumentMap arguments = null;
+	ArgumentMap arguments;
 
 	public StorageNode(String[] args) throws UnknownHostException {
 		ip = InetAddress.getLocalHost();

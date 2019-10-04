@@ -45,6 +45,7 @@ public class StorageNode implements DFSNode {
 			controllerHostName = arguments.getString("-h");
 		} else {
 			System.err.println("Usage: java -cp ..... -h controllerhostname");
+			System.exit(1);
 		}
 		/* For log4j2 */
 		System.setProperty("hostName", hostname);

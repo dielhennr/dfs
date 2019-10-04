@@ -14,14 +14,16 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder;
 public class MessagePipeline extends ChannelInitializer<SocketChannel> {
 
 	private InboundHandler inboundHandler;
+	private int chunkSize;
 
 	public MessagePipeline() {
 		inboundHandler = new InboundHandler();
 	}
 
-	public MessagePipeline(DFSNode node) {
+	public MessagePipeline(DFSNode node, int chunkSize) {
 		/* Finally, pass the node to the inbound handler */
 		inboundHandler = new InboundHandler(node);
+		this.chunkSize = chunkSize;
 	}
 
 	@Override
@@ -36,7 +38,7 @@ public class MessagePipeline extends ChannelInitializer<SocketChannel> {
 		 * we'll use 128 MB here. We use a 4-byte length field to give us 32 bits' worth
 		 * of frame length, which should be plenty for the future...
 		 */
-		pipeline.addLast(new LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4));
+		pipeline.addLast(new LengthFieldBasedFrameDecoder(chunkSize + 1048576, 0, 4, 0, 4));
 		pipeline.addLast(new ProtobufDecoder(StorageMessages.StorageMessageWrapper.getDefaultInstance()));
 
 		/* Outbound: */

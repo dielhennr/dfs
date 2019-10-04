@@ -95,8 +95,8 @@ public class Client implements DFSNode {
 
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
-		if (message.hasJoinRequest()) {
-			logger.info("Recieved permission to put file on " + message.getJoinRequest().getNodeName());
+		if (message.hasStoreResponse()) {
+			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
 		}
 		/*
 		 * At this point we should get a response from controller telling us where to

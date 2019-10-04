@@ -92,7 +92,7 @@ public class Controller implements DFSNode {
 			 * Write back a join request to client with hostname of the node to send chunks
 			 * to
 			 */
-			ChannelFuture write = ctx.writeAndFlush(StorageNode.buildJoinRequest(storageNode));
+			ChannelFuture write = ctx.writeAndFlush(Controller.buildStoreResponse(storageNode));
 			write.syncUninterruptibly();
 
 			/* Put that file in this nodes bloom filter */
@@ -107,6 +107,17 @@ public class Controller implements DFSNode {
 		}
 	}
 
+	private static StorageMessages.StorageMessageWrapper buildStoreResponse(String hostname) {
+
+		StorageMessages.StoreResponse storeRequest = StorageMessages.StoreResponse.newBuilder()
+				.setHostname(hostname)
+				.build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
+				.setStoreResponse(storeRequest).build();
+
+		return msgWrapper;
+	}
+	
 	private static class HeartBeatChecker implements Runnable {
 		ConcurrentHashMap<String, StorageNodeContext> nodeMap;
 

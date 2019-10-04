@@ -86,7 +86,6 @@ public class Client implements DFSNode {
 		
 		cf.syncUninterruptibly();
 		
-		chan.close().syncUninterruptibly();
 
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");

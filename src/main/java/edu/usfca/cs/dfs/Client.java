@@ -78,6 +78,7 @@ public class Client implements DFSNode {
 
 		Channel chan = cf.channel();
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
+		cf.syncUninterruptibly();
 
 		write.syncUninterruptibly();
 		chan.close().syncUninterruptibly();

@@ -18,70 +18,57 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
-public class Client implements DFSNode{
+public class Client implements DFSNode {
 	private static final Logger logger = LogManager.getLogger(Client.class);
-    public Client() {}
 
-    public static void main(String[] args)
-    throws IOException {
-    	
-    	ArgumentParser parser = new ArgumentParser(args);
-    	String controllerHost = parser.getString("-h");
-    	
-    	
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        Client client = new Client();
-        MessagePipeline pipeline = new MessagePipeline(client);
-        
+	public Client() {
+	}
 
-        Bootstrap bootstrap = new Bootstrap()
-            .group(workerGroup)
-            .channel(NioSocketChannel.class)
-            .option(ChannelOption.SO_KEEPALIVE, true)
-            .handler(pipeline);
+	public static void main(String[] args) throws IOException {
 
-        ChannelFuture cf = bootstrap.connect(controllerHost, 13100);
-        cf.syncUninterruptibly();
-        
-        File f = new File("/bigdata/rdielhenn/testfile");
+		ArgumentParser parser = new ArgumentParser(args);
+		String controllerHost = parser.getString("-h");
 
-        StorageMessages.StoreRequest storeRequest
-            = StorageMessages.StoreRequest.newBuilder()
-                .setFileName(f.getName())
-                .setFileSize(f.getTotalSpace())
-                .build();
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		Client client = new Client();
+		MessagePipeline pipeline = new MessagePipeline(client);
 
-        
-        StorageMessages.StorageMessageWrapper msgWrapper =
-            StorageMessages.StorageMessageWrapper.newBuilder()
-                .setStoreRequest(storeRequest)
-                .build();
-        
+		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
-        Channel chan = cf.channel();
-        ChannelFuture write = chan.writeAndFlush(msgWrapper);
-        write.syncUninterruptibly();
-        chan.close().syncUninterruptibly();
-        
-        /* Don't quit until we've disconnected: */
-        System.out.println("Shutting down");
-        workerGroup.shutdownGracefully();
-    }
+		ChannelFuture cf = bootstrap.connect(controllerHost, 13100);
+		cf.syncUninterruptibly();
+
+		File f = new File("/bigdata/rdielhenn/testfile");
+
+		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(f.getName())
+				.setFileSize(f.getTotalSpace()).build();
+
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
+				.setStoreRequest(storeRequest).build();
+
+		Channel chan = cf.channel();
+		ChannelFuture write = chan.writeAndFlush(msgWrapper);
+		write.syncUninterruptibly();
+
+		/* Don't quit until we've disconnected: */
+		System.out.println("Shutting down");
+		workerGroup.shutdownGracefully();
+	}
 
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
 	}
-	
-	
+
 	public StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
-		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().
-				setFileName(filename).setFileSize(fileSize).build();
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder().
-				setStoreRequest(storeRequest).build();
-		
+
+		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(filename)
+				.setFileSize(fileSize).build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
+				.setStoreRequest(storeRequest).build();
+
 		return msgWrapper;
 	}
-	
-	
+
 }

@@ -16,6 +16,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+
 public class Controller implements DFSNode {
 
 	private ServerMessageRouter messageRouter;
@@ -78,7 +79,7 @@ public class Controller implements DFSNode {
 			 */
 			ChannelFuture write = ctx.writeAndFlush(StorageNode.buildJoinRequest(storageNode));
 			write.syncUninterruptibly();
-			
+
 			/* Put that file in this nodes bloom filter */
 			nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());
 			storageNodes.add(storageNode);
@@ -120,7 +121,6 @@ public class Controller implements DFSNode {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				/* Also need to rereplicate data here. */
 			}
 		}
 	}

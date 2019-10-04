@@ -46,11 +46,11 @@ public class StorageNode implements DFSNode {
 	}
 
 	public static void main(String[] args) throws IOException {
-		
+
 		ArgumentParser parser = new ArgumentParser(args);
-		
+
 		String controllerHost = parser.getString("-h");
-		
+
 		StorageNode storageNode = null;
 		try {
 			storageNode = new StorageNode();
@@ -73,7 +73,7 @@ public class StorageNode implements DFSNode {
 		Channel chan = cf.channel();
 
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
-		
+
 		if (write.syncUninterruptibly().isSuccess()) {
 			logger.info("Sent join request to " + controllerHost);
 		} else {
@@ -82,11 +82,12 @@ public class StorageNode implements DFSNode {
 			workerGroup.shutdownGracefully();
 			System.exit(1);
 		}
-		
+
 		chan.close().syncUninterruptibly();
 
-		/* 
-		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make connections
+		/*
+		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make
+		 * connections
 		 **/
 		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), controllerHost, bootstrap);
 		Thread heartThread = new Thread(heartBeat);

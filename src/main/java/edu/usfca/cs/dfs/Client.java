@@ -46,11 +46,15 @@ public class Client implements DFSNode {
 	public Client(String[] args) {
 		/* Command Line Arguments */
 		this.arguments = new ArgumentMap(args);
-
-		file = new File(arguments.getString("-f"));
-
-		/* Controllers hostname */
-		controllerHost = arguments.getString("-h");
+		
+		if (arguments.hasFlag("-f") && arguments.hasFlag("-h")) {
+			file = new File(arguments.getString("-f"));
+			controllerHost = arguments.getString("-h");
+		} else {
+			System.err.println("Usage: java -cp .... -h hostToContact -f fileToSend.\n"
+					+ "-p port and -c <chunksize(int)>  are optional flags.");
+			System.exit(1);
+		}
 
 		/* Default to port 13100 */
 		port = arguments.getInteger("-p", 13100);
@@ -78,9 +82,10 @@ public class Client implements DFSNode {
 
 		Channel chan = cf.channel();
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
-		cf.syncUninterruptibly();
-
 		write.syncUninterruptibly();
+		
+		cf.syncUninterruptibly();
+		
 		chan.close().syncUninterruptibly();
 
 		/* Don't quit until we've disconnected: */

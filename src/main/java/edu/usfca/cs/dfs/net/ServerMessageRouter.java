@@ -26,7 +26,7 @@ public class ServerMessageRouter {
         workerGroup = new NioEventLoopGroup(4);
         
         /* Pass the node to the pipeline as well */
-        pipeline = new MessagePipeline(node);
+        pipeline = new MessagePipeline(node, 0);
 
         bootstrap = new ServerBootstrap()
             .group(bossGroup, workerGroup)

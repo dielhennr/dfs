@@ -23,6 +23,7 @@ public class Controller implements DFSNode {
 	ArrayList<String> storageNodes;
 	ConcurrentHashMap<String, StorageNodeContext> nodeMap;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
+	Bootstrap bootstrap;
 
 	/**
 	 * Constructor
@@ -30,6 +31,7 @@ public class Controller implements DFSNode {
 	public Controller(Bootstrap bootstrap) {
 		storageNodes = new ArrayList<String>();
 		nodeMap = new ConcurrentHashMap<String, StorageNodeContext>();
+		this.bootstrap = bootstrap;
 	}
 
 	public void start() throws IOException {
@@ -40,22 +42,26 @@ public class Controller implements DFSNode {
 	}
 
 	public static void main(String[] args) throws IOException {
-		/* Start controller to listen for message */
+		/*We haven't used this in controller*/
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline();
 
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
+		/* Start controller to listen for messages */
 		Controller controller = new Controller(bootstrap);
 		controller.start();
 		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
+		workerGroup.shutdownGracefully();
+		
 	}
 
 	public void onMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
 		if (message.hasJoinRequest()) {
+			/* On join request need to add node to our network */
 			String storageHost = message.getJoinRequest().getNodeName();
 
 			logger.info("Recieved join request from " + storageHost);
@@ -65,6 +71,7 @@ public class Controller implements DFSNode {
 				storageNodes.notifyAll();
 			}
 		} else if (message.hasHeartbeat()) {
+			/* Update metadata */
 			String hostName = message.getHeartbeat().getHostname();
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
 			if (nodeMap.containsKey(hostName)) {
@@ -73,30 +80,26 @@ public class Controller implements DFSNode {
 				logger.info("Recieved heartbeat from " + hostName);
 			} /* Otherwise ignore if join request not processed yet? */
 		} else if (message.hasStoreRequest()) {
-			/* Remove next node from the queue */
-			while (storageNodes.isEmpty()) {
-				try {
-					storageNodes.wait();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if (storageNodes.isEmpty()) {
+				logger.error("No storage nodes in the network");
+			} else {
+				String storageNode;
+				synchronized(storageNodes) {
+					storageNode = storageNodes.remove(0);
+					storageNodes.add(storageNode);
 				}
-			}
-			String storageNode = "";
-			synchronized (storageNodes) {
-				storageNode = storageNodes.remove(0);
-				storageNodes.add(storageNode);
-			}
-			logger.info("Recieved request to put file on " + storageNode + " from client.");
-			/*
-			 * Write back a join request to client with hostname of the node to send chunks
-			 * to
-			 */
-			ChannelFuture write = ctx.channel().writeAndFlush(Controller.buildStoreResponse(storageNode));
-			write.syncUninterruptibly();
+				
+				logger.info("Recieved request to put file on " + storageNode + " from client.");
+				/*
+				 * Write back a join request to client with hostname of the node to send chunks
+				 * to
+				 */
+				ChannelFuture write = ctx.pipeline().writeAndFlush(Controller.buildStoreResponse(storageNode));
+				write.syncUninterruptibly();
 
-			/* Put that file in this nodes bloom filter */
-			nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());
+				/* Put that file in this nodes bloom filter */
+				nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());
+			}
 
 		} else if (message.hasRetrieveFile()) {
 			/*

@@ -97,7 +97,6 @@ public class StorageNode implements DFSNode {
 		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.run();
-
 		storageNode.start();
 
 		/* Don't quit until we've disconnected: */
@@ -111,7 +110,7 @@ public class StorageNode implements DFSNode {
 		messageRouter.listen(13100);
 		System.out.println("Listening for connections on port 13100");
 	}
-
+	
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreChunk()) {
@@ -167,13 +166,4 @@ public class StorageNode implements DFSNode {
 		return msgWrapper;
 	}
 	
-	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
-
-		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(filename)
-				.setFileSize(fileSize).build();
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-				.setStoreRequest(storeRequest).build();
-
-		return msgWrapper;
-	}
 }

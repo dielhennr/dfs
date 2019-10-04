@@ -85,7 +85,7 @@ public class Client implements DFSNode {
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
 		write.syncUninterruptibly();
 		if(cf.syncUninterruptibly().isSuccess()) {
-			System.err.println("wth");
+			System.err.println("Synced on channel after writing to controller");
 		}
 		
 

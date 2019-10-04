@@ -95,8 +95,9 @@ public class Client implements DFSNode {
 
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
-		logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
-
+		if (message.hasJoinRequest()) {
+			logger.info("Recieved permission to put file on " + message.getJoinRequest().getNodeName());
+		}
 		/*
 		 * At this point we should get a response from controller telling us where to
 		 * put this file.
@@ -104,52 +105,53 @@ public class Client implements DFSNode {
 		 * ChannelFuture nodeWrite = bootstrap.connect(storageHost, #port) Channel
 		 * writeChannel = nodeWrites.chan();
 		 */
+		else if (message.hasStoreChunk()) {
+			/* Get number of chunks */
+			long length = file.length();
+			int chunks = (int) (length / this.chunkSize);
 
-		/* Get number of chunks */
-		long length = file.length();
-		int chunks = (int) (length / this.chunkSize);
+			/* Asynch writes and input stream */
+			List<ChannelFuture> writes = new ArrayList<>();
 
-		/* Asynch writes and input stream */
-		List<ChannelFuture> writes = new ArrayList<>();
+			Channel chan = ctx.channel();
 
-		Channel chan = ctx.channel();
+			try (FileInputStream inputStream = new FileInputStream(this.file)) {
+				byte[] messageBytes = new byte[this.chunkSize];
+				/* Write a protobuf to the channel for each chunk */
+				for (int i = 0; i < chunks; i++) {
+					messageBytes = inputStream.readNBytes(this.chunkSize);
+					StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
+							.setFileName(file.getName()).setChunkId(i).setData(ByteString.copyFrom(messageBytes)).build();
+					writes.add(chan.write(storeChunk));
+				}
 
-		try (FileInputStream inputStream = new FileInputStream(this.file)) {
-			byte[] messageBytes = new byte[this.chunkSize];
-			/* Write a protobuf to the channel for each chunk */
-			for (int i = 0; i < chunks; i++) {
-				messageBytes = inputStream.readNBytes(this.chunkSize);
-				StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
-						.setFileName(file.getName()).setChunkId(i).setData(ByteString.copyFrom(messageBytes)).build();
-				writes.add(chan.write(storeChunk));
+				/* We will add one extra chunk for and leftover bytes */
+				int leftover = (int) (length % this.chunkSize);
+
+				/* If we have leftover bytes */
+				if (leftover != 0) {
+					/* Read them and write the protobuf */
+					byte[] last = new byte[leftover];
+					last = inputStream.readNBytes(leftover);
+					StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
+							.setFileName(file.getName()).setChunkId(chunks).setData(ByteString.copyFrom(last)).build();
+					writes.add(chan.write(storeChunk));
+				}
+
+				chan.flush();
+
+				for (ChannelFuture writeChunk : writes) {
+					writeChunk.syncUninterruptibly();
+				}
+
+				inputStream.close();
+				chan.close().syncUninterruptibly();
+			} catch (FileNotFoundException e1) {
+				e1.printStackTrace();
+			} catch (IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
 			}
-
-			/* We will add one extra chunk for and leftover bytes */
-			int leftover = (int) (length % this.chunkSize);
-
-			/* If we have leftover bytes */
-			if (leftover != 0) {
-				/* Read them and write the protobuf */
-				byte[] last = new byte[leftover];
-				last = inputStream.readNBytes(leftover);
-				StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
-						.setFileName(file.getName()).setChunkId(chunks).setData(ByteString.copyFrom(last)).build();
-				writes.add(chan.write(storeChunk));
-			}
-
-			chan.flush();
-
-			for (ChannelFuture writeChunk : writes) {
-				writeChunk.syncUninterruptibly();
-			}
-
-			inputStream.close();
-			chan.close().syncUninterruptibly();
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
 		}
 
 	}

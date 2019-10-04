@@ -51,10 +51,6 @@ public class StorageNode implements DFSNode {
 		System.setProperty("hostName", hostname);
 	};
 
-	private InetAddress getIp() {
-		return ip;
-	}
-
 	private String getHostname() {
 		return hostname;
 	}
@@ -68,7 +64,7 @@ public class StorageNode implements DFSNode {
 			System.exit(1);
 		} 
 
-		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(storageNode.getHostname());
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline();
@@ -170,5 +166,14 @@ public class StorageNode implements DFSNode {
 
 		return msgWrapper;
 	}
+	
+	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
 
+		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(filename)
+				.setFileSize(fileSize).build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
+				.setStoreRequest(storeRequest).build();
+
+		return msgWrapper;
+	}
 }

@@ -26,13 +26,26 @@ import org.apache.logging.log4j.Logger;
 public class StorageNode implements DFSNode {
 
 	private static final Logger logger = LogManager.getLogger(StorageNode.class);
+	
 	ServerMessageRouter messageRouter;
+	
 	private InetAddress ip = null;
+	
 	private String hostname = null;
+	
+	String controllerHostName = null;
+	
+	ArgumentMap arguments = null;
 
-	public StorageNode() throws UnknownHostException {
+	public StorageNode(String[] args) throws UnknownHostException {
 		ip = InetAddress.getLocalHost();
 		hostname = ip.getHostName();
+		arguments = new ArgumentMap(args);
+		if (arguments.hasFlag("-h")) {
+			controllerHostName = arguments.getString("-h");
+		} else {
+			System.err.println("Usage: java -cp ..... -h controllerhostname");
+		}
 		/* For log4j2 */
 		System.setProperty("hostName", hostname);
 	};
@@ -46,18 +59,13 @@ public class StorageNode implements DFSNode {
 	}
 
 	public static void main(String[] args) throws IOException {
-
-		ArgumentMap arguments = new ArgumentMap(args);
-
-		String controllerHost = arguments.getString("-h");
-
 		StorageNode storageNode = null;
 		try {
-			storageNode = new StorageNode();
+			storageNode = new StorageNode(args);
 		} catch (UnknownHostException e) {
 			logger.error("Could not start storage node.");
 			System.exit(1);
-		}
+		} 
 
 		StorageMessages.StorageMessageWrapper msgWrapper = buildJoinRequest(storageNode.getHostname());
 
@@ -67,7 +75,7 @@ public class StorageNode implements DFSNode {
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
-		ChannelFuture cf = bootstrap.connect(controllerHost, 13100);
+		ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13100);
 		cf.syncUninterruptibly();
 
 		Channel chan = cf.channel();
@@ -75,9 +83,9 @@ public class StorageNode implements DFSNode {
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
 
 		if (write.syncUninterruptibly().isSuccess()) {
-			logger.info("Sent join request to " + controllerHost);
+			logger.info("Sent join request to " + storageNode.controllerHostName);
 		} else {
-			logger.info("Failed join request to " + controllerHost);
+			logger.info("Failed join request to " + storageNode.controllerHostName);
 			chan.close().syncUninterruptibly();
 			workerGroup.shutdownGracefully();
 			System.exit(1);
@@ -89,7 +97,7 @@ public class StorageNode implements DFSNode {
 		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make
 		 * connections
 		 **/
-		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), controllerHost, bootstrap);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.run();
 

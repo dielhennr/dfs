@@ -88,6 +88,7 @@ public class Client implements DFSNode {
 			System.err.println("Synced on channel after writing to controller");
 		}
 		
+		cf.channel().read();
 
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");

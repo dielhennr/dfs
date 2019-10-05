@@ -18,7 +18,6 @@ import com.google.protobuf.ByteString;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -44,6 +43,8 @@ public class Client implements DFSNode {
 	/* Chunk Size */
 	Integer chunkSize;
 
+    Bootstrap bootstrap;
+
 	public Client(String[] args) {
 		/* Command Line Arguments */
 		this.arguments = new ArgumentMap(args);
@@ -64,16 +65,22 @@ public class Client implements DFSNode {
 		this.chunkSize = arguments.getInteger("-c", 16384);
 	}
 
+    private void addBootstrap(Bootstrap bootstrap) {
+        this.bootstrap = bootstrap;
+    }
+
 	public static void main(String[] args) throws IOException {
 
 		/* Create this node for interfacing in the pipeline */
-		Client client = new Client(args);
 
+		Client client = new Client(args);
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline(client, client.chunkSize);
 
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
+
+        client.addBootstrap(bootstrap);
 
 		ChannelFuture cf = bootstrap.connect(client.controllerHost, client.port);
 		cf.syncUninterruptibly();
@@ -87,82 +94,81 @@ public class Client implements DFSNode {
 		if(cf.syncUninterruptibly().isSuccess()) {
 			System.err.println("Synced on channel after writing to controller");
 		}
-		
 
 		/* Don't quit until we've disconnected: */
 		System.out.println("Shutting down");
-		workerGroup.shutdownGracefully();
 	}
 
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
-		}
-		/*
-		 * At this point we should get a response from controller telling us where to
-		 * put this file.
-		 * 
-		 * ChannelFuture nodeWrite = bootstrap.connect(storageHost, #port) Channel
-		 * writeChannel = nodeWrites.chan();
-		 */
-		else if (message.hasStoreChunk()) {
-			/* Get number of chunks */
-			long length = file.length();
-			int chunks = (int) (length / this.chunkSize);
+            /*
+            * At this point we should get a response from controller telling us where to
+            * put this file.
+            * 
+            */
+            ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), this.port);
+            /* Get number of chunks */
+            long length = file.length();
+            int chunks = (int) (length / this.chunkSize);
 
-			/* Asynch writes and input stream */
-			List<ChannelFuture> writes = new ArrayList<>();
+            /* Asynch writes and input stream */
+            List<ChannelFuture> writes = new ArrayList<>();
 
-			Channel chan = ctx.channel();
+            try (FileInputStream inputStream = new FileInputStream(this.file)) {
+                byte[] messageBytes = new byte[this.chunkSize];
+                /* Write a protobuf to the channel for each chunk */
+                for (int i = 0; i < chunks; i++) {
+                    messageBytes = inputStream.readNBytes(this.chunkSize);
+                    StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
+                            .setFileName(file.getName()).setChunkId(i).setData(ByteString.copyFrom(messageBytes)).build();
+                    writes.add(cf.channel().write(storeChunk));
+                }
 
-			try (FileInputStream inputStream = new FileInputStream(this.file)) {
-				byte[] messageBytes = new byte[this.chunkSize];
-				/* Write a protobuf to the channel for each chunk */
-				for (int i = 0; i < chunks; i++) {
-					messageBytes = inputStream.readNBytes(this.chunkSize);
-					StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
-							.setFileName(file.getName()).setChunkId(i).setData(ByteString.copyFrom(messageBytes)).build();
-					writes.add(chan.write(storeChunk));
-				}
+                /* We will add one extra chunk for and leftover bytes */
+                int leftover = (int) (length % this.chunkSize);
 
-				/* We will add one extra chunk for and leftover bytes */
-				int leftover = (int) (length % this.chunkSize);
+                /* If we have leftover bytes */
+                if (leftover != 0) {
+                    /* Read them and write the protobuf */
+                    byte[] last = new byte[leftover];
+                    last = inputStream.readNBytes(leftover);
+                    StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
+                            .setFileName(file.getName()).setChunkId(chunks).setData(ByteString.copyFrom(last)).build();
+                    writes.add(cf.channel().write(storeChunk));
+                }
+                
+                cf.channel().flush();
 
-				/* If we have leftover bytes */
-				if (leftover != 0) {
-					/* Read them and write the protobuf */
-					byte[] last = new byte[leftover];
-					last = inputStream.readNBytes(leftover);
-					StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
-							.setFileName(file.getName()).setChunkId(chunks).setData(ByteString.copyFrom(last)).build();
-					writes.add(chan.write(storeChunk));
-				}
+                for (ChannelFuture writeChunk : writes) {
+                    writeChunk.syncUninterruptibly();
+                }
 
-				chan.flush();
+                inputStream.close();
+                cf.channel().close().syncUninterruptibly();
+            } catch (FileNotFoundException e1) {
+                logger.info("File not found: %s", this.file.getName());
+            } catch (IOException e2) {
+                e2.printStackTrace();
+            }
+        }
 
-				for (ChannelFuture writeChunk : writes) {
-					writeChunk.syncUninterruptibly();
-				}
 
-				inputStream.close();
-				chan.close().syncUninterruptibly();
-			} catch (FileNotFoundException e1) {
-				e1.printStackTrace();
-			} catch (IOException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-			}
-		}
 
 	}
-
 	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
 
-		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(filename)
-				.setFileSize(fileSize).build();
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-				.setStoreRequest(storeRequest).build();
+		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest
+                                                    .newBuilder()
+                                                    .setFileName(filename)
+				                                    .setFileSize(fileSize)
+                                                    .build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages
+                                                           .StorageMessageWrapper
+                                                           .newBuilder()
+				                                           .setStoreRequest(storeRequest)
+                                                           .build();
 
 		return msgWrapper;
 	}

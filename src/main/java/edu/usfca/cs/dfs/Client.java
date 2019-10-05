@@ -146,6 +146,7 @@ public class Client implements DFSNode {
                 }
 
                 inputStream.close();
+                cf.syncUninterruptibly();
                 cf.channel().close().syncUninterruptibly();
             } catch (FileNotFoundException e1) {
                 logger.info("File not found: %s", this.file.getName());

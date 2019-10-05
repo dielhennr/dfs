@@ -7,15 +7,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import edu.usfca.cs.dfs.net.MessagePipeline;
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class Controller implements DFSNode {
 
@@ -23,15 +17,13 @@ public class Controller implements DFSNode {
 	ArrayList<String> storageNodes;
 	ConcurrentHashMap<String, StorageNodeContext> nodeMap;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
-	Bootstrap bootstrap;
 
 	/**
 	 * Constructor
 	 */
-	public Controller(Bootstrap bootstrap) {
+	public Controller() {
 		storageNodes = new ArrayList<String>();
 		nodeMap = new ConcurrentHashMap<String, StorageNodeContext>();
-		this.bootstrap = bootstrap;
 	}
 
 	public void start() throws IOException {
@@ -42,20 +34,12 @@ public class Controller implements DFSNode {
 	}
 
 	public static void main(String[] args) throws IOException {
-		/*We haven't used this in controller*/
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline();
-
-		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
-				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
-
 		/* Start controller to listen for messages */
-		Controller controller = new Controller(bootstrap);
+		Controller controller = new Controller();
 		controller.start();
 		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
-		workerGroup.shutdownGracefully();
 		
 	}
 

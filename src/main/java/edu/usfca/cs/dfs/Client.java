@@ -103,12 +103,21 @@ public class Client implements DFSNode {
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
+            StorageMessages.StorageMessageWrapper msgWrapper = Client.buildStoreRequest(this.file.getName(),
+                    this.file.length());
             /*
             * At this point we should get a response from controller telling us where to
             * put this file.
             * 
             */
-            ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13111);
+            ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13111).syncUninterruptibly();
+
+            ChannelFuture write = cf.channel().writeAndFlush(msgWrapper).syncUninterruptibly();
+
+            if (write.isSuccess() && write.isDone()) {
+                logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
+            } 
+
             /* Get number of chunks */
             long length = file.length();
             int chunks = (int) (length / this.chunkSize);

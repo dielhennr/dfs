@@ -67,7 +67,7 @@ public class StorageNode implements DFSNode {
 		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline(storageNode, 0);
+		MessagePipeline pipeline = new MessagePipeline(storageNode, 16384);
 
 
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
@@ -123,7 +123,8 @@ public class StorageNode implements DFSNode {
 			} catch (IOException e) {
 				logger.error("Could not write " + chunk.getFileName() + "_chunk" + chunk.getChunkId() + " to disk.");
 			}
-		}
+		} 
+
 
 	}
 	/**

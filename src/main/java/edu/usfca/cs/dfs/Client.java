@@ -158,6 +158,7 @@ public class Client implements DFSNode {
 
 
 	}
+
 	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
 
 		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest

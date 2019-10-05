@@ -67,7 +67,8 @@ public class StorageNode implements DFSNode {
 		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline();
+		MessagePipeline pipeline = new MessagePipeline(storageNode, 0);
+
 
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
@@ -128,7 +129,6 @@ public class StorageNode implements DFSNode {
 		}
 
 	}
-
 	/**
 	 * Build a join request protobuf with hostname/ip
 	 * 

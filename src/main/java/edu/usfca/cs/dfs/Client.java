@@ -118,56 +118,20 @@ public class Client implements DFSNode {
                 logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
             } 
 
-            /* Get number of chunks */
-            long length = file.length();
-            int chunks = (int) (length / this.chunkSize);
-
-            /* Asynch writes and input stream */
-            List<ChannelFuture> writes = new ArrayList<>();
-
-            try (FileInputStream inputStream = new FileInputStream(this.file)) {
-                byte[] messageBytes = new byte[this.chunkSize];
-                /* Write a protobuf to the channel for each chunk */
-                for (int i = 0; i < chunks; i++) {
-                    messageBytes = inputStream.readNBytes(this.chunkSize);
-                    StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
-                            .setFileName(file.getName()).setChunkId(i).setData(ByteString.copyFrom(messageBytes)).build();
-                    writes.add(cf.channel().write(storeChunk));
-                }
-
-                /* We will add one extra chunk for and leftover bytes */
-                int leftover = (int) (length % this.chunkSize);
-
-                /* If we have leftover bytes */
-                if (leftover != 0) {
-                    /* Read them and write the protobuf */
-                    byte[] last = new byte[leftover];
-                    last = inputStream.readNBytes(leftover);
-                    StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
-                            .setFileName(file.getName()).setChunkId(chunks).setData(ByteString.copyFrom(last)).build();
-                    writes.add(cf.channel().write(storeChunk));
-                }
-                
-                cf.channel().flush();
-
-                for (ChannelFuture writeChunk : writes) {
-                    writeChunk.syncUninterruptibly();
-                }
-
-                inputStream.close();
-                cf.syncUninterruptibly();
-                cf.channel().close().syncUninterruptibly();
-            } catch (FileNotFoundException e1) {
-                logger.info("File not found: %s", this.file.getName());
-            } catch (IOException e2) {
-                e2.printStackTrace();
-            }
+            cf.channel().close().syncUninterruptibly();
         }
 
 
 
 	}
 
+    /**
+     * Builds a store request protobuf
+     *
+     * @param filename
+     * @param fileSize
+     * @return
+     */
 	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
 
 		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest

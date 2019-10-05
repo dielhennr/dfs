@@ -115,21 +115,10 @@ public class StorageNode implements DFSNode {
 	
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
-        heartBeat.bumpRequests();
-		if (message.hasStoreChunk()) {
-			StorageMessages.StoreChunk chunk = message.getStoreChunk();
-			File fileStore = new File("/bigdata/" + chunk.getFileName() + "_chunk" + chunk.getChunkId());
-			try {
-				fileStore.createNewFile();
-				BufferedWriter writer = new BufferedWriter(new FileWriter(fileStore));
-				writer.write(chunk.getData().toString());
-				writer.close();
-			} catch (IOException e) {
-				logger.error("Could not write " + chunk.getFileName() + "_chunk" + chunk.getChunkId() + " to disk.");
-			}
-		} 
-
-
+        if (message.hasStoreRequest()) {
+            logger.info("Request to store " + message.getStoreRequest().getFileName() 
+                    + " size: " + message.getStoreRequest().getFileSize());
+        }
 	}
 
 	/**

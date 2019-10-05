@@ -101,15 +101,12 @@ public class StorageNode implements DFSNode {
         logger.info("Started heartbeat thread.");
 		storageNode.start();
 
-		/* Don't quit until we've disconnected: */
-		System.out.println("Shutting down");
-		workerGroup.shutdownGracefully();
 	}
 
 	public void start() throws IOException {
 		/* Pass a reference of the controller to our message router */
 		messageRouter = new ServerMessageRouter(this);
-		messageRouter.listen(13100);
+		messageRouter.listen(13111);
 		System.out.println("Listening for connections on port 13100");
 	}
 	

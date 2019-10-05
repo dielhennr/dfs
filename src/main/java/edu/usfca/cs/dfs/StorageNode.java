@@ -97,7 +97,7 @@ public class StorageNode implements DFSNode {
 		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.start();
-		System.out.println("Shutting down");
+        logger.info("Started heartbeat thread.");
 		storageNode.start();
 
 		/* Don't quit until we've disconnected: */

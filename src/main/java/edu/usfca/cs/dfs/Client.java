@@ -108,7 +108,7 @@ public class Client implements DFSNode {
             * put this file.
             * 
             */
-            ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), this.port);
+            ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13111);
             /* Get number of chunks */
             long length = file.length();
             int chunks = (int) (length / this.chunkSize);

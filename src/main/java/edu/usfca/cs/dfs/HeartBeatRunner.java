@@ -17,7 +17,7 @@ public class HeartBeatRunner implements Runnable {
 	/* Heartbeat MetaData */
 	String hostname;
 	String controllerHost;
-	int requests;
+	volatile int requests;
 	File f;
 	Bootstrap bootstrap;
 

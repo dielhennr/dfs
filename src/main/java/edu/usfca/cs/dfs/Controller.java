@@ -15,24 +15,28 @@ public class Controller implements DFSNode {
 	private ServerMessageRouter messageRouter;
 	PriorityQueue<StorageNodeContext> storageNodes;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
+    ArgumentMap arguments;
+    int port;
 
 	/**
 	 * Constructor
 	 */
-	public Controller() {
+	public Controller(String[] args) {
         storageNodes = new PriorityQueue<>(new StorageNodeComparator());
+        this.arguments = new ArgumentMap(args);
+        this.port = arguments.getInteger("-p", 13100);
 	}
-
+    
 	public void start() throws IOException {
 		/* Pass a reference of the controller to our message router */
 		messageRouter = new ServerMessageRouter(this);
-		messageRouter.listen(13100);
+		messageRouter.listen(this.port);
 		System.out.println("Listening for connections on port 13100");
 	}
 
 	public static void main(String[] args) throws IOException {
 		/* Start controller to listen for messages */
-		Controller controller = new Controller();
+		Controller controller = new Controller(args);
 		controller.start();
 		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes);
 		Thread heartbeatThread = new Thread(checker);
@@ -46,6 +50,7 @@ public class Controller implements DFSNode {
 			String storageHost = message.getJoinRequest().getNodeName();
 
 			logger.info("Recieved join request from " + storageHost);
+            /* Add to PriorityQueue */
 			synchronized (storageNodes) {
 				storageNodes.add(new StorageNodeContext(ctx, storageHost));
 			}
@@ -53,6 +58,7 @@ public class Controller implements DFSNode {
 			/* Update metadata */
 			String hostName = message.getHeartbeat().getHostname();
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
+			/* This sucks but works for now maybe have a hashmap hostname -> wrapper */
             for (StorageNodeContext storageNode : storageNodes)  {
                 if (storageNode.getHostName().equals(hostName)) {
                     storageNode.updateTimestamp(heartbeat.getTimestamp());
@@ -71,10 +77,7 @@ public class Controller implements DFSNode {
 				}
 				
 				logger.info("Recieved request to put file on " + storageNode + " from client.");
-				/*
-				 * Write back a join request to client with hostname of the node to send chunks
-				 * to
-				 */
+				/* Write back a store response to client with hostname of the node to send chunks to */
 				ChannelFuture write = ctx.pipeline().writeAndFlush(Controller.buildStoreResponse(storageNode.getHostName()));
 				write.syncUninterruptibly();
 
@@ -90,7 +93,13 @@ public class Controller implements DFSNode {
 
 		}
 	}
-
+    
+    /**
+     * Builds a store response protobuf
+     *
+     * @param hostname
+     * @return msgWrapper
+     */
 	private static StorageMessages.StorageMessageWrapper buildStoreResponse(String hostname) {
 
 		StorageMessages.StoreResponse storeRequest = StorageMessages.StoreResponse.newBuilder()
@@ -101,7 +110,10 @@ public class Controller implements DFSNode {
 
 		return msgWrapper;
 	}
-	
+
+    /**
+     * Runnable object that iterates through the queue of storage nodes every 5 sedons checking timestamps
+     */
 	private static class HeartBeatChecker implements Runnable {
 		PriorityQueue<StorageNodeContext> storageNodes;
 
@@ -116,7 +128,7 @@ public class Controller implements DFSNode {
 				for (StorageNodeContext node : storageNodes) {
 					long nodeTime = node.getTimestamp();
 
-					if (currentTime - nodeTime > 7000) {
+					if (currentTime - nodeTime > 5500) {
 						logger.info("Detected failure on node: " + node);
 						/* Also need to rereplicate data here. */
 						/* We have to rereplicate this nodes replicas as well as its primarys */

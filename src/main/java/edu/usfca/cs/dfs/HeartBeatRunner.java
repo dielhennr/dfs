@@ -31,6 +31,10 @@ public class HeartBeatRunner implements Runnable {
 		this.bootstrap = bootstrap;
 	}
 
+    public void bumpRequests() {
+        this.requests++;
+    }
+
 	@Override
 	public void run() {
 

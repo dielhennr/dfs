@@ -1,8 +1,7 @@
 package edu.usfca.cs.dfs;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.PriorityQueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,16 +13,14 @@ import io.netty.channel.ChannelHandlerContext;
 public class Controller implements DFSNode {
 
 	private ServerMessageRouter messageRouter;
-	ArrayList<String> storageNodes;
-	ConcurrentHashMap<String, StorageNodeContext> nodeMap;
+	PriorityQueue<StorageNodeContext> storageNodes;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
 
 	/**
 	 * Constructor
 	 */
 	public Controller() {
-		storageNodes = new ArrayList<String>();
-		nodeMap = new ConcurrentHashMap<String, StorageNodeContext>();
+        storageNodes = new PriorityQueue<>(new StorageNodeComparator());
 	}
 
 	public void start() throws IOException {
@@ -37,8 +34,7 @@ public class Controller implements DFSNode {
 		/* Start controller to listen for messages */
 		Controller controller = new Controller();
 		controller.start();
-		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, 
-                                                        controller.nodeMap);
+		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
 		
@@ -50,27 +46,27 @@ public class Controller implements DFSNode {
 			String storageHost = message.getJoinRequest().getNodeName();
 
 			logger.info("Recieved join request from " + storageHost);
-			nodeMap.put(storageHost, new StorageNodeContext(ctx));
 			synchronized (storageNodes) {
-				storageNodes.add(storageHost);
-				storageNodes.notifyAll();
+				storageNodes.add(new StorageNodeContext(ctx, storageHost));
 			}
 		} else if (message.hasHeartbeat()) {
 			/* Update metadata */
 			String hostName = message.getHeartbeat().getHostname();
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
-			if (nodeMap.containsKey(hostName)) {
-				nodeMap.get(hostName).updateTimestamp(heartbeat.getTimestamp());
-				nodeMap.get(hostName).setFreeSpace(heartbeat.getFreeSpace());
-				logger.info("Recieved heartbeat from " + hostName);
-			} /* Otherwise ignore if join request not processed yet? */
+            for (StorageNodeContext storageNode : storageNodes)  {
+                if (storageNode.getHostName().equals(hostName)) {
+                    storageNode.updateTimestamp(heartbeat.getTimestamp());
+                    storageNode.setFreeSpace(heartbeat.getFreeSpace());
+                    logger.info("Recieved heartbeat from " + hostName);
+                } /* Otherwise ignore if join request not processed yet? */
+            }
 		} else if (message.hasStoreRequest()) {
 			if (storageNodes.isEmpty()) {
 				logger.error("No storage nodes in the network");
 			} else {
-				String storageNode;
+				StorageNodeContext storageNode;
 				synchronized(storageNodes) {
-					storageNode = storageNodes.remove(0);
+					storageNode = storageNodes.remove();
 					storageNodes.add(storageNode);
 				}
 				
@@ -79,11 +75,11 @@ public class Controller implements DFSNode {
 				 * Write back a join request to client with hostname of the node to send chunks
 				 * to
 				 */
-				ChannelFuture write = ctx.pipeline().writeAndFlush(Controller.buildStoreResponse(storageNode));
+				ChannelFuture write = ctx.pipeline().writeAndFlush(Controller.buildStoreResponse(storageNode.getHostName()));
 				write.syncUninterruptibly();
 
 				/* Put that file in this nodes bloom filter */
-				nodeMap.get(storageNode).put(message.getStoreRequest().getFileName().getBytes());
+				storageNode.put(message.getStoreRequest().getFileName().getBytes());
 			}
 
 		} else if (message.hasRetrieveFile()) {
@@ -107,25 +103,24 @@ public class Controller implements DFSNode {
 	}
 	
 	private static class HeartBeatChecker implements Runnable {
-		ConcurrentHashMap<String, StorageNodeContext> nodeMap;
+		PriorityQueue<StorageNodeContext> storageNodes;
 
-		public HeartBeatChecker(ArrayList<String> storageNodes, ConcurrentHashMap<String, StorageNodeContext> nodeMap) {
-			this.nodeMap = nodeMap;
+		public HeartBeatChecker(PriorityQueue<StorageNodeContext> storageNodes) {
+			this.storageNodes = storageNodes;
 		}
 
 		@Override
 		public void run() {
 			while (true) {
 				long currentTime = System.currentTimeMillis();
-				for (String node : nodeMap.keySet()) {
-					StorageNodeContext storageNode = nodeMap.get(node);
-					long nodeTime = storageNode.getTimestamp();
+				for (StorageNodeContext node : storageNodes) {
+					long nodeTime = node.getTimestamp();
 
 					if (currentTime - nodeTime > 7000) {
 						logger.info("Detected failure on node: " + node);
 						/* Also need to rereplicate data here. */
 						/* We have to rereplicate this nodes replicas as well as its primarys */
-						nodeMap.remove(node);
+						storageNodes.remove(node);
 					}
 
 				}

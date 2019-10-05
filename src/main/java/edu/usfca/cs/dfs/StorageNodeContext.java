@@ -7,24 +7,36 @@ public class StorageNodeContext {
 
     private ChannelHandlerContext ctx;
     private ArrayList<BloomFilter> filters;
+    private String hostname;
     private long timestamp;
     private long freeSpace;
+    private int requests;
 
-    public StorageNodeContext(ChannelHandlerContext ctx) {
+    public StorageNodeContext(ChannelHandlerContext ctx, String hostname) {
         this.ctx = ctx;
         this.filters = new ArrayList<BloomFilter>();
         this.filters.add(new BloomFilter(100000, 3));
         this.timestamp = System.currentTimeMillis();
         this.freeSpace = 0;
+        this.requests = 0;
+        this.hostname = hostname;
     }
 
 	public ChannelHandlerContext getCtx() {
 		return ctx;
 	}
 	
+	public String getHostName() {
+		return this.hostname;
+	}
+	
 	public long getFreeSpace() {
 		return freeSpace;
 	}
+
+    public int getRequests() {
+        return this.requests;
+    }
 
 	public void setFreeSpace(long freeSpace) {
 		this.freeSpace = freeSpace;

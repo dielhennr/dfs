@@ -37,6 +37,8 @@ public class StorageNode implements DFSNode {
 	
 	ArgumentMap arguments;
 
+    static HeartBeatRunner heartBeat;
+
 	public StorageNode(String[] args) throws UnknownHostException {
 		ip = InetAddress.getLocalHost();
 		hostname = ip.getHostName();
@@ -47,6 +49,7 @@ public class StorageNode implements DFSNode {
 			System.err.println("Usage: java -cp ..... -h controllerhostname");
 			System.exit(1);
 		}
+
 		/* For log4j2 */
 		System.setProperty("hostName", hostname);
 	};
@@ -95,7 +98,7 @@ public class StorageNode implements DFSNode {
 		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make
 		 * connections
 		 **/
-		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
+		heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.start();
         logger.info("Started heartbeat thread.");
@@ -112,6 +115,7 @@ public class StorageNode implements DFSNode {
 	
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
+        heartBeat.bumpRequests();
 		if (message.hasStoreChunk()) {
 			StorageMessages.StoreChunk chunk = message.getStoreChunk();
 			File fileStore = new File("/bigdata/" + chunk.getFileName() + "_chunk" + chunk.getChunkId());
@@ -127,6 +131,7 @@ public class StorageNode implements DFSNode {
 
 
 	}
+
 	/**
 	 * Build a join request protobuf with hostname/ip
 	 * 
@@ -161,7 +166,7 @@ public class StorageNode implements DFSNode {
 	public static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
 
 		StorageMessages.Heartbeat heartbeat = StorageMessages.Heartbeat.newBuilder().setFreeSpace(freeSpace)
-				.setHostname(hostname).setRequests(0).setTimestamp(System.currentTimeMillis()).build();
+				.setHostname(hostname).setRequests(requests).setTimestamp(System.currentTimeMillis()).build();
 
 		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
 				.setHeartbeat(heartbeat).build();

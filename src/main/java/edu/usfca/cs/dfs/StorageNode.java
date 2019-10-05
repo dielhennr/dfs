@@ -136,12 +136,16 @@ public class StorageNode implements DFSNode {
 	 */
 	public static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 		/* Store hostname in a JoinRequest protobuf */
-		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest.newBuilder().setNodeName(hostname)
-				.build();
+		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest
+                                                                 .newBuilder()
+                                                                 .setNodeName(hostname)
+				                                                 .build();
 
 		/* Wrapper */
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-				.setJoinRequest(joinRequest).build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
+                .newBuilder()
+				.setJoinRequest(joinRequest)
+                .build();
 
 		return msgWrapper;
 	}

@@ -37,7 +37,8 @@ public class Controller implements DFSNode {
 		/* Start controller to listen for messages */
 		Controller controller = new Controller();
 		controller.start();
-		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, controller.nodeMap);
+		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes, 
+                                                        controller.nodeMap);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
 		

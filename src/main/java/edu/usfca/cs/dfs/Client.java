@@ -3,6 +3,7 @@ package edu.usfca.cs.dfs;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +123,6 @@ public class Client implements DFSNode {
 
             /* Asynch writes and input stream */
             List<ChannelFuture> writes = new ArrayList<>();
-
             try (FileInputStream inputStream = new FileInputStream(path.toFile())) {
                 byte[] messageBytes = new byte[this.chunkSize];
                 /* Write a protobuf to the channel for each chunk */

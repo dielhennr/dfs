@@ -122,7 +122,7 @@ public class StorageNode implements DFSNode {
             ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder((int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
         } else if (message.hasStoreChunk()) {
             logger.info("Recieved store chunk.");
-            Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName());
+            Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId());
             try {
                 Files.write(path, message.getStoreChunk().getData().toByteArray());
             } catch (IOException ioe) {

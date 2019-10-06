@@ -85,7 +85,7 @@ public class Client implements DFSNode {
 		cf.syncUninterruptibly();
 
 		StorageMessages.StorageMessageWrapper msgWrapper = Client.buildStoreRequest(client.path.getFileName().toString(),
-				client.path.toFile().length());
+				client.chunkSize);
 
 		Channel chan = cf.channel();
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
@@ -103,7 +103,7 @@ public class Client implements DFSNode {
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
             StorageMessages.StorageMessageWrapper msgWrapper = Client.buildStoreRequest(this.path.getFileName().toString(),
-                    this.path.toFile().length());
+                    this.chunkSize);
             /*
             * At this point we should get a response from controller telling us where to
             * put this file.
@@ -154,7 +154,6 @@ public class Client implements DFSNode {
 
                 inputStream.close();
                 cf.syncUninterruptibly();
-                cf.channel().close().syncUninterruptibly();
             } catch (FileNotFoundException e1) {
                 logger.info("File not found: %s", this.path.getFileName().toString());
             } catch (IOException e2) {

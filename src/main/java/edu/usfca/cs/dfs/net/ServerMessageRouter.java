@@ -26,7 +26,7 @@ public class ServerMessageRouter {
         workerGroup = new NioEventLoopGroup(4);
         
         /* Pass the node to the pipeline as well */
-        pipeline = new MessagePipeline(node, 16384);
+        pipeline = new MessagePipeline(node);
 
         bootstrap = new ServerBootstrap()
             .group(bossGroup, workerGroup)
@@ -39,10 +39,6 @@ public class ServerMessageRouter {
     public ServerMessageRouter(DFSNode node, int readBufferSize, int maxWriteQueueSize) {
         /* Ignoring parameters ... */
         this(node);
-    }
-
-    public void changeDecoder(int size) {
-        this.pipeline.changeChunkSize(size);
     }
 
     /**

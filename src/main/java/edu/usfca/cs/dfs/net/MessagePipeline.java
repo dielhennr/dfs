@@ -1,5 +1,4 @@
-package edu.usfca.cs.dfs.net;
-
+package edu.usfca.cs.dfs.net; 
 import edu.usfca.cs.dfs.DFSNode;
 import edu.usfca.cs.dfs.StorageMessages;
 
@@ -14,21 +13,15 @@ import io.netty.handler.codec.protobuf.ProtobufEncoder;
 public class MessagePipeline extends ChannelInitializer<SocketChannel> {
 
 	private InboundHandler inboundHandler;
-	private int chunkSize;
 
 	public MessagePipeline() {
 		inboundHandler = new InboundHandler();
 	}
 
-	public MessagePipeline(DFSNode node, int chunkSize) {
+	public MessagePipeline(DFSNode node) {
 		/* Finally, pass the node to the inbound handler */
 		inboundHandler = new InboundHandler(node);
-		this.chunkSize = chunkSize;
 	}
-
-    public void changeChunkSize(int size) {
-        this.chunkSize = size;
-    }
 
 	@Override
 	public void initChannel(SocketChannel ch) throws Exception {
@@ -42,7 +35,7 @@ public class MessagePipeline extends ChannelInitializer<SocketChannel> {
 		 * we'll use 128 MB here. We use a 4-byte length field to give us 32 bits' worth
 		 * of frame length, which should be plenty for the future...
 		 */
-		pipeline.addLast(new LengthFieldBasedFrameDecoder(chunkSize + 1048576, 0, 4, 0, 4));
+		pipeline.addLast(new LengthFieldBasedFrameDecoder(1048576, 0, 4, 0, 4));
 		pipeline.addLast(new ProtobufDecoder(StorageMessages.StorageMessageWrapper.getDefaultInstance()));
 
 		/* Outbound: */

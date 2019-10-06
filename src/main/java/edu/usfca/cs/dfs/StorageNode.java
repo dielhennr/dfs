@@ -70,7 +70,7 @@ public class StorageNode implements DFSNode {
 		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline(storageNode, 16384);
+		MessagePipeline pipeline = new MessagePipeline(storageNode);
 
 
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)

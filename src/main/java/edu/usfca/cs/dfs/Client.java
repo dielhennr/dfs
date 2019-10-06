@@ -72,7 +72,7 @@ public class Client implements DFSNode {
 
 		Client client = new Client(args);
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline(client, client.chunkSize);
+		MessagePipeline pipeline = new MessagePipeline(client);
 
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
@@ -127,7 +127,6 @@ public class Client implements DFSNode {
             } catch (IOException ioe) {
                 logger.info("could not read file");
             }
-
 
 
             cf.channel().close().syncUninterruptibly();

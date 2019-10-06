@@ -26,6 +26,10 @@ public class MessagePipeline extends ChannelInitializer<SocketChannel> {
 		this.chunkSize = chunkSize;
 	}
 
+    public void changeChunkSize(int size) {
+        this.chunkSize = size;
+    }
+
 	@Override
 	public void initChannel(SocketChannel ch) throws Exception {
 		ChannelPipeline pipeline = ch.pipeline();

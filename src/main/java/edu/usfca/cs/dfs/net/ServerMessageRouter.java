@@ -41,6 +41,10 @@ public class ServerMessageRouter {
         this(node);
     }
 
+    public void changeDecoder(int size) {
+        this.pipeline.changeChunkSize(size);
+    }
+
     /**
      * Begins listening for incoming messages on the specified port. When this
      * method returns, the server socket is open and ready to accept

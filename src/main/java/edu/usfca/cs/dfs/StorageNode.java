@@ -2,6 +2,9 @@ package edu.usfca.cs.dfs;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.FileWriter;
 import java.io.IOException;
 
@@ -119,8 +122,11 @@ public class StorageNode implements DFSNode {
             logger.info("Request to store " + message.getStoreRequest().getFileName() 
                     + " size: " + message.getStoreRequest().getFileSize());
 
+
         } else if (message.hasStoreChunk()) {
             logger.info("recieved store chunk");
+            Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName())
+            Files.write(path, message.getStoreChunk().getData().toByteArray());
         }
 	}
 

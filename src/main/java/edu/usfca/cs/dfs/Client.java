@@ -4,16 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import com.google.protobuf.ByteString;
-
-import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
-import edu.usfca.cs.dfs.net.MessagePipeline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
+import edu.usfca.cs.dfs.net.MessagePipeline;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -116,8 +114,6 @@ public class Client implements DFSNode {
             if (write.isSuccess() && write.isDone()) {
                 logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
             } 
-
-            cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13111).syncUninterruptibly();
 
             Path path = arguments.getPath("-f");
 

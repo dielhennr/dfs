@@ -1,9 +1,11 @@
 package edu.usfca.cs.dfs;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.protobuf.ByteString;
 
@@ -29,7 +31,7 @@ public class Client implements DFSNode {
 	/* Client logger */
 	private static final Logger logger = LogManager.getLogger(Client.class);
 
-	File file;
+    Path path;
 
 	/* Controller's hostname */
 	String controllerHost;
@@ -47,7 +49,7 @@ public class Client implements DFSNode {
 		this.arguments = new ArgumentMap(args);
 		
 		if (arguments.hasFlag("-f") && arguments.hasFlag("-h")) {
-			file = new File(arguments.getString("-f"));
+			path = arguments.getPath("-f");
 			controllerHost = arguments.getString("-h");
 		} else {
 			System.err.println("Usage: java -cp .... -h hostToContact -f fileToSend.\n"
@@ -82,8 +84,8 @@ public class Client implements DFSNode {
 		ChannelFuture cf = bootstrap.connect(client.controllerHost, client.port);
 		cf.syncUninterruptibly();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = Client.buildStoreRequest(client.file.getName(),
-				client.file.length());
+		StorageMessages.StorageMessageWrapper msgWrapper = Client.buildStoreRequest(client.path.getFileName().toString(),
+				client.path.toFile().length());
 
 		Channel chan = cf.channel();
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
@@ -100,8 +102,8 @@ public class Client implements DFSNode {
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
-            StorageMessages.StorageMessageWrapper msgWrapper = Client.buildStoreRequest(this.file.getName(),
-                    this.file.length());
+            StorageMessages.StorageMessageWrapper msgWrapper = Client.buildStoreRequest(this.path.getFileName().toString(),
+                    this.path.toFile().length());
             /*
             * At this point we should get a response from controller telling us where to
             * put this file.
@@ -114,19 +116,51 @@ public class Client implements DFSNode {
             if (write.isSuccess() && write.isDone()) {
                 logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
             } 
+            /* Get number of chunks */
+            long length = path.toFile().length();
+            int chunks = (int) (length / this.chunkSize);
 
-            Path path = arguments.getPath("-f");
+            /* Asynch writes and input stream */
+            List<ChannelFuture> writes = new ArrayList<>();
 
-            try {
-                ByteString data; 
-                data = ByteString.copyFrom(Files.readAllBytes(path));
-                StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder().setChunkId(0).setFileName(path.getFileName().toString()).setData(data).build();
-                StorageMessages.StorageMessageWrapper wrapper = StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
-                ChannelFuture writeChunk = cf.channel().writeAndFlush(wrapper).syncUninterruptibly();
+            try (FileInputStream inputStream = new FileInputStream(path.toFile())) {
+                byte[] messageBytes = new byte[this.chunkSize];
+                /* Write a protobuf to the channel for each chunk */
+                for (int i = 0; i < chunks; i++) {
+                    messageBytes = inputStream.readNBytes(this.chunkSize);
+                    StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
+                            .setFileName(path.getFileName().toString()).setChunkId(i).setData(ByteString.copyFrom(messageBytes)).build();
+                    writes.add(cf.channel().write(storeChunk));
+                }
 
-            } catch (IOException ioe) {
-                logger.info("could not read file");
-            }
+                /* We will add one extra chunk for and leftover bytes */
+                int leftover = (int) (length % this.chunkSize);
+
+                /* If we have leftover bytes */
+                if (leftover != 0) {
+                    /* Read them and write the protobuf */
+                    byte[] last = new byte[leftover];
+                    last = inputStream.readNBytes(leftover);
+                    StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder()
+                            .setFileName(path.getFileName().toString()).setChunkId(chunks).setData(ByteString.copyFrom(last)).build();
+                    writes.add(cf.channel().write(storeChunk));
+                }
+
+                cf.channel().flush();
+
+                for (ChannelFuture writeChunk : writes) {
+                    writeChunk.syncUninterruptibly();
+                }
+
+                inputStream.close();
+                cf.syncUninterruptibly();
+                cf.channel().close().syncUninterruptibly();
+            } catch (FileNotFoundException e1) {
+                logger.info("File not found: %s", this.path.getFileName().toString());
+            } catch (IOException e2) {
+                e2.printStackTrace();
+			}
+
 
 
             cf.channel().close().syncUninterruptibly();

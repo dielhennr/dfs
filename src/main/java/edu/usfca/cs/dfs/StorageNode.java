@@ -1,10 +1,18 @@
 package edu.usfca.cs.dfs;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
+import edu.usfca.cs.dfs.net.MessagePipeline;
+import edu.usfca.cs.dfs.net.ServerMessageRouter;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -13,15 +21,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
-import edu.usfca.cs.dfs.net.MessagePipeline;
-import edu.usfca.cs.dfs.net.ServerMessageRouter;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 public class StorageNode implements DFSNode {
 
@@ -70,7 +70,7 @@ public class StorageNode implements DFSNode {
 		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline(storageNode, 16384);
+		MessagePipeline pipeline = new MessagePipeline(storageNode);
 
 
 		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
@@ -115,21 +115,20 @@ public class StorageNode implements DFSNode {
 	
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
-        heartBeat.bumpRequests();
-		if (message.hasStoreChunk()) {
-			StorageMessages.StoreChunk chunk = message.getStoreChunk();
-			File fileStore = new File("/bigdata/" + chunk.getFileName() + "_chunk" + chunk.getChunkId());
-			try {
-				fileStore.createNewFile();
-				BufferedWriter writer = new BufferedWriter(new FileWriter(fileStore));
-				writer.write(chunk.getData().toString());
-				writer.close();
-			} catch (IOException e) {
-				logger.error("Could not write " + chunk.getFileName() + "_chunk" + chunk.getChunkId() + " to disk.");
-			}
-		} 
-
-
+        if (message.hasStoreRequest()) {
+            logger.info("Request to store " + message.getStoreRequest().getFileName() 
+                    + " size: " + message.getStoreRequest().getFileSize());
+            ctx.pipeline().removeFirst();
+            ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder((int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
+        } else if (message.hasStoreChunk()) {
+            logger.info("Recieved store chunk.");
+            Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName());
+            try {
+                Files.write(path, message.getStoreChunk().getData().toByteArray());
+            } catch (IOException ioe) {
+                logger.info("Could not write file");
+            }
+        }
 	}
 
 	/**

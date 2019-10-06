@@ -117,7 +117,7 @@ public class Client implements DFSNode {
                 logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
             } 
 
-            Path path = Paths.get("/bigdata/rdielhenn/testfile");
+            Path path = arguments.getPath("-f");
 
             try {
                 ByteString data; 

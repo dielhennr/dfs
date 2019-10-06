@@ -1,13 +1,18 @@
 package edu.usfca.cs.dfs;
 
-import java.io.BufferedWriter;
-import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.io.FileWriter;
-import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
+import edu.usfca.cs.dfs.net.MessagePipeline;
+import edu.usfca.cs.dfs.net.ServerMessageRouter;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -16,15 +21,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
-import edu.usfca.cs.dfs.net.MessagePipeline;
-import edu.usfca.cs.dfs.net.ServerMessageRouter;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class StorageNode implements DFSNode {
 
@@ -125,8 +121,12 @@ public class StorageNode implements DFSNode {
 
         } else if (message.hasStoreChunk()) {
             logger.info("recieved store chunk");
-            Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName())
-            Files.write(path, message.getStoreChunk().getData().toByteArray());
+            Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName());
+            try {
+                Files.write(path, message.getStoreChunk().getData().toByteArray());
+            } catch (IOException ioe) {
+                logger.info("Could not write file");
+            }
         }
 	}
 

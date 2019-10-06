@@ -1,19 +1,18 @@
 package edu.usfca.cs.dfs;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import com.google.protobuf.ByteString;
 
 import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
 import edu.usfca.cs.dfs.net.MessagePipeline;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.google.protobuf.ByteString;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -117,6 +116,21 @@ public class Client implements DFSNode {
             if (write.isSuccess() && write.isDone()) {
                 logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
             } 
+
+            Path path = Paths.get("/bigdata/rdielhenn/testfile");
+
+            try {
+                ByteString data; 
+                data = ByteString.copyFrom(Files.readAllBytes(path));
+                StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder().setChunkId(0).setFileName(path.getFileName().toString()).setData(data).build();
+                StorageMessages.StorageMessageWrapper wrapper = StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
+                ChannelFuture writeChunk = cf.channel().writeAndFlush(wrapper).syncUninterruptibly();
+
+            } catch (IOException ioe) {
+                logger.info("could not read file");
+            }
+
+
 
             cf.channel().close().syncUninterruptibly();
         }

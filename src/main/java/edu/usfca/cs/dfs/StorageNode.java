@@ -118,6 +118,9 @@ public class StorageNode implements DFSNode {
         if (message.hasStoreRequest()) {
             logger.info("Request to store " + message.getStoreRequest().getFileName() 
                     + " size: " + message.getStoreRequest().getFileSize());
+
+        } else if (message.hasStoreChunk()) {
+            logger.info("recieved store chunk");
         }
 	}
 

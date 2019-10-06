@@ -118,7 +118,7 @@ public class StorageNode implements DFSNode {
             logger.info("Request to store " + message.getStoreRequest().getFileName() 
                     + " size: " + message.getStoreRequest().getFileSize());
             messageRouter.changeDecoder((int)message.getStoreRequest().getFileSize());
-
+            ctx.channel().close().syncUninterruptibly();
         } else if (message.hasStoreChunk()) {
             logger.info("recieved store chunk");
             Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName());

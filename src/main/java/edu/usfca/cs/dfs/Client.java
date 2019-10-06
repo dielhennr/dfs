@@ -117,6 +117,8 @@ public class Client implements DFSNode {
                 logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
             } 
 
+            cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13111).syncUninterruptibly();
+
             Path path = arguments.getPath("-f");
 
             try {

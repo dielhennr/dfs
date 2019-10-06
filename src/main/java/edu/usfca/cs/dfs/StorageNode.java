@@ -21,6 +21,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 public class StorageNode implements DFSNode {
 
@@ -117,9 +118,10 @@ public class StorageNode implements DFSNode {
         if (message.hasStoreRequest()) {
             logger.info("Request to store " + message.getStoreRequest().getFileName() 
                     + " size: " + message.getStoreRequest().getFileSize());
-            messageRouter.changeDecoder((int)message.getStoreRequest().getFileSize());
+            ctx.pipeline().removeFirst();
+            ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder((int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
         } else if (message.hasStoreChunk()) {
-            logger.info("recieved store chunk");
+            logger.info("Recieved store chunk.");
             Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName());
             try {
                 Files.write(path, message.getStoreChunk().getData().toByteArray());

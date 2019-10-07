@@ -11,7 +11,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -29,6 +28,7 @@ public class Client implements DFSNode {
   /* Client logger */
   private static final Logger logger = LogManager.getLogger(Client.class);
 
+  /* File to send or query for */
   Path path;
 
   /* Controller's hostname */
@@ -40,12 +40,21 @@ public class Client implements DFSNode {
   /* Chunk Size */
   Integer chunkSize;
 
+  /* Clients bootstrap for connecting to controller and storeagenodes */
   Bootstrap bootstrap;
 
+  EventLoopGroup workerGroup;
+
+  /**
+   * Constructs a client given the command line arguments
+   *
+   * @param args
+   */
   public Client(String[] args) {
     /* Command Line Arguments */
     this.arguments = new ArgumentMap(args);
 
+    /* Check that user entered controller to connect to and file to send */
     if (arguments.hasFlag("-f") && arguments.hasFlag("-h")) {
       path = arguments.getPath("-f");
       controllerHost = arguments.getString("-h");
@@ -61,10 +70,16 @@ public class Client implements DFSNode {
 
     /* Default Chunk size to 16kb */
     this.chunkSize = arguments.getInteger("-c", 16384);
-  }
 
-  private void addBootstrap(Bootstrap bootstrap) {
-    this.bootstrap = bootstrap;
+    workerGroup = new NioEventLoopGroup();
+    MessagePipeline pipeline = new MessagePipeline(this);
+
+    bootstrap =
+        new Bootstrap()
+            .group(workerGroup)
+            .channel(NioSocketChannel.class)
+            .option(ChannelOption.SO_KEEPALIVE, true)
+            .handler(pipeline);
   }
 
   public static void main(String[] args) throws IOException {
@@ -72,19 +87,8 @@ public class Client implements DFSNode {
     /* Create this node for interfacing in the pipeline */
 
     Client client = new Client(args);
-    EventLoopGroup workerGroup = new NioEventLoopGroup();
-    MessagePipeline pipeline = new MessagePipeline(client);
 
-    Bootstrap bootstrap =
-        new Bootstrap()
-            .group(workerGroup)
-            .channel(NioSocketChannel.class)
-            .option(ChannelOption.SO_KEEPALIVE, true)
-            .handler(pipeline);
-
-    client.addBootstrap(bootstrap);
-
-    ChannelFuture cf = bootstrap.connect(client.controllerHost, client.port);
+    ChannelFuture cf = client.bootstrap.connect(client.controllerHost, client.port);
     cf.syncUninterruptibly();
 
     StorageMessages.StorageMessageWrapper msgWrapper =
@@ -112,12 +116,23 @@ public class Client implements DFSNode {
       /* Build a store request to send to the storagenode so that it can change it's decoder */
       StorageMessages.StorageMessageWrapper storeRequest =
           Client.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize);
-      logger.info("Chunk size: " + this.chunkSize);
-      /* Connect to StorageNode */
+      logger.info(
+          "Sending chunks in size %d to %s",
+          this.chunkSize, message.getStoreResponse().getHostname());
+
+      /**
+       * Connect to StorageNode and start sending chunks
+       *
+       * <p>Not sure if these ports should be hard coded thats something you could change too
+       * Storeagenodes connect to controller through a port but i dont think client can send chunks
+       * through that port if its being used to listen. That's why I hard coded client to connect to
+       * a SN through 13111 and the SNs to listen on 13111. Meanwhile controller is listening on
+       * 13000 for heartbeats from SNs HeartBeatRunner.
+       */
       ChannelFuture cf =
           bootstrap.connect(message.getStoreResponse().getHostname(), 13111).syncUninterruptibly();
 
-      /* Write the request */
+      /* Write the request to change the SNs decoder so that it can start receiving chunks */
       ChannelFuture write = cf.channel().writeAndFlush(storeRequest).syncUninterruptibly();
 
       if (write.isSuccess() && write.isDone()) {
@@ -145,6 +160,7 @@ public class Client implements DFSNode {
         }
 
         /* If we have leftover bytes */
+        data = new byte[leftover];
         if (leftover != 0) {
           data = inputStream.readNBytes(leftover);
           /* Read them and write the protobuf */
@@ -154,21 +170,23 @@ public class Client implements DFSNode {
           writes.add(cf.channel().write(chunk));
         }
 
+        /* Flush the channel */
         cf.channel().flush();
 
+        /* Sync on each write, their priority doesn't really matter */
         for (ChannelFuture writeChunk : writes) {
           writeChunk.syncUninterruptibly();
         }
-
+        /* At this point all writes are done. Close the input stream and sync on the channelfuture */
         inputStream.close();
         cf.syncUninterruptibly();
-      } catch (FileNotFoundException e1) {
-        logger.info("File not found: %s", this.path.getFileName().toString());
-      } catch (IOException e2) {
-        e2.printStackTrace();
+      } catch (IOException ioe) {
+        logger.info("Could not read file %s", this.path.getFileName().toString());
       }
-
+      /* Close the channel */
       cf.channel().close().syncUninterruptibly();
+      /* Shutdown the workerGroup */
+      this.workerGroup.shutdownGracefully();
     }
   }
 

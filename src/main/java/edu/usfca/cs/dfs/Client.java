@@ -117,8 +117,10 @@ public class Client implements DFSNode {
       StorageMessages.StorageMessageWrapper storeRequest =
           Client.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize);
       logger.info(
-          "Sending chunks in size %d to %s",
-          this.chunkSize, message.getStoreResponse().getHostname());
+          "Sending chunks in size "
+              + this.chunkSize
+              + " to "
+              + message.getStoreResponse().getHostname());
 
       /**
        * Connect to StorageNode and start sending chunks

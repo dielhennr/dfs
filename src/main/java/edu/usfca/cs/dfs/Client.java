@@ -128,6 +128,9 @@ public class Client implements DFSNode {
       long length = path.toFile().length();
       int chunks = (int) (length / this.chunkSize);
 
+      /* We will add one extra chunk for leftover bytes */
+      int leftover = (int) (length % this.chunkSize);
+
       /* Asynch writes and input stream */
       List<ChannelFuture> writes = new ArrayList<>();
 
@@ -138,11 +141,8 @@ public class Client implements DFSNode {
           data = inputStream.readNBytes(this.chunkSize);
           StorageMessageWrapper chunk =
               Client.buildStoreChunk(path.getFileName().toString(), i, ByteString.copyFrom(data));
-          writes.add(cf.channel().writeAndFlush(chunk));
+          writes.add(cf.channel().write(chunk));
         }
-
-        /* We will add one extra chunk for leftover bytes */
-        int leftover = (int) (length % this.chunkSize);
 
         /* If we have leftover bytes */
         if (leftover != 0) {
@@ -151,8 +151,10 @@ public class Client implements DFSNode {
           StorageMessageWrapper chunk =
               Client.buildStoreChunk(
                   path.getFileName().toString(), chunks, ByteString.copyFrom(data));
-          writes.add(cf.channel().writeAndFlush(chunk));
+          writes.add(cf.channel().write(chunk));
         }
+
+        cf.channel().flush();
 
         for (ChannelFuture writeChunk : writes) {
           writeChunk.syncUninterruptibly();

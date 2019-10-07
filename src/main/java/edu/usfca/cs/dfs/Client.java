@@ -138,7 +138,9 @@ public class Client implements DFSNode {
                   .setChunkId(i)
                   .setData(ByteString.copyFrom(messageBytes))
                   .build();
-          writes.add(cf.channel().writeAndFlush(storeChunk));
+          StorageMessages.StorageMessageWrapper wrap =
+              StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
+          writes.add(cf.channel().writeAndFlush(wrap));
         }
 
         /* We will add one extra chunk for leftover bytes */
@@ -155,7 +157,9 @@ public class Client implements DFSNode {
                   .setChunkId(chunks)
                   .setData(ByteString.copyFrom(last))
                   .build();
-          writes.add(cf.channel().writeAndFlush(storeChunk));
+          StorageMessages.StorageMessageWrapper wrap =
+              StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
+          writes.add(cf.channel().writeAndFlush(wrap));
         }
 
         for (ChannelFuture writeChunk : writes) {

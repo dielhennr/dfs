@@ -106,6 +106,7 @@ public class Client implements DFSNode {
       logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
       StorageMessages.StorageMessageWrapper msgWrapper =
           Client.buildStoreRequest(this.path.getFileName().toString(), this.chunkSize);
+      logger.info("Chunk size: " + this.chunkSize);
       /*
        * At this point we should get a response from controller telling us where to
        * put this file.
@@ -119,6 +120,7 @@ public class Client implements DFSNode {
       if (write.isSuccess() && write.isDone()) {
         logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
       }
+
       /* Get number of chunks */
       long length = path.toFile().length();
       int chunks = (int) (length / this.chunkSize);

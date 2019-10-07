@@ -108,6 +108,11 @@ public class StorageNode implements DFSNode {
     storageNode.start();
   }
 
+  /**
+   * Start listening for requests and inbound chunks
+   *
+   * @throws IOException
+   */
   public void start() throws IOException {
     /* Pass a reference of the controller to our message router */
     messageRouter = new ServerMessageRouter(this);
@@ -115,9 +120,11 @@ public class StorageNode implements DFSNode {
     System.out.println("Listening for connections on port 13100");
   }
 
+  /* Storage node inbound duties */
   @Override
   public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
     if (message.hasStoreRequest()) {
+      /** If we get a store request we need to change our decoder to fit the chunk size */
       logger.info(
           "Request to store "
               + message.getStoreRequest().getFileName()
@@ -129,7 +136,12 @@ public class StorageNode implements DFSNode {
               new LengthFieldBasedFrameDecoder(
                   (int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
     } else if (message.hasStoreChunk()) {
-      logger.info("Recieved store chunk.");
+      logger.info(
+          "Recieved store chunk for "
+              + message.getStoreChunk().getFileName()
+              + " id: "
+              + message.getStoreChunk().getChunkId());
+      /* Write that shit to disk, i've hard coded my bigdata directory change that */
       Path path =
           Paths.get(
               "/bigdata/rdielhenn",

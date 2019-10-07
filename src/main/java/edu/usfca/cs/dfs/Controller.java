@@ -45,7 +45,7 @@ public class Controller implements DFSNode {
       String storageHost = message.getJoinRequest().getNodeName();
 
       logger.info("Recieved join request from " + storageHost);
-      /* Add to PriorityQueue */
+      /* Add to PriorityQueue save the context here or nah? arent we closing the channel from SN anyway? */
       synchronized (storageNodes) {
         storageNodes.add(new StorageNodeContext(ctx, storageHost));
       }

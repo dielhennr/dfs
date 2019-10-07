@@ -99,22 +99,24 @@ public class Client implements DFSNode {
     /* Don't quit until we've disconnected: */
     System.out.println("Shutting down");
   }
-
+  /** Client's inbound duties */
   @Override
   public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
+    /*
+     * At this point we should get a response from controller telling us where to
+     * put this file.
+     */
     if (message.hasStoreResponse()) {
       logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
+      /* Build a store request to send to the storagenode so that it can change it's decoder */
       StorageMessages.StorageMessageWrapper msgWrapper =
-          Client.buildStoreRequest(this.path.getFileName().toString(), this.chunkSize);
+          Client.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize);
       logger.info("Chunk size: " + this.chunkSize);
-      /*
-       * At this point we should get a response from controller telling us where to
-       * put this file.
-       *
-       */
+      /* Connect to StorageNode */
       ChannelFuture cf =
           bootstrap.connect(message.getStoreResponse().getHostname(), 13111).syncUninterruptibly();
 
+      /* Write the request */
       ChannelFuture write = cf.channel().writeAndFlush(msgWrapper).syncUninterruptibly();
 
       if (write.isSuccess() && write.isDone()) {
@@ -128,15 +130,14 @@ public class Client implements DFSNode {
       /* Asynch writes and input stream */
       List<ChannelFuture> writes = new ArrayList<>();
       try (FileInputStream inputStream = new FileInputStream(path.toFile())) {
-        byte[] messageBytes = new byte[this.chunkSize];
         /* Write a protobuf to the channel for each chunk */
         for (int i = 0; i < chunks; i++) {
-          messageBytes = inputStream.readNBytes(this.chunkSize);
-          writes.add(
-              cf.channel()
-                  .writeAndFlush(
-                      Client.buildStoreChunk(
-                          path.getFileName().toString(), i, ByteString.copyFrom(messageBytes))));
+          StorageMessageWrapper chunk =
+              Client.buildStoreChunk(
+                  path.getFileName().toString(),
+                  i,
+                  ByteString.readFrom(inputStream, this.chunkSize));
+          writes.add(cf.channel().writeAndFlush(chunk));
         }
 
         /* We will add one extra chunk for leftover bytes */
@@ -145,13 +146,12 @@ public class Client implements DFSNode {
         /* If we have leftover bytes */
         if (leftover != 0) {
           /* Read them and write the protobuf */
-          byte[] last = new byte[leftover];
-          last = inputStream.readNBytes(leftover);
-          writes.add(
-              cf.channel()
-                  .writeAndFlush(
-                      Client.buildStoreChunk(
-                          path.getFileName().toString(), chunks, ByteString.copyFrom(last))));
+          StorageMessageWrapper chunk =
+              Client.buildStoreChunk(
+                  path.getFileName().toString(),
+                  chunks,
+                  ByteString.readFrom(inputStream, leftover));
+          writes.add(cf.channel().writeAndFlush(chunk));
         }
 
         for (ChannelFuture writeChunk : writes) {
@@ -171,7 +171,8 @@ public class Client implements DFSNode {
   }
 
   /**
-   * Builds a store request protobuf
+   * Builds a store request protobuf {@link edu.usfca.cs.dfs.StorageMessages.StoreRequest} {@link
+   * edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper}
    *
    * @param filename
    * @param fileSize
@@ -185,12 +186,18 @@ public class Client implements DFSNode {
             .setFileName(filename)
             .setFileSize(fileSize)
             .build();
-    StorageMessages.StorageMessageWrapper msgWrapper =
-        StorageMessages.StorageMessageWrapper.newBuilder().setStoreRequest(storeRequest).build();
 
-    return msgWrapper;
+    return StorageMessages.StorageMessageWrapper.newBuilder().setStoreRequest(storeRequest).build();
   }
-
+  /**
+   * Builds a store chunk protobuf {@link edu.usfca.cs.dfs.StorageMessages.StoreChunk} {@link
+   * edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper}
+   *
+   * @param fileName
+   * @param id
+   * @param data
+   * @return
+   */
   private static StorageMessages.StorageMessageWrapper buildStoreChunk(
       String fileName, int id, ByteString data) {
 

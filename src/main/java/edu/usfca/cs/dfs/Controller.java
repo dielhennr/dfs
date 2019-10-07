@@ -38,7 +38,7 @@ public class Controller implements DFSNode {
     Thread heartbeatThread = new Thread(checker);
     heartbeatThread.run();
   }
-
+  /* Controller inbound duties */
   public void onMessage(ChannelHandlerContext ctx, StorageMessages.StorageMessageWrapper message) {
     if (message.hasJoinRequest()) {
       /* On join request need to add node to our network */
@@ -77,8 +77,13 @@ public class Controller implements DFSNode {
          * chunks to
          */
         ChannelFuture write =
-            ctx.pipeline().writeAndFlush(Controller.buildStoreResponse(storageNode.getHostName()));
+            ctx.pipeline()
+                .writeAndFlush(
+                    Controller.buildStoreResponse(
+                        message.getStoreRequest().getFileName(), storageNode.getHostName()));
         write.syncUninterruptibly();
+
+        ctx.channel().close().syncUninterruptibly();
 
         /* Put that file in this nodes bloom filter */
         storageNode.put(message.getStoreRequest().getFileName().getBytes());
@@ -94,15 +99,20 @@ public class Controller implements DFSNode {
   }
 
   /**
-   * Builds a store response protobuf
+   * Builds a store response protobuf {@link edu.usfca.cs.dfs.StorageMessages.StoreResponse} {@link
+   * edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper}
    *
    * @param hostname
    * @return msgWrapper
    */
-  private static StorageMessages.StorageMessageWrapper buildStoreResponse(String hostname) {
+  private static StorageMessages.StorageMessageWrapper buildStoreResponse(
+      String fileName, String hostname) {
 
     StorageMessages.StoreResponse storeRequest =
-        StorageMessages.StoreResponse.newBuilder().setHostname(hostname).build();
+        StorageMessages.StoreResponse.newBuilder()
+            .setHostname(hostname)
+            .setFileName(fileName)
+            .build();
     StorageMessages.StorageMessageWrapper msgWrapper =
         StorageMessages.StorageMessageWrapper.newBuilder().setStoreResponse(storeRequest).build();
 

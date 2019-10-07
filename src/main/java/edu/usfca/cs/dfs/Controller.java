@@ -71,7 +71,8 @@ public class Controller implements DFSNode {
           storageNodes.add(storageNode);
         }
 
-        logger.info("Recieved request to put file on " + storageNode + " from client.");
+        logger.info(
+            "Recieved request to put file on " + storageNode.getHostName() + " from client.");
         /*
          * Write back a store response to client with hostname of the node to send
          * chunks to

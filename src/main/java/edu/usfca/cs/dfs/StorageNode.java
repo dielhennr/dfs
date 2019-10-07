@@ -1,15 +1,5 @@
 package edu.usfca.cs.dfs;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
 import edu.usfca.cs.dfs.net.MessagePipeline;
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
@@ -22,155 +12,179 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class StorageNode implements DFSNode {
 
-	private static final Logger logger = LogManager.getLogger(StorageNode.class);
-	
-	ServerMessageRouter messageRouter;
-	
-	private InetAddress ip;
-	
-	private String hostname;
-	
-	String controllerHostName;
-	
-	ArgumentMap arguments;
+  private static final Logger logger = LogManager.getLogger(StorageNode.class);
 
-    static HeartBeatRunner heartBeat;
+  ServerMessageRouter messageRouter;
 
-	public StorageNode(String[] args) throws UnknownHostException {
-		ip = InetAddress.getLocalHost();
-		hostname = ip.getHostName();
-		arguments = new ArgumentMap(args);
-		if (arguments.hasFlag("-h")) {
-			controllerHostName = arguments.getString("-h");
-		} else {
-			System.err.println("Usage: java -cp ..... -h controllerhostname");
-			System.exit(1);
-		}
+  private InetAddress ip;
 
-		/* For log4j2 */
-		System.setProperty("hostName", hostname);
-	};
+  private String hostname;
 
-	private String getHostname() {
-		return hostname;
-	}
+  String controllerHostName;
 
-	public static void main(String[] args) throws IOException {
-		StorageNode storageNode = null;
-		try {
-			storageNode = new StorageNode(args);
-		} catch (UnknownHostException e) {
-			logger.error("Could not start storage node.");
-			System.exit(1);
-		} 
+  ArgumentMap arguments;
 
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
+  static HeartBeatRunner heartBeat;
 
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline(storageNode);
+  public StorageNode(String[] args) throws UnknownHostException {
+    ip = InetAddress.getLocalHost();
+    hostname = ip.getHostName();
+    arguments = new ArgumentMap(args);
+    if (arguments.hasFlag("-h")) {
+      controllerHostName = arguments.getString("-h");
+    } else {
+      System.err.println("Usage: java -cp ..... -h controllerhostname");
+      System.exit(1);
+    }
 
+    /* For log4j2 */
+    System.setProperty("hostName", hostname);
+  };
 
-		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
-				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
+  private String getHostname() {
+    return hostname;
+  }
 
-		ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13100);
-		cf.syncUninterruptibly();
+  public static void main(String[] args) throws IOException {
+    StorageNode storageNode = null;
+    try {
+      storageNode = new StorageNode(args);
+    } catch (UnknownHostException e) {
+      logger.error("Could not start storage node.");
+      System.exit(1);
+    }
 
-		Channel chan = cf.channel();
+    StorageMessages.StorageMessageWrapper msgWrapper =
+        StorageNode.buildJoinRequest(storageNode.getHostname());
 
-		ChannelFuture write = chan.writeAndFlush(msgWrapper);
+    EventLoopGroup workerGroup = new NioEventLoopGroup();
+    MessagePipeline pipeline = new MessagePipeline(storageNode);
 
-		if (write.syncUninterruptibly().isSuccess()) {
-			logger.info("Sent join request to " + storageNode.controllerHostName);
-		} else {
-			logger.info("Failed join request to " + storageNode.controllerHostName);
-			chan.close().syncUninterruptibly();
-			workerGroup.shutdownGracefully();
-			System.exit(1);
-		}
+    Bootstrap bootstrap =
+        new Bootstrap()
+            .group(workerGroup)
+            .channel(NioSocketChannel.class)
+            .option(ChannelOption.SO_KEEPALIVE, true)
+            .handler(pipeline);
 
-		chan.close().syncUninterruptibly();
+    ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13100);
+    cf.syncUninterruptibly();
 
-		/*
-		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make
-		 * connections
-		 **/
-		heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
-		Thread heartThread = new Thread(heartBeat);
-		heartThread.start();
-        logger.info("Started heartbeat thread.");
-		storageNode.start();
+    Channel chan = cf.channel();
 
-	}
+    ChannelFuture write = chan.writeAndFlush(msgWrapper);
 
-	public void start() throws IOException {
-		/* Pass a reference of the controller to our message router */
-		messageRouter = new ServerMessageRouter(this);
-		messageRouter.listen(13111);
-		System.out.println("Listening for connections on port 13100");
-	}
-	
-	@Override
-	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
-        if (message.hasStoreRequest()) {
-            logger.info("Request to store " + message.getStoreRequest().getFileName() 
-                    + " size: " + message.getStoreRequest().getFileSize());
-            ctx.pipeline().removeFirst();
-            ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder((int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
-        } else if (message.hasStoreChunk()) {
-            logger.info("Recieved store chunk.");
-            Path path = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId());
-            try {
-                Files.write(path, message.getStoreChunk().getData().toByteArray());
-            } catch (IOException ioe) {
-                logger.info("Could not write file");
-            }
-        }
-	}
+    if (write.syncUninterruptibly().isSuccess()) {
+      logger.info("Sent join request to " + storageNode.controllerHostName);
+    } else {
+      logger.info("Failed join request to " + storageNode.controllerHostName);
+      chan.close().syncUninterruptibly();
+      workerGroup.shutdownGracefully();
+      System.exit(1);
+    }
 
-	/**
-	 * Build a join request protobuf with hostname/ip
-	 * 
-	 * @param hostname
-	 * @param ip
-	 * @return the protobuf
-	 */
-	public static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
-		/* Store hostname in a JoinRequest protobuf */
-		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest
-                                                                 .newBuilder()
-                                                                 .setNodeName(hostname)
-				                                                 .build();
+    chan.close().syncUninterruptibly();
 
-		/* Wrapper */
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-                .newBuilder()
-				.setJoinRequest(joinRequest)
-                .build();
+    /*
+     * Have a thread start sending heartbeats to controller. Pass bootstrap to make
+     * connections
+     **/
+    heartBeat =
+        new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
+    Thread heartThread = new Thread(heartBeat);
+    heartThread.start();
+    logger.info("Started heartbeat thread.");
+    storageNode.start();
+  }
 
-		return msgWrapper;
-	}
+  public void start() throws IOException {
+    /* Pass a reference of the controller to our message router */
+    messageRouter = new ServerMessageRouter(this);
+    messageRouter.listen(13111);
+    System.out.println("Listening for connections on port 13100");
+  }
 
-	/**
-	 * Build a heartbeat protobuf
-	 * 
-	 * @param hostname
-	 * @param freeSpace
-	 * @param requests
-	 * @return the protobuf
-	 */
-	public static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace, int requests) {
+  @Override
+  public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
+    if (message.hasStoreRequest()) {
+      logger.info(
+          "Request to store "
+              + message.getStoreRequest().getFileName()
+              + " size: "
+              + message.getStoreRequest().getFileSize());
+      ctx.pipeline().removeFirst();
+      ctx.pipeline()
+          .addFirst(
+              new LengthFieldBasedFrameDecoder(
+                  (int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
+    } else if (message.hasStoreChunk()) {
+      logger.info("Recieved store chunk.");
+      Path path =
+          Paths.get(
+              "/bigdata/rdielhenn",
+              message.getStoreChunk().getFileName()
+                  + "_chunk"
+                  + message.getStoreChunk().getChunkId());
+      try {
+        Files.write(path, message.getStoreChunk().getData().toByteArray());
+      } catch (IOException ioe) {
+        logger.info("Could not write file");
+      }
+    }
+  }
 
-		StorageMessages.Heartbeat heartbeat = StorageMessages.Heartbeat.newBuilder().setFreeSpace(freeSpace)
-				.setHostname(hostname).setRequests(requests).setTimestamp(System.currentTimeMillis()).build();
+  /**
+   * Build a join request protobuf with hostname/ip
+   *
+   * @param hostname
+   * @param ip
+   * @return the protobuf
+   */
+  public static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
+    /* Store hostname in a JoinRequest protobuf */
+    StorageMessages.JoinRequest joinRequest =
+        StorageMessages.JoinRequest.newBuilder().setNodeName(hostname).build();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-				.setHeartbeat(heartbeat).build();
+    /* Wrapper */
+    StorageMessages.StorageMessageWrapper msgWrapper =
+        StorageMessages.StorageMessageWrapper.newBuilder().setJoinRequest(joinRequest).build();
 
-		return msgWrapper;
-	}
-	
+    return msgWrapper;
+  }
+
+  /**
+   * Build a heartbeat protobuf
+   *
+   * @param hostname
+   * @param freeSpace
+   * @param requests
+   * @return the protobuf
+   */
+  public static StorageMessages.StorageMessageWrapper buildHeartBeat(
+      String hostname, long freeSpace, int requests) {
+
+    StorageMessages.Heartbeat heartbeat =
+        StorageMessages.Heartbeat.newBuilder()
+            .setFreeSpace(freeSpace)
+            .setHostname(hostname)
+            .setRequests(requests)
+            .setTimestamp(System.currentTimeMillis())
+            .build();
+
+    StorageMessages.StorageMessageWrapper msgWrapper =
+        StorageMessages.StorageMessageWrapper.newBuilder().setHeartbeat(heartbeat).build();
+
+    return msgWrapper;
+  }
 }

@@ -132,15 +132,11 @@ public class Client implements DFSNode {
         /* Write a protobuf to the channel for each chunk */
         for (int i = 0; i < chunks; i++) {
           messageBytes = inputStream.readNBytes(this.chunkSize);
-          StorageMessages.StoreChunk storeChunk =
-              StorageMessages.StoreChunk.newBuilder()
-                  .setFileName(path.getFileName().toString())
-                  .setChunkId(i)
-                  .setData(ByteString.copyFrom(messageBytes))
-                  .build();
-          StorageMessages.StorageMessageWrapper wrap =
-              StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
-          writes.add(cf.channel().writeAndFlush(wrap));
+          writes.add(
+              cf.channel()
+                  .writeAndFlush(
+                      Client.buildStoreChunk(
+                          path.getFileName().toString(), i, ByteString.copyFrom(messageBytes))));
         }
 
         /* We will add one extra chunk for leftover bytes */
@@ -151,15 +147,11 @@ public class Client implements DFSNode {
           /* Read them and write the protobuf */
           byte[] last = new byte[leftover];
           last = inputStream.readNBytes(leftover);
-          StorageMessages.StoreChunk storeChunk =
-              StorageMessages.StoreChunk.newBuilder()
-                  .setFileName(path.getFileName().toString())
-                  .setChunkId(chunks)
-                  .setData(ByteString.copyFrom(last))
-                  .build();
-          StorageMessages.StorageMessageWrapper wrap =
-              StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
-          writes.add(cf.channel().writeAndFlush(wrap));
+          writes.add(
+              cf.channel()
+                  .writeAndFlush(
+                      Client.buildStoreChunk(
+                          path.getFileName().toString(), chunks, ByteString.copyFrom(last))));
         }
 
         for (ChannelFuture writeChunk : writes) {
@@ -197,5 +189,18 @@ public class Client implements DFSNode {
         StorageMessages.StorageMessageWrapper.newBuilder().setStoreRequest(storeRequest).build();
 
     return msgWrapper;
+  }
+
+  private static StorageMessages.StorageMessageWrapper buildStoreChunk(
+      String fileName, int id, ByteString data) {
+
+    StorageMessages.StoreChunk storeChunk =
+        StorageMessages.StoreChunk.newBuilder()
+            .setFileName(fileName)
+            .setChunkId(id)
+            .setData(data)
+            .build();
+
+    return StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
   }
 }

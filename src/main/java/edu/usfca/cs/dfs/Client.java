@@ -11,9 +11,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -109,7 +110,7 @@ public class Client implements DFSNode {
     if (message.hasStoreResponse()) {
       logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
       /* Build a store request to send to the storagenode so that it can change it's decoder */
-      StorageMessages.StorageMessageWrapper msgWrapper =
+      StorageMessages.StorageMessageWrapper storeRequest =
           Client.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize);
       logger.info("Chunk size: " + this.chunkSize);
       /* Connect to StorageNode */
@@ -117,7 +118,7 @@ public class Client implements DFSNode {
           bootstrap.connect(message.getStoreResponse().getHostname(), 13111).syncUninterruptibly();
 
       /* Write the request */
-      ChannelFuture write = cf.channel().writeAndFlush(msgWrapper).syncUninterruptibly();
+      ChannelFuture write = cf.channel().writeAndFlush(storeRequest).syncUninterruptibly();
 
       if (write.isSuccess() && write.isDone()) {
         logger.info("Sent store request to node " + message.getStoreResponse().getHostname());
@@ -129,14 +130,14 @@ public class Client implements DFSNode {
 
       /* Asynch writes and input stream */
       List<ChannelFuture> writes = new ArrayList<>();
-      try (FileInputStream inputStream = new FileInputStream(path.toFile())) {
+
+      try (InputStream inputStream = Files.newInputStream(this.path)) {
         /* Write a protobuf to the channel for each chunk */
+        byte[] data = new byte[this.chunkSize];
         for (int i = 0; i < chunks; i++) {
+          data = inputStream.readNBytes(this.chunkSize);
           StorageMessageWrapper chunk =
-              Client.buildStoreChunk(
-                  path.getFileName().toString(),
-                  i,
-                  ByteString.readFrom(inputStream, this.chunkSize));
+              Client.buildStoreChunk(path.getFileName().toString(), i, ByteString.copyFrom(data));
           writes.add(cf.channel().writeAndFlush(chunk));
         }
 
@@ -145,12 +146,11 @@ public class Client implements DFSNode {
 
         /* If we have leftover bytes */
         if (leftover != 0) {
+          data = inputStream.readNBytes(leftover);
           /* Read them and write the protobuf */
           StorageMessageWrapper chunk =
               Client.buildStoreChunk(
-                  path.getFileName().toString(),
-                  chunks,
-                  ByteString.readFrom(inputStream, leftover));
+                  path.getFileName().toString(), chunks, ByteString.copyFrom(data));
           writes.add(cf.channel().writeAndFlush(chunk));
         }
 

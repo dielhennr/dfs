@@ -5,6 +5,7 @@ message StoreChunk {
     string fileName = 1;
     int32 chunkId = 2;
     bytes data = 3;
+    string originHost = 4;
 }
 
 message RetrieveFile {
@@ -32,6 +33,12 @@ message StoreResponse {
     string hostname = 2;
 }
 
+message ReplicaRequest {
+	string hostname = 1;
+	string replica1 = 2;
+	string replica2 = 3;
+}
+
 message StorageMessageWrapper {
     oneof msg {
         StoreChunk storeChunk = 1;
@@ -40,5 +47,6 @@ message StorageMessageWrapper {
         Heartbeat heartbeat = 4;
         StoreRequest storeRequest = 5;
         StoreResponse storeResponse = 6;
+        ReplicaRequest replicaRequest = 7;
     }
 }

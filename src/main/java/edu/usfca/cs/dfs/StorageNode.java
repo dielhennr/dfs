@@ -45,8 +45,6 @@ public class StorageNode implements DFSNode {
   HashMap<String, ArrayList<Path>> nodeFileMap;
   
 
-  static HeartBeatRunner heartBeat;
-
   public StorageNode(String[] args) throws UnknownHostException {
 	  
 	filePaths = new ArrayList<>();
@@ -137,7 +135,7 @@ public class StorageNode implements DFSNode {
      * Have a thread start sending heartbeats to controller. Pass bootstrap to make
      * connections
      **/
-    heartBeat =
+    HeartBeatRunner heartBeat =
         new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
     Thread heartThread = new Thread(heartBeat);
     heartThread.start();
@@ -172,10 +170,7 @@ public class StorageNode implements DFSNode {
                   (int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
       
     } else if (message.hasStoreChunk()) {
-    	
-      logger.info("Recieved store chunk for " + message.getStoreChunk().getFileName()
-              	  + " id: " + message.getStoreChunk().getChunkId());
-              	  
+
       /* Write that shit to disk, i've hard coded my bigdata directory change that */
       String fileName = message.getStoreChunk().getFileName();
       
@@ -246,17 +241,15 @@ public class StorageNode implements DFSNode {
    *
    * @param hostname
    * @param freeSpace
-   * @param requests
    * @return the protobuf
    */
   public static StorageMessages.StorageMessageWrapper buildHeartBeat(
-      String hostname, long freeSpace, int requests) {
+      String hostname, long freeSpace) {
 
     StorageMessages.Heartbeat heartbeat =
         StorageMessages.Heartbeat.newBuilder()
             .setFreeSpace(freeSpace)
             .setHostname(hostname)
-            .setRequests(requests)
             .setTimestamp(System.currentTimeMillis())
             .build();
 

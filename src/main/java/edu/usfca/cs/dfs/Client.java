@@ -183,7 +183,7 @@ public class Client implements DFSNode {
         inputStream.close();
         cf.syncUninterruptibly();
       } catch (IOException ioe) {
-        logger.info("Could not read file %s", this.path.getFileName().toString());
+        logger.info("Could not read file " + this.path.getFileName().toString());
       }
       /* Close the channel */
       cf.channel().close().syncUninterruptibly();

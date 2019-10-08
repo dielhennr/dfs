@@ -140,25 +140,29 @@ public class StorageNode implements DFSNode {
               	  + " id: " + message.getStoreChunk().getChunkId());
               	  
       /* Write that shit to disk, i've hard coded my bigdata directory change that */
+      String fileName = message.getStoreChunk().getFileName();
       
-      Path path = Paths.get("/bigdata/dhutchinson/" + message.getStoreChunk().getFileName());
+      Path directoryPath = Paths.get("/bigdata/dhutchinson/" + fileName);
     		  //message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId());
       
-      if (!Files.exists(path)) {
+      if (!Files.exists(directoryPath)) {
     	  try {
-			Files.createDirectory(path);
+			Files.createDirectory(directoryPath);
 		} catch (IOException e) {
-			logger.info("Problem creating path: " + path);
+			logger.info("Problem creating path: " + directoryPath);
 		}
           System.out.println("Directory created");
       }
       
       
-//      try {
-//        Files.write(path, message.getStoreChunk().getData().toByteArray());
-//      } catch (IOException ioe) {
-//        logger.info("Could not write file");
-//      }
+      
+      Path path = Paths.get("bigdata/dhutchinson/" + fileName + "_chunk" + message.getStoreChunk().getChunkId());
+      
+      try {
+        Files.write(path, message.getStoreChunk().getData().toByteArray());
+      } catch (IOException ioe) {
+        logger.info("Could not write file");
+      }
     }
   }
 

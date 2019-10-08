@@ -20,7 +20,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,20 +36,19 @@ public class StorageNode implements DFSNode {
   String controllerHostName;
 
   ArgumentMap arguments;
-  
+
   ArrayList<Path> filePaths;
-  
+
   ArrayList<String> replicaHosts;
-  
+
   HashMap<String, ArrayList<Path>> nodeFileMap;
-  
 
   public StorageNode(String[] args) throws UnknownHostException {
-	  
-	filePaths = new ArrayList<>();
-	nodeFileMap = new HashMap<>();
-	replicaHosts = new ArrayList<>();
-	
+
+    filePaths = new ArrayList<>();
+    nodeFileMap = new HashMap<>();
+    replicaHosts = new ArrayList<>();
+
     ip = InetAddress.getLocalHost();
     hostname = ip.getHostName();
     arguments = new ArgumentMap(args);
@@ -104,28 +102,25 @@ public class StorageNode implements DFSNode {
       logger.info("Failed join request to " + storageNode.controllerHostName);
       chan.close().syncUninterruptibly();
       workerGroup.shutdownGracefully();
-      
-      
+
       cf = bootstrap.connect(storageNode.controllerHostName, 13100);
       cf.syncUninterruptibly();
 
       chan = cf.channel();
 
       StorageMessages.StorageMessageWrapper replicaWrapper =
-    	        StorageNode.buildReplicaRequest(storageNode.getHostname());     
-      
+          StorageNode.buildReplicaRequest(storageNode.getHostname());
+
       write = chan.writeAndFlush(replicaWrapper);
-      
-      
+
       if (write.syncUninterruptibly().isSuccess()) {
-          logger.info("Sent replica request " + storageNode.controllerHostName);
-        } else {
-          logger.info("Failed replica request to " + storageNode.controllerHostName);
-          chan.close().syncUninterruptibly();
-          workerGroup.shutdownGracefully();
-      
-        }
-      
+        logger.info("Sent replica request " + storageNode.controllerHostName);
+      } else {
+        logger.info("Failed replica request to " + storageNode.controllerHostName);
+        chan.close().syncUninterruptibly();
+        workerGroup.shutdownGracefully();
+      }
+
       System.exit(1);
     }
 
@@ -166,46 +161,47 @@ public class StorageNode implements DFSNode {
               + " size: "
               + message.getStoreRequest().getFileSize());
       ctx.pipeline().removeFirst();
-      ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
+      ctx.pipeline()
+          .addFirst(
+              new LengthFieldBasedFrameDecoder(
                   (int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
-      
+
     } else if (message.hasStoreChunk()) {
 
       /* Write that shit to disk, i've hard coded my bigdata directory change that */
       String fileName = message.getStoreChunk().getFileName();
-      
-      Path directoryPath = Paths.get("/bigdata/dhutchinson/" + fileName);
-    		  //message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId());
-      
+
+      Path directoryPath = Paths.get("/bigdata/rdielhenn", fileName);
+      // message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId());
+
       if (!Files.exists(directoryPath)) {
-    	  try {
-			Files.createDirectory(directoryPath);
-		} catch (IOException e) {
-			logger.info("Problem creating path: " + directoryPath);
-		}
-          System.out.println("Directory created: " + directoryPath);
+        try {
+          Files.createDirectory(directoryPath);
+        } catch (IOException e) {
+          logger.info("Problem creating path: " + directoryPath);
+        }
+        System.out.println("Directory created: " + directoryPath);
       }
-      
-      
-      
-      Path path = Paths.get("bigdata/dhutchinson/", message.getStoreChunk().getFileName()
-              + "_chunk" + message.getStoreChunk().getChunkId());
+
+      Path path =
+          Paths.get(
+              "bigdata/rdielhenn/",
+              message.getStoreChunk().getFileName(),
+              message.getStoreChunk().getFileName()
+                  + "_chunk"
+                  + message.getStoreChunk().getChunkId());
+
       System.out.println("Path is: " + path);
       try {
         Files.write(path, message.getStoreChunk().getData().toByteArray());
         if (!filePaths.contains(path)) {
-        	filePaths.add(path);
+          filePaths.add(path);
         }
-        
-        
+
       } catch (IOException ioe) {
-    	
+
         logger.info("Could not write file");
       }
-      
-      
-      
-      
     }
   }
 
@@ -227,13 +223,16 @@ public class StorageNode implements DFSNode {
 
     return msgWrapper;
   }
-  
+
   public static StorageMessages.StorageMessageWrapper buildReplicaRequest(String hostname) {
-	  StorageMessages.ReplicaRequest replicaRequest = StorageMessages.ReplicaRequest.newBuilder().setHostname(hostname).build();
-	  
-	    StorageMessages.StorageMessageWrapper msgWrapper =
-	            StorageMessages.StorageMessageWrapper.newBuilder().setReplicaRequest(replicaRequest).build();
-	    return msgWrapper;
+    StorageMessages.ReplicaRequest replicaRequest =
+        StorageMessages.ReplicaRequest.newBuilder().setHostname(hostname).build();
+
+    StorageMessages.StorageMessageWrapper msgWrapper =
+        StorageMessages.StorageMessageWrapper.newBuilder()
+            .setReplicaRequest(replicaRequest)
+            .build();
+    return msgWrapper;
   }
 
   /**

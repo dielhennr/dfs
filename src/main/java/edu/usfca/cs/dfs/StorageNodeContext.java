@@ -55,6 +55,10 @@ public class StorageNodeContext {
     return false;
   }
 
+  public void bumpRequests() {
+    this.requests++;
+  }
+
   public void put(byte[] data) {
     this.filters.get(0).put(data);
   }

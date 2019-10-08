@@ -43,7 +43,6 @@ public class Controller implements DFSNode {
     if (message.hasJoinRequest()) {
       /* On join request need to add node to our network */
       String storageHost = message.getJoinRequest().getNodeName();
-
       logger.info("Recieved join request from " + storageHost);
       /* Add to PriorityQueue save the context here or nah? arent we closing the channel from SN anyway? */
       synchronized (storageNodes) {
@@ -68,11 +67,17 @@ public class Controller implements DFSNode {
         StorageNodeContext storageNode;
         synchronized (storageNodes) {
           storageNode = storageNodes.remove();
+          storageNode.bumpRequests();
           storageNodes.add(storageNode);
         }
 
         logger.info(
-            "Recieved request to put file on " + storageNode.getHostName() + " from client.");
+            "Recieved request to put file on "
+                + storageNode.getHostName()
+                + " from client."
+                + "This SN has processed "
+                + storageNode.getRequests()
+                + " requests.");
         /*
          * Write back a store response to client with hostname of the node to send
          * chunks to

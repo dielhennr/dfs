@@ -35,8 +35,6 @@ public class StorageNode implements DFSNode {
 
   ArgumentMap arguments;
 
-  static HeartBeatRunner heartBeat;
-
   public StorageNode(String[] args) throws UnknownHostException {
     ip = InetAddress.getLocalHost();
     hostname = ip.getHostName();
@@ -100,7 +98,7 @@ public class StorageNode implements DFSNode {
      * Have a thread start sending heartbeats to controller. Pass bootstrap to make
      * connections
      **/
-    heartBeat =
+    HeartBeatRunner heartBeat =
         new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
     Thread heartThread = new Thread(heartBeat);
     heartThread.start();
@@ -180,17 +178,15 @@ public class StorageNode implements DFSNode {
    *
    * @param hostname
    * @param freeSpace
-   * @param requests
    * @return the protobuf
    */
   public static StorageMessages.StorageMessageWrapper buildHeartBeat(
-      String hostname, long freeSpace, int requests) {
+      String hostname, long freeSpace) {
 
     StorageMessages.Heartbeat heartbeat =
         StorageMessages.Heartbeat.newBuilder()
             .setFreeSpace(freeSpace)
             .setHostname(hostname)
-            .setRequests(requests)
             .setTimestamp(System.currentTimeMillis())
             .build();
 

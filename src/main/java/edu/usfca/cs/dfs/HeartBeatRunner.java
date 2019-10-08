@@ -15,7 +15,6 @@ public class HeartBeatRunner implements Runnable {
   /* Heartbeat MetaData */
   String hostname;
   String controllerHost;
-  volatile int requests;
   File f;
   Bootstrap bootstrap;
 
@@ -25,12 +24,7 @@ public class HeartBeatRunner implements Runnable {
     f = new File("/bigdata");
     this.hostname = hostname;
     this.controllerHost = controllerHost;
-    this.requests = 0;
     this.bootstrap = bootstrap;
-  }
-
-  public void bumpRequests() {
-    this.requests++;
   }
 
   @Override
@@ -41,7 +35,7 @@ public class HeartBeatRunner implements Runnable {
       long freeSpace = f.getFreeSpace();
 
       StorageMessages.StorageMessageWrapper msgWrapper =
-          StorageNode.buildHeartBeat(hostname, freeSpace, requests);
+          StorageNode.buildHeartBeat(hostname, freeSpace);
 
       ChannelFuture cf = this.bootstrap.connect(controllerHost, 13100);
       cf.syncUninterruptibly();

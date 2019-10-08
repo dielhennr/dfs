@@ -151,16 +151,18 @@ public class StorageNode implements DFSNode {
 		} catch (IOException e) {
 			logger.info("Problem creating path: " + directoryPath);
 		}
-          System.out.println("Directory created");
+          System.out.println("Directory created: " + directoryPath);
       }
       
       
       
-      Path path = Paths.get("bigdata/dhutchinson/" + fileName + "_chunk" + message.getStoreChunk().getChunkId());
-      
+      Path path = Paths.get("bigdata/dhutchinson/", message.getStoreChunk().getFileName()
+              + "_chunk" + message.getStoreChunk().getChunkId());
+      System.out.println("Path is: " + path);
       try {
         Files.write(path, message.getStoreChunk().getData().toByteArray());
       } catch (IOException ioe) {
+    	
         logger.info("Could not write file");
       }
     }

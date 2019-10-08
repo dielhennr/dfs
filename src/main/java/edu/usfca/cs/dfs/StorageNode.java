@@ -131,28 +131,34 @@ public class StorageNode implements DFSNode {
               + " size: "
               + message.getStoreRequest().getFileSize());
       ctx.pipeline().removeFirst();
-      ctx.pipeline()
-          .addFirst(
-              new LengthFieldBasedFrameDecoder(
+      ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
                   (int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
+      
     } else if (message.hasStoreChunk()) {
-      logger.info(
-          "Recieved store chunk for "
-              + message.getStoreChunk().getFileName()
-              + " id: "
-              + message.getStoreChunk().getChunkId());
+    	
+      logger.info("Recieved store chunk for " + message.getStoreChunk().getFileName()
+              	  + " id: " + message.getStoreChunk().getChunkId());
+              	  
       /* Write that shit to disk, i've hard coded my bigdata directory change that */
-      Path path =
-          Paths.get(
-              "/bigdata/rdielhenn",
-              message.getStoreChunk().getFileName()
-                  + "_chunk"
-                  + message.getStoreChunk().getChunkId());
-      try {
-        Files.write(path, message.getStoreChunk().getData().toByteArray());
-      } catch (IOException ioe) {
-        logger.info("Could not write file");
+      
+      Path path = Paths.get("/bigdata/dhutchinson/" + message.getStoreChunk().getFileName());
+    		  //message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId());
+      
+      if (!Files.exists(path)) {
+    	  try {
+			Files.createDirectory(path);
+		} catch (IOException e) {
+			logger.info("Problem creating path: " + path);
+		}
+          System.out.println("Directory created");
       }
+      
+      
+//      try {
+//        Files.write(path, message.getStoreChunk().getData().toByteArray());
+//      } catch (IOException ioe) {
+//        logger.info("Could not write file");
+//      }
     }
   }
 

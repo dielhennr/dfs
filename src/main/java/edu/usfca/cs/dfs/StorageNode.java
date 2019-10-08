@@ -134,11 +134,6 @@ public class StorageNode implements DFSNode {
               new LengthFieldBasedFrameDecoder(
                   (int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
     } else if (message.hasStoreChunk()) {
-      logger.info(
-          "Recieved store chunk for "
-              + message.getStoreChunk().getFileName()
-              + " id: "
-              + message.getStoreChunk().getChunkId());
       /* Write that shit to disk, i've hard coded my bigdata directory change that */
       Path path =
           Paths.get(

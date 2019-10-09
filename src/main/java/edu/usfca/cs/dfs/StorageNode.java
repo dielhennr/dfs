@@ -137,7 +137,7 @@ public class StorageNode implements DFSNode {
 			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
 					+ message.getStoreRequest().getFileSize());
             logger.info("Replica Assignment 1: " + message.getStoreRequest().getReplicaAssignments().getReplica1());
-            logger.info("Replica Assignment 2: " + message.getStoreRequest().getReplicaAssignments().getReplica1());
+            logger.info("Replica Assignment 2: " + message.getStoreRequest().getReplicaAssignments().getReplica2());
 			ctx.pipeline().removeFirst();
 			ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
 					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));

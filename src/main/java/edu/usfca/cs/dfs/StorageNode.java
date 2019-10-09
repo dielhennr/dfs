@@ -1,5 +1,22 @@
 package edu.usfca.cs.dfs;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Formatter;
+import java.util.HashMap;
+
+import com.google.protobuf.ByteString;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
 import edu.usfca.cs.dfs.net.MessagePipeline;
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
@@ -12,16 +29,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class StorageNode implements DFSNode {
 
@@ -145,6 +152,19 @@ public class StorageNode implements DFSNode {
 		System.out.println("Listening for connections on port 13100");
 	}
 
+    public static String SHAsum(byte[] convertme) throws NoSuchAlgorithmException{
+        MessageDigest md = MessageDigest.getInstance("SHA-1"); 
+        return byteArray2Hex(md.digest(convertme));
+    }
+
+    private static String byteArray2Hex(final byte[] hash) {
+        Formatter formatter = new Formatter();
+        for (byte b : hash) {
+            formatter.format("%02x", b);
+        }
+        return formatter.toString();
+    }
+
 	/* Storage node inbound duties */
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
@@ -164,8 +184,6 @@ public class StorageNode implements DFSNode {
 			String fileName = message.getStoreChunk().getFileName();
 
 			Path directoryPath = Paths.get("/bigdata/rdielhenn", fileName);
-			// message.getStoreChunk().getFileName() + "_chunk" +
-			// message.getStoreChunk().getChunkId());
 
 			if (!Files.exists(directoryPath)) {
 				try {
@@ -175,18 +193,18 @@ public class StorageNode implements DFSNode {
 				}
 				System.out.println("Directory created: " + directoryPath);
 			}
+            
+            ByteString bytes = message.getStoreChunk().getData();
 
-			Path path = Paths.get("/bigdata/rdielhenn/", fileName,
-					message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId());
-
-			System.out.println("Path is: " + path);
-			try {
+            try {
+                Path path = Paths.get("/bigdata/rdielhenn/", fileName,
+                        message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId() + StorageNode.SHAsum(bytes.toByteArray()));
 				Files.write(path, message.getStoreChunk().getData().toByteArray());
 				if (!filePaths.contains(path)) {
 					filePaths.add(path);
 				}
 
-			} catch (IOException ioe) {
+			} catch (IOException | NoSuchAlgorithmException ioe) {
 
 				logger.info("Could not write file");
 			}

@@ -130,31 +130,6 @@ public class Controller implements DFSNode {
 		}
 	}
 
-    /**
-     * Builds a replica request protobuf to assign nodes who they're supposed to replicate to
-     *
-     * @param host
-     * @param replicaHost1
-     * @param replicaHost2
-     * @return
-     */
-	private static StorageMessages.StorageMessageWrapper buildReplicaRequest(String host, String replicaHost1,
-			String replicaHost2) {
-
-		StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments
-                                            .newBuilder()
-				                            .setReplica1(replicaHost1)
-                                            .setReplica2(replicaHost2)
-                                            .build();
-		StorageMessages.StorageMessageWrapper wrapper = StorageMessages.StorageMessageWrapper
-                                                .newBuilder()
-				                                .setReplicaAssignments(replicaAssignments)
-                                                .build();
-
-		return wrapper;
-
-	}
-
 	/**
 	 * Builds a store response protobuf
 	 * {@link edu.usfca.cs.dfs.StorageMessages.StoreResponse}

@@ -111,7 +111,7 @@ public class Client implements DFSNode {
 		 */
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
-			logger.info("Replicating to " + message.getStoreResponse().getReplicaAssignments().getReplica1() + " and " + message.getStoreResponse().getReplicaAssignments().getReplica2());
+			logger.info("Replicating to " + message.getStoreResponse().getReplicaAssignments().getReplica1());
 			/*
 			 * Build a store request to send to the storagenode so that it can change it's
 			 * decoder

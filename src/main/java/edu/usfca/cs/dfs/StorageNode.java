@@ -139,12 +139,9 @@ public class StorageNode implements DFSNode {
 			ctx.pipeline().removeFirst();
 			ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
 					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
+            logger.info("Replica Assignment 1: " + message.getStoreResponse().getReplicaAssignments().getReplica1());
+            logger.info("Replica Assignment 2: " + message.getStoreResponse().getReplicaAssignments().getReplica1());
 
-		} else if (message.hasReplicaRequest()) {
-            String assignment1 = message.getReplicaRequest().getReplica1();
-            String assignment2 = message.getReplicaRequest().getReplica2();
-            logger.info("Assigned to replicate to " + assignment1 + " and " + assignment2);
-            ctx.channel().close().syncUninterruptibly();
         } else if (message.hasStoreChunk()) {
 
 			/* Write that shit to disk, i've hard coded my bigdata directory change that */
@@ -217,19 +214,6 @@ public class StorageNode implements DFSNode {
 				                                .setJoinRequest(joinRequest)
                                                 .build();
 
-		return msgWrapper;
-	}
-
-	public static StorageMessages.StorageMessageWrapper buildReplicaRequest(String hostname) {
-		StorageMessages.ReplicaRequest replicaRequest = StorageMessages.ReplicaRequest
-                                            .newBuilder()
-				                            .setHostname(hostname)
-                                            .build();
-
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-                                                .newBuilder()
-				                                .setReplicaRequest(replicaRequest)
-                                                .build();
 		return msgWrapper;
 	}
 

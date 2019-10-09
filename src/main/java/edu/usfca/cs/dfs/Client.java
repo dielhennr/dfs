@@ -85,9 +85,11 @@ public class Client implements DFSNode {
 
 		ChannelFuture cf = client.bootstrap.connect(client.controllerHost, client.port);
 		cf.syncUninterruptibly();
+        
+        StorageMessages.ReplicaAssignments assignments = StorageMessages.ReplicaAssignments.newBuilder().build();
 
 		StorageMessages.StorageMessageWrapper msgWrapper = Client
-				.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize);
+				.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, assignments);
 
 		Channel chan = cf.channel();
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
@@ -109,12 +111,13 @@ public class Client implements DFSNode {
 		 */
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
+			logger.info("Replicating to " + message.getStoreResponse().getReplicaAssignments().getReplica1() + " and " + message.getStoreResponse().getReplicaAssignments().getReplica2());
 			/*
 			 * Build a store request to send to the storagenode so that it can change it's
 			 * decoder
 			 */
 			StorageMessages.StorageMessageWrapper storeRequest = Client
-					.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize);
+					.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize, message.getStoreResponse().getReplicaAssignments());
 			logger.info("Sending chunks in size " + this.chunkSize + " to " + message.getStoreResponse().getHostname());
 
 			/**
@@ -202,10 +205,10 @@ public class Client implements DFSNode {
 	 * @param fileSize
 	 * @return
 	 */
-	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
+	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize, StorageMessages.ReplicaAssignments replicaAssignments) {
 
 		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(filename)
-				.setFileSize(fileSize).build();
+				.setFileSize(fileSize).setReplicaAssignments(replicaAssignments).build();
 
 		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreRequest(storeRequest).build();
 	}

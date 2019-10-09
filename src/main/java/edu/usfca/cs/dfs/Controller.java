@@ -48,33 +48,13 @@ public class Controller implements DFSNode {
 			/* On join request need to add node to our network */
 			String storageHost = message.getJoinRequest().getNodeName();
 			logger.info("Recieved join request from " + storageHost);
-			/*
-			 * Add to PriorityQueue save the context here or nah? arent we closing the
-			 * channel from SN anyway?
-			 */
-            StorageNodeContext thisRequest = new StorageNodeContext(ctx, storageHost);
-            StorageNodeContext first; 
-            StorageNodeContext second;
 
+            /* Add new node to priority queue */
+            StorageNodeContext thisRequest = new StorageNodeContext(storageHost);
             synchronized(storageNodes) {
-                first = storageNodes.poll();
-                second = storageNodes.poll();
-			    storageNodes.add(thisRequest);
+                storageNodes.add(thisRequest);
             }
-            
-            if (first == null) {
-                first = thisRequest;
-            } else if (second == null) {
-                second = thisRequest;
-            }
-            /* Write replica assignments to the SN */
-            ChannelFuture response = ctx
-                            .pipeline()
-                            .writeAndFlush(
-                            Controller.buildReplicaRequest(storageHost, first.getHostName(), second.getHostName()));
 
-            response.syncUninterruptibly();
-            
 		} else if (message.hasHeartbeat()) {
 			/* Update metadata */
 			String hostName = message.getHeartbeat().getHostname();
@@ -88,30 +68,57 @@ public class Controller implements DFSNode {
 				} /* Otherwise ignore if join request not processed yet? */
 			}
 		} else if (message.hasStoreRequest()) {
-			if (storageNodes.isEmpty()) {
-				logger.error("No storage nodes in the network");
+			if (storageNodes.size() < 3) {
+				logger.error("Not enough storage nodes in the network");
 			} else {
-				StorageNodeContext storageNode;
+
 				synchronized (storageNodes) {
-					storageNode = storageNodes.remove();
-					storageNode.bumpRequests();
-					storageNodes.add(storageNode);
+
+					StorageNodeContext storageNodePrimary = storageNodes.poll();
+                    StorageNodeContext replicaAssignment1 = null;
+                    StorageNodeContext replicaAssignment2 = null;
+
+                    if (storageNodePrimary.replicaAssignment1 == null) {
+                        replicaAssignment1 = storageNodes.poll();
+                        storageNodePrimary.replicaAssignment1 = replicaAssignment1.getHostName();
+                    }
+
+                    if (storageNodePrimary.replicaAssignment2 == null) {
+                        replicaAssignment2 = storageNodes.poll();
+                        storageNodePrimary.replicaAssignment2 = replicaAssignment2.getHostName();
+                    }
+                    
+                    storageNodePrimary.bumpRequests();
+
+                    /* Put that file in this nodes bloom filter */
+                    storageNodePrimary.put(message.getStoreRequest().getFileName().getBytes());
+
+                    storageNodes.add(storageNodePrimary);
+
+                    if (replicaAssignment1 != null) {
+                        replicaAssignment1.bumpRequests();
+                        storageNodes.add(replicaAssignment1);
+                    }
+                    if (replicaAssignment2 != null ) {
+                        replicaAssignment2.bumpRequests();
+                        storageNodes.add(replicaAssignment2);
+                    }
+
+                    /*
+                    * Write back a store response to client with hostname of the node to send
+                    * chunks to
+                    */
+                    ChannelFuture write = ctx.pipeline().writeAndFlush(Controller
+                            .buildStoreResponse(message.getStoreRequest().getFileName(), storageNodePrimary.getHostName(), storageNodePrimary.replicaAssignment1, 
+                                storageNodePrimary.replicaAssignment2));
+                    write.syncUninterruptibly();
+
+                    logger.info("Recieved request to put file on " + storageNodePrimary.getHostName() + " from client."
+                            + "This SN has processed " + storageNodePrimary.getRequests() + " requests.");
+                    logger.info("Replicating to " + storageNodePrimary.replicaAssignment1 + " and " + storageNodePrimary.replicaAssignment2);
+                    ctx.channel().close().syncUninterruptibly();
 				}
 
-				logger.info("Recieved request to put file on " + storageNode.getHostName() + " from client."
-						+ "This SN has processed " + storageNode.getRequests() + " requests.");
-				/*
-				 * Write back a store response to client with hostname of the node to send
-				 * chunks to
-				 */
-				ChannelFuture write = ctx.pipeline().writeAndFlush(Controller
-						.buildStoreResponse(message.getStoreRequest().getFileName(), storageNode.getHostName()));
-				write.syncUninterruptibly();
-
-				ctx.channel().close().syncUninterruptibly();
-
-				/* Put that file in this nodes bloom filter */
-				storageNode.put(message.getStoreRequest().getFileName().getBytes());
 			}
 
 		} else if (message.hasRetrieveFile()) {
@@ -134,15 +141,14 @@ public class Controller implements DFSNode {
 	private static StorageMessages.StorageMessageWrapper buildReplicaRequest(String host, String replicaHost1,
 			String replicaHost2) {
 
-		StorageMessages.ReplicaRequest replicaRequest = StorageMessages.ReplicaRequest
+		StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments
                                             .newBuilder()
-                                            .setHostname(host)
 				                            .setReplica1(replicaHost1)
                                             .setReplica2(replicaHost2)
                                             .build();
 		StorageMessages.StorageMessageWrapper wrapper = StorageMessages.StorageMessageWrapper
                                                 .newBuilder()
-				                                .setReplicaRequest(replicaRequest)
+				                                .setReplicaAssignments(replicaAssignments)
                                                 .build();
 
 		return wrapper;
@@ -157,12 +163,24 @@ public class Controller implements DFSNode {
 	 * @param hostname
 	 * @return msgWrapper
 	 */
-	private static StorageMessages.StorageMessageWrapper buildStoreResponse(String fileName, String hostname) {
-
-		StorageMessages.StoreResponse storeRequest = StorageMessages.StoreResponse.newBuilder().setHostname(hostname)
-				.setFileName(fileName).build();
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-				.setStoreResponse(storeRequest).build();
+	private static StorageMessages.StorageMessageWrapper buildStoreResponse(String fileName, String hostname, String replicaHost1, String replicaHost2) {
+    
+        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments
+                                                .newBuilder()
+                                                .setReplica1(replicaHost1)
+                                                .setReplica2(replicaHost2)
+                                                .build();
+        
+		StorageMessages.StoreResponse storeRequest = StorageMessages.StoreResponse
+                                            .newBuilder()
+                                            .setHostname(hostname)
+				                            .setFileName(fileName)
+                                            .setReplicaAssignments(replicaAssignments)
+                                            .build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
+                                                    .newBuilder()
+				                                    .setStoreResponse(storeRequest)
+                                                    .build();
 
 		return msgWrapper;
 	}

@@ -198,7 +198,7 @@ public class StorageNode implements DFSNode {
 
             try {
                 Path path = Paths.get("/bigdata/rdielhenn/", fileName,
-                        message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId() + StorageNode.SHAsum(bytes.toByteArray()));
+                        message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId() + "#" + StorageNode.SHAsum(bytes.toByteArray()));
 				Files.write(path, message.getStoreChunk().getData().toByteArray());
 				if (!filePaths.contains(path)) {
 					filePaths.add(path);

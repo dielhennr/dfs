@@ -1,18 +1,24 @@
 package edu.usfca.cs.dfs;
 
-import edu.usfca.cs.dfs.net.ServerMessageRouter;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.PriorityQueue;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import edu.usfca.cs.dfs.net.ServerMessageRouter;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
 
 public class Controller implements DFSNode {
 
 	private ServerMessageRouter messageRouter;
 	PriorityQueue<StorageNodeContext> storageNodes;
 	private static final Logger logger = LogManager.getLogger(Controller.class);
+
 	ArgumentMap arguments;
 	int port;
 
@@ -49,9 +55,47 @@ public class Controller implements DFSNode {
 			 * Add to PriorityQueue save the context here or nah? arent we closing the
 			 * channel from SN anyway?
 			 */
+            StorageNodeContext thisRequest = new StorageNodeContext(ctx, storageHost);
 			synchronized (storageNodes) {
-				storageNodes.add(new StorageNodeContext(ctx, storageHost));
+				storageNodes.add(thisRequest);
+                storageNodes.notifyAll();
 			}
+            
+            /* Wait for at least three SNs to join the network */
+            while (storageNodes.size() < 3) {
+                try {
+                    storageNodes.wait();
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                }
+            }
+            
+            /* Assign where each node stores replicas one by one */
+            ArrayList<String> replicaAssignments = new ArrayList<String>();
+            synchronized(storageNodes) {
+                /* Pick where a sn's replicas go */
+                StorageNodeContext current;
+                /** 
+                 * Iterate over priority queue until we've picked two hostnames, these will be the ones with the least amount 
+                 * of requests processed, not including the SN that sent this join request
+                 */
+                Iterator<StorageNodeContext> iter = storageNodes.iterator();
+                while (replicaAssignments.size() < 2) {
+                    current = iter.next();
+                    if (!current.getHostName().equals(storageHost)) {
+                        replicaAssignments.add(current.getHostName());
+                    }
+                }
+            }
+    
+            /* Write replica assignments to the SN */
+            Channel chan = ctx.channel();
+            ChannelFuture response = chan
+                .writeAndFlush(
+                        Controller.buildReplicaRequest(storageHost, replicaAssignments.get(0), replicaAssignments.get(1)));
+
+            response.syncUninterruptibly();
+            
 		} else if (message.hasHeartbeat()) {
 			/* Update metadata */
 			String hostName = message.getHeartbeat().getHostname();
@@ -98,6 +142,32 @@ public class Controller implements DFSNode {
 			 */
 
 		}
+	}
+
+    /**
+     * Builds a replica request protobuf to assign nodes who they're supposed to replicate to
+     *
+     * @param host
+     * @param replicaHost1
+     * @param replicaHost2
+     * @return
+     */
+	private static StorageMessages.StorageMessageWrapper buildReplicaRequest(String host, String replicaHost1,
+			String replicaHost2) {
+
+		StorageMessages.ReplicaRequest replicaRequest = StorageMessages.ReplicaRequest
+                                            .newBuilder()
+                                            .setHostname(host)
+				                            .setReplica1(replicaHost1)
+                                            .setReplica2(replicaHost2)
+                                            .build();
+		StorageMessages.StorageMessageWrapper wrapper = StorageMessages.StorageMessageWrapper
+                                                .newBuilder()
+				                                .setReplicaRequest(replicaRequest)
+                                                .build();
+
+		return wrapper;
+
 	}
 
 	/**

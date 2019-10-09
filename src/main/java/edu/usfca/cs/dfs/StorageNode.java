@@ -6,10 +6,8 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.HashMap;
 
 import com.google.protobuf.ByteString;
@@ -83,7 +81,6 @@ public class StorageNode implements DFSNode {
 			System.exit(1);
 		}
 
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
 
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline(storageNode);
@@ -96,37 +93,15 @@ public class StorageNode implements DFSNode {
 
 		Channel chan = cf.channel();
 
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
+
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
 
 		if (write.syncUninterruptibly().isSuccess()) {
 			logger.info("Sent join request to " + storageNode.controllerHostName);
 		} else {
 			logger.info("Failed join request to " + storageNode.controllerHostName);
-			chan.close().syncUninterruptibly();
-			workerGroup.shutdownGracefully();
-
-			cf = bootstrap.connect(storageNode.controllerHostName, 13100);
-			cf.syncUninterruptibly();
-
-			chan = cf.channel();
-
-			StorageMessages.StorageMessageWrapper replicaWrapper = StorageNode
-					.buildReplicaRequest(storageNode.getHostname());
-
-			write = chan.writeAndFlush(replicaWrapper);
-
-			if (write.syncUninterruptibly().isSuccess()) {
-				logger.info("Sent replica request " + storageNode.controllerHostName);
-			} else {
-				logger.info("Failed replica request to " + storageNode.controllerHostName);
-				chan.close().syncUninterruptibly();
-				workerGroup.shutdownGracefully();
-			}
-
-			System.exit(1);
 		}
-
-		chan.close().syncUninterruptibly();
 
 		/*
 		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make
@@ -152,19 +127,6 @@ public class StorageNode implements DFSNode {
 		System.out.println("Listening for connections on port 13100");
 	}
 
-    public static String SHAsum(byte[] convertme) throws NoSuchAlgorithmException{
-        MessageDigest md = MessageDigest.getInstance("SHA-1"); 
-        return byteArray2Hex(md.digest(convertme));
-    }
-
-    private static String byteArray2Hex(final byte[] hash) {
-        Formatter formatter = new Formatter();
-        for (byte b : hash) {
-            formatter.format("%02x", b);
-        }
-        return formatter.toString();
-    }
-
 	/* Storage node inbound duties */
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
@@ -178,7 +140,12 @@ public class StorageNode implements DFSNode {
 			ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
 					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
 
-		} else if (message.hasStoreChunk()) {
+		} else if (message.hasReplicaRequest()) {
+            String assignment1 = message.getReplicaRequest().getReplica1();
+            String assignment2 = message.getReplicaRequest().getReplica2();
+            logger.info("Assigned to replicate to " + assignment1 + " and " + assignment2);
+            ctx.channel().close().syncUninterruptibly();
+        } else if (message.hasStoreChunk()) {
 
 			/* Write that shit to disk, i've hard coded my bigdata directory change that */
 			String fileName = message.getStoreChunk().getFileName();
@@ -197,8 +164,27 @@ public class StorageNode implements DFSNode {
             ByteString bytes = message.getStoreChunk().getData();
 
             try {
+                /** 
+                 * Store chunks in users specified home directory 
+                 *
+                 * Home -
+                 *      file_chunks -
+                 *          chunk0#AD12341FFC
+                 *          chunk1#AD12341111
+                 *          chunk2#12341FFC11
+                 *
+                 *  file_chunks will be named the name of the file whose chunks we are storing
+                 *  we will also append a chunks chunkid, #, and the sha1sum of the given
+                 *  file's bytes.
+                 *
+                 *  This will allow us to verify to correctness of the data on retrieval 
+                 */
                 Path path = Paths.get("/bigdata/rdielhenn/", fileName,
-                        message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId() + "#" + StorageNode.SHAsum(bytes.toByteArray()));
+                        message.getStoreChunk().getFileName() 
+                        + "_chunk" 
+                        + message.getStoreChunk().getChunkId() 
+                        + "#" 
+                        + Checksum.SHAsum(bytes.toByteArray()));
 				Files.write(path, message.getStoreChunk().getData().toByteArray());
 				if (!filePaths.contains(path)) {
 					filePaths.add(path);
@@ -220,22 +206,30 @@ public class StorageNode implements DFSNode {
 	 */
 	public static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 		/* Store hostname in a JoinRequest protobuf */
-		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest.newBuilder().setNodeName(hostname)
-				.build();
+		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest
+                                        .newBuilder()
+                                        .setNodeName(hostname)
+				                        .build();
 
 		/* Wrapper */
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-				.setJoinRequest(joinRequest).build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
+                                                .newBuilder()
+				                                .setJoinRequest(joinRequest)
+                                                .build();
 
 		return msgWrapper;
 	}
 
 	public static StorageMessages.StorageMessageWrapper buildReplicaRequest(String hostname) {
-		StorageMessages.ReplicaRequest replicaRequest = StorageMessages.ReplicaRequest.newBuilder()
-				.setHostname(hostname).build();
+		StorageMessages.ReplicaRequest replicaRequest = StorageMessages.ReplicaRequest
+                                            .newBuilder()
+				                            .setHostname(hostname)
+                                            .build();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-				.setReplicaRequest(replicaRequest).build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
+                                                .newBuilder()
+				                                .setReplicaRequest(replicaRequest)
+                                                .build();
 		return msgWrapper;
 	}
 
@@ -246,13 +240,20 @@ public class StorageNode implements DFSNode {
 	 * @param freeSpace
 	 * @return the protobuf
 	 */
-	public static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, long freeSpace) {
+	public static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, 
+                                                                            long freeSpace) {
 
-		StorageMessages.Heartbeat heartbeat = StorageMessages.Heartbeat.newBuilder().setFreeSpace(freeSpace)
-				.setHostname(hostname).setTimestamp(System.currentTimeMillis()).build();
+		StorageMessages.Heartbeat heartbeat = StorageMessages.Heartbeat
+                                        .newBuilder()
+                                        .setFreeSpace(freeSpace)
+				                        .setHostname(hostname)
+                                        .setTimestamp(System.currentTimeMillis())
+                                        .build();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-				.setHeartbeat(heartbeat).build();
+		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
+                                                    .newBuilder()
+                                                    .setHeartbeat(heartbeat)
+                                                    .build();
 
 		return msgWrapper;
 	}

@@ -1,8 +1,6 @@
 package edu.usfca.cs.dfs;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import org.apache.logging.log4j.LogManager;
@@ -56,43 +54,25 @@ public class Controller implements DFSNode {
 			 * channel from SN anyway?
 			 */
             StorageNodeContext thisRequest = new StorageNodeContext(ctx, storageHost);
-			synchronized (storageNodes) {
-				storageNodes.add(thisRequest);
-                storageNodes.notifyAll();
-			}
-            
-            /* Wait for at least three SNs to join the network */
-            while (storageNodes.size() < 3) {
-                try {
-                    storageNodes.wait();
-                } catch (InterruptedException ie) {
-                    ie.printStackTrace();
-                }
-            }
-            
-            /* Assign where each node stores replicas one by one */
-            ArrayList<String> replicaAssignments = new ArrayList<String>();
+            StorageNodeContext first; 
+            StorageNodeContext second;
+
             synchronized(storageNodes) {
-                /* Pick where a sn's replicas go */
-                StorageNodeContext current;
-                /** 
-                 * Iterate over priority queue until we've picked two hostnames, these will be the ones with the least amount 
-                 * of requests processed, not including the SN that sent this join request
-                 */
-                Iterator<StorageNodeContext> iter = storageNodes.iterator();
-                while (replicaAssignments.size() < 2) {
-                    current = iter.next();
-                    if (!current.getHostName().equals(storageHost)) {
-                        replicaAssignments.add(current.getHostName());
-                    }
-                }
+                first = storageNodes.poll();
+                second = storageNodes.poll();
+			    storageNodes.add(thisRequest);
             }
-    
+            
+            if (first == null) {
+                first = thisRequest;
+            } else if (second == null) {
+                second = thisRequest;
+            }
             /* Write replica assignments to the SN */
             Channel chan = ctx.channel();
             ChannelFuture response = chan
                 .writeAndFlush(
-                        Controller.buildReplicaRequest(storageHost, replicaAssignments.get(0), replicaAssignments.get(1)));
+                        Controller.buildReplicaRequest(storageHost, first.getHostName(), second.getHostName()));
 
             response.syncUninterruptibly();
             

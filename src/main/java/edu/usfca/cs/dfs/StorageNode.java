@@ -186,7 +186,7 @@ public class StorageNode implements DFSNode {
       Path path =
           Paths.get(
               "bigdata/rdielhenn/",
-              message.getStoreChunk().getFileName(),
+              fileName,
               message.getStoreChunk().getFileName()
                   + "_chunk"
                   + message.getStoreChunk().getChunkId());

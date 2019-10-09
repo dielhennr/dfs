@@ -109,15 +109,21 @@ public class Client implements DFSNode {
 		 */
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
-			logger.info("Replicating to " + message.getStoreResponse().getReplicaAssignments().getReplica1());
-			logger.info("Replicating to " + message.getStoreResponse().getReplicaAssignments().getReplica2());
+            String replica1 = message.getStoreResponse().getReplicaAssignments().getReplica1();
+            String replica2 = message.getStoreResponse().getReplicaAssignments().getReplica2();
+			logger.info("Replicating to " + replica1 + " and " + replica2);
 			/*
 			 * Build a store request to send to the storagenode so that it can change it's
 			 * decoder
 			 */
 
 			StorageMessages.StorageMessageWrapper storeRequest = Client
-					.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize, message.getStoreResponse().getReplicaAssignments().getReplica1(), message.getStoreResponse().getReplicaAssignments().getReplica2());
+					.buildStoreRequest(
+                                        message.getStoreResponse().getFileName(), 
+                                        this.chunkSize, 
+                                        replica1,
+                                        replica2);
+
 			logger.info("Sending chunks in size " + this.chunkSize + " to " + message.getStoreResponse().getHostname());
 
 			/**

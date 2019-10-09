@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -69,10 +68,10 @@ public class Controller implements DFSNode {
                 second = thisRequest;
             }
             /* Write replica assignments to the SN */
-            Channel chan = ctx.channel();
-            ChannelFuture response = chan
-                .writeAndFlush(
-                        Controller.buildReplicaRequest(storageHost, first.getHostName(), second.getHostName()));
+            ChannelFuture response = ctx
+                            .pipeline()
+                            .writeAndFlush(
+                            Controller.buildReplicaRequest(storageHost, first.getHostName(), second.getHostName()));
 
             response.syncUninterruptibly();
             

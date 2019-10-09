@@ -10,8 +10,8 @@ public class StorageNodeContext {
 	private long freeSpace;
 	private int requests;
 
-    String replicaAssignment1;
-    String replicaAssignment2;
+    StorageNodeContext replicaAssignment1;
+    StorageNodeContext replicaAssignment2;
 
 	public StorageNodeContext(String hostname) {
 		this.filters = new ArrayList<BloomFilter>();

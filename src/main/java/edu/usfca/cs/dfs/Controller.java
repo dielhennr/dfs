@@ -60,13 +60,15 @@ public class Controller implements DFSNode {
 			String hostName = message.getHeartbeat().getHostname();
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
 			/* This sucks but works for now maybe have a hashmap hostname -> wrapper */
-			for (StorageNodeContext storageNode : storageNodes) {
-				if (storageNode.getHostName().equals(hostName)) {
-					storageNode.updateTimestamp(heartbeat.getTimestamp());
-					storageNode.setFreeSpace(heartbeat.getFreeSpace());
-					logger.info("Recieved heartbeat from " + hostName);
-				} /* Otherwise ignore if join request not processed yet? */
-			}
+            synchronized(storageNodes) {
+                for (StorageNodeContext storageNode : storageNodes) {
+                    if (storageNode.getHostName().equals(hostName)) {
+                        storageNode.updateTimestamp(heartbeat.getTimestamp());
+                        storageNode.setFreeSpace(heartbeat.getFreeSpace());
+                        logger.info("Recieved heartbeat from " + hostName);
+                    } /* Otherwise ignore if join request not processed yet? */
+                }
+            }
 		} else if (message.hasStoreRequest()) {
 			if (storageNodes.size() < 3) {
 				logger.error("Not enough storage nodes in the network");
@@ -80,12 +82,14 @@ public class Controller implements DFSNode {
 
                     if (storageNodePrimary.replicaAssignment1 == null) {
                         replicaAssignment1 = storageNodes.poll();
-                        storageNodePrimary.replicaAssignment1 = replicaAssignment1.getHostName();
+                        storageNodePrimary.replicaAssignment1 = replicaAssignment1;
+                        storageNodes.add(replicaAssignment1);
                     }
 
                     if (storageNodePrimary.replicaAssignment2 == null) {
                         replicaAssignment2 = storageNodes.poll();
-                        storageNodePrimary.replicaAssignment2 = replicaAssignment2.getHostName();
+                        storageNodePrimary.replicaAssignment2 = replicaAssignment2;
+                        storageNodes.add(replicaAssignment2);
                     }
                     
                     storageNodePrimary.bumpRequests();
@@ -95,27 +99,21 @@ public class Controller implements DFSNode {
 
                     storageNodes.add(storageNodePrimary);
 
-                    if (replicaAssignment1 != null) {
-                        replicaAssignment1.bumpRequests();
-                        storageNodes.add(replicaAssignment1);
-                    }
-                    if (replicaAssignment2 != null ) {
-                        replicaAssignment2.bumpRequests();
-                        storageNodes.add(replicaAssignment2);
-                    }
+                    storageNodePrimary.replicaAssignment1.bumpRequests();
+                    storageNodePrimary.replicaAssignment2.bumpRequests();
 
                     /*
                     * Write back a store response to client with hostname of the node to send
                     * chunks to
                     */
                     ChannelFuture write = ctx.pipeline().writeAndFlush(Controller
-                            .buildStoreResponse(message.getStoreRequest().getFileName(), storageNodePrimary.getHostName(), storageNodePrimary.replicaAssignment1, 
-                                storageNodePrimary.replicaAssignment2));
+                            .buildStoreResponse(message.getStoreRequest().getFileName(), storageNodePrimary.getHostName(), storageNodePrimary.replicaAssignment1.getHostName(), 
+                                storageNodePrimary.replicaAssignment2.getHostName()));
                     write.syncUninterruptibly();
 
                     logger.info("Recieved request to put file on " + storageNodePrimary.getHostName() + " from client."
                             + "This SN has processed " + storageNodePrimary.getRequests() + " requests.");
-                    logger.info("Replicating to " + storageNodePrimary.replicaAssignment1 + " and " + storageNodePrimary.replicaAssignment2);
+                    logger.info("Replicating to " + storageNodePrimary.replicaAssignment1.getHostName() + " and " + storageNodePrimary.replicaAssignment2.getHostName());
                     ctx.channel().close().syncUninterruptibly();
 				}
 

@@ -86,10 +86,8 @@ public class Client implements DFSNode {
 		ChannelFuture cf = client.bootstrap.connect(client.controllerHost, client.port);
 		cf.syncUninterruptibly();
         
-        StorageMessages.ReplicaAssignments assignments = StorageMessages.ReplicaAssignments.newBuilder().build();
-
 		StorageMessages.StorageMessageWrapper msgWrapper = Client
-				.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, assignments);
+				.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, "", "");
 
 		Channel chan = cf.channel();
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
@@ -117,14 +115,9 @@ public class Client implements DFSNode {
 			 * Build a store request to send to the storagenode so that it can change it's
 			 * decoder
 			 */
-            StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments
-                                                        .newBuilder()
-                                                        .setReplica1(message.getReplicaAssignments().getReplica1())
-                                                        .setReplica2(message.getReplicaAssignments().getReplica2())
-                                                        .build();
 
 			StorageMessages.StorageMessageWrapper storeRequest = Client
-					.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize, replicaAssignments);
+					.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize, message.getStoreResponse().getReplicaAssignments().getReplica1(), message.getStoreResponse().getReplicaAssignments().getReplica2());
 			logger.info("Sending chunks in size " + this.chunkSize + " to " + message.getStoreResponse().getHostname());
 
 			/**
@@ -210,10 +203,13 @@ public class Client implements DFSNode {
 	 *
 	 * @param filename
 	 * @param fileSize
-	 * @return
+     * @param replicaHost1
+     * @param replicaHost2
+     *
+	 * @return store request for a storagenode
 	 */
-	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize, StorageMessages.ReplicaAssignments replicaAssignments) {
-
+	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize, String replicaHost1, String replicaHost2) {
+        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments.newBuilder().setReplica1(replicaHost1).setReplica2(replicaHost2).build();
 		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(filename)
 				.setFileSize(fileSize).setReplicaAssignments(replicaAssignments).build();
 

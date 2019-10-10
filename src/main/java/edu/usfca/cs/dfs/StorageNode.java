@@ -135,10 +135,16 @@ public class StorageNode implements DFSNode {
 			 */
 			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
 					+ message.getStoreRequest().getFileSize());
-            logger.info("Replica Assignment 1: " + message.getStoreRequest().getReplicaAssignments().getReplica1());
-            logger.info("Replica Assignment 2: " + message.getStoreRequest().getReplicaAssignments().getReplica2());
-            replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica1());
-            replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica2());
+
+            /* Only accept first assignments for now */
+            if (replicaHosts.isEmpty()) {
+                replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica1());
+                replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica2());
+                logger.info("Replica Assignment 1: " + message.getStoreRequest().getReplicaAssignments().getReplica1());
+                logger.info("Replica Assignment 2: " + message.getStoreRequest().getReplicaAssignments().getReplica2());
+            } else {
+                logger.info("Rejecting Assignment");
+            }
 			ctx.pipeline().removeFirst();
 			ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
 					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
@@ -149,16 +155,27 @@ public class StorageNode implements DFSNode {
             }
 			/* Write that shit to disk, i've hard coded my bigdata directory change that */
 			String fileName = message.getStoreChunk().getFileName();
-
-			Path directoryPath = Paths.get("/bigdata/rdielhenn", fileName);
-
-			if (!Files.exists(directoryPath)) {
+            
+            /* We will need to handle changing the path name if a 
+             * primary routing gets switched to a different node because of a failure
+             **/
+            Path hostPath = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getOriginHost());
+            if (!Files.exists(hostPath)) {
 				try {
-					Files.createDirectory(directoryPath);
+					Files.createDirectory(hostPath);
 				} catch (IOException e) {
-					logger.info("Problem creating path: " + directoryPath);
+					logger.info("Problem creating path: " + hostPath);
 				}
-				System.out.println("Directory created: " + directoryPath);
+            }
+
+			Path chunkPath = Paths.get(hostPath.toString(), fileName);
+
+			if (!Files.exists(chunkPath)) {
+				try {
+					Files.createDirectory(chunkPath);
+				} catch (IOException e) {
+					logger.info("Problem creating path: " + chunkPath);
+				}
 			}
             
             ByteString bytes = message.getStoreChunk().getData();
@@ -179,13 +196,17 @@ public class StorageNode implements DFSNode {
                  *
                  *  This will allow us to verify to correctness of the data on retrieval 
                  */
-                Path path = Paths.get("/bigdata/rdielhenn", fileName,
+                Path path = Paths.get(chunkPath.toString(),
                         message.getStoreChunk().getFileName() 
                         + "_chunk" 
                         + message.getStoreChunk().getChunkId() 
                         + "#" 
                         + Checksum.SHAsum(bytes.toByteArray()));
+
+                /* Write chunk to disk */
 				Files.write(path, message.getStoreChunk().getData().toByteArray());
+
+                /* */
                 if (replicaHosts.size() == 2) {
                     ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13111);
                     cf.syncUninterruptibly();

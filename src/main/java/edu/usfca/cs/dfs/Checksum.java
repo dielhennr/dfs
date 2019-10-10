@@ -5,7 +5,7 @@ import java.util.Formatter;
 
 /**
  * Computes the sha1sum of an array of bytes and formats the sum as hex digits 
- * this gives us 10 character hashes that we can append to each chunk's filename.
+ * this gives us 40 character hashes that we can append to each chunk's filename.
  *
  * Functions taken from some stack overflow page can't find it again 
  */
@@ -14,7 +14,7 @@ public class Checksum {
     /**
      * Computes SHA1SUM which returns 160 bytes
      * @param convertme
-     * @return 10 character String representation of the sha1sum
+     * @return 40 character String representation of the sha1sum
      * @throws NoSuchAlgorithmException
      */
     public static String SHAsum(byte[] convertme) throws NoSuchAlgorithmException{

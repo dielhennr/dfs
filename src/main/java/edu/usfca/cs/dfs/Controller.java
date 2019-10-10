@@ -106,7 +106,7 @@ public class Controller implements DFSNode {
                     * Write back a store response to client with hostname of the node to send
                     * chunks to
                     */
-                    ChannelFuture write = ctx.pipeline().writeAndFlush(Controller
+                    ChannelFuture write = ctx.pipeline().writeAndFlush(Builders
                             .buildStoreResponse(message.getStoreRequest().getFileName(), storageNodePrimary.getHostName(), storageNodePrimary.replicaAssignment1.getHostName(), 
                                 storageNodePrimary.replicaAssignment2.getHostName()));
                     write.syncUninterruptibly();
@@ -129,36 +129,6 @@ public class Controller implements DFSNode {
 	}
 
 	/**
-	 * Builds a store response protobuf
-	 * {@link edu.usfca.cs.dfs.StorageMessages.StoreResponse}
-	 * {@link edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper}
-	 *
-	 * @param hostname
-	 * @return msgWrapper
-	 */
-	private static StorageMessages.StorageMessageWrapper buildStoreResponse(String fileName, String hostname, String replicaHost1, String replicaHost2) {
-    
-        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments
-                                                .newBuilder()
-                                                .setReplica1(replicaHost1)
-                                                .setReplica2(replicaHost2)
-                                                .build();
-        
-		StorageMessages.StoreResponse storeRequest = StorageMessages.StoreResponse
-                                            .newBuilder()
-                                            .setHostname(hostname)
-				                            .setFileName(fileName)
-                                            .setReplicaAssignments(replicaAssignments)
-                                            .build();
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-                                                    .newBuilder()
-				                                    .setStoreResponse(storeRequest)
-                                                    .build();
-
-		return msgWrapper;
-	}
-
-	/**
 	 * Runnable object that iterates through the queue of storage nodes every 5
 	 * sedons checking timestamps
 	 */
@@ -173,16 +143,18 @@ public class Controller implements DFSNode {
 		public void run() {
 			while (true) {
 				long currentTime = System.currentTimeMillis();
-				for (StorageNodeContext node : storageNodes) {
-					long nodeTime = node.getTimestamp();
+                synchronized(storageNodes) {
+                    for (StorageNodeContext node : storageNodes) {
+                        long nodeTime = node.getTimestamp();
 
-					if (currentTime - nodeTime > 5500) {
-						logger.info("Detected failure on node: " + node.getHostName());
-						/* Also need to rereplicate data here. */
-						/* We have to rereplicate this nodes replicas as well as its primarys */
-						storageNodes.remove(node);
-					}
-				}
+                        if (currentTime - nodeTime > 5500) {
+                            logger.info("Detected failure on node: " + node.getHostName());
+                            /* Also need to rereplicate data here. */
+                            /* We have to rereplicate this nodes replicas as well as its primarys */
+                            storageNodes.remove(node);
+                        }
+                    }
+                }
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {

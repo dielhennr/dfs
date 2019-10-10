@@ -86,7 +86,7 @@ public class Client implements DFSNode {
 		ChannelFuture cf = client.bootstrap.connect(client.controllerHost, client.port);
 		cf.syncUninterruptibly();
         
-		StorageMessages.StorageMessageWrapper msgWrapper = Client
+		StorageMessages.StorageMessageWrapper msgWrapper = Builders
 				.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, "", "");
 
 		Channel chan = cf.channel();
@@ -116,8 +116,7 @@ public class Client implements DFSNode {
 			 * Build a store request to send to the storagenode so that it can change it's
 			 * decoder
 			 */
-
-			StorageMessages.StorageMessageWrapper storeRequest = Client
+			StorageMessages.StorageMessageWrapper storeRequest = Builders
 					.buildStoreRequest(
                                         message.getStoreResponse().getFileName(), 
                                         this.chunkSize, 
@@ -164,7 +163,7 @@ public class Client implements DFSNode {
 				byte[] data = new byte[this.chunkSize];
 				for (int i = 0; i < chunks; i++) {
 					data = inputStream.readNBytes(this.chunkSize);
-					StorageMessageWrapper chunk = Client.buildStoreChunk(path.getFileName().toString(), i,
+					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(), i,
 							ByteString.copyFrom(data));
 					writes.add(cf.channel().write(chunk));
 				}
@@ -174,7 +173,7 @@ public class Client implements DFSNode {
 				if (leftover != 0) {
 					data = inputStream.readNBytes(leftover);
 					/* Read them and write the protobuf */
-					StorageMessageWrapper chunk = Client.buildStoreChunk(path.getFileName().toString(), chunks,
+					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(), chunks,
 							ByteString.copyFrom(data));
 					writes.add(cf.channel().write(chunk));
 				}
@@ -202,41 +201,4 @@ public class Client implements DFSNode {
 		}
 	}
 
-	/**
-	 * Builds a store request protobuf
-	 * {@link edu.usfca.cs.dfs.StorageMessages.StoreRequest}
-	 * {@link edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper}
-	 *
-	 * @param filename
-	 * @param fileSize
-     * @param replicaHost1
-     * @param replicaHost2
-     *
-	 * @return store request for a storagenode
-	 */
-	private static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize, String replicaHost1, String replicaHost2) {
-        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments.newBuilder().setReplica1(replicaHost1).setReplica2(replicaHost2).build();
-		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(filename)
-				.setFileSize(fileSize).setReplicaAssignments(replicaAssignments).build();
-
-		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreRequest(storeRequest).build();
-	}
-
-	/**
-	 * Builds a store chunk protobuf
-	 * {@link edu.usfca.cs.dfs.StorageMessages.StoreChunk}
-	 * {@link edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper}
-	 *
-	 * @param fileName
-	 * @param id
-	 * @param data
-	 * @return
-	 */
-	private static StorageMessages.StorageMessageWrapper buildStoreChunk(String fileName, int id, ByteString data) {
-
-		StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder().setFileName(fileName)
-				.setChunkId(id).setData(data).build();
-
-		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
-	}
 }

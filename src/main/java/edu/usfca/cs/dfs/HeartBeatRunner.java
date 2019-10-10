@@ -20,7 +20,7 @@ public class HeartBeatRunner implements Runnable {
 
 	private static final Logger logger = LogManager.getLogger(StorageNode.class);
 
-	public HeartBeatRunner(String hostname, String controllerHost, Bootstrap bootstrap) {
+	public HeartBeatRunner(String hostname, String controllerHost) {
 		f = new File("/bigdata");
 		this.hostname = hostname;
 		this.controllerHost = controllerHost;
@@ -34,7 +34,7 @@ public class HeartBeatRunner implements Runnable {
 
 			long freeSpace = f.getFreeSpace();
 
-			StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildHeartBeat(hostname, freeSpace);
+			StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildHeartBeat(hostname, freeSpace);
 
 			ChannelFuture cf = this.bootstrap.connect(controllerHost, 13100);
 			cf.syncUninterruptibly();

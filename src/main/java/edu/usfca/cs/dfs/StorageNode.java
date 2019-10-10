@@ -47,6 +47,7 @@ public class StorageNode implements DFSNode {
 	ArrayList<String> replicaHosts;
 
 	HashMap<String, ArrayList<Path>> nodeFileMap;
+    Bootstrap bootstrap;
 
 	public StorageNode(String[] args) throws UnknownHostException {
 
@@ -66,6 +67,11 @@ public class StorageNode implements DFSNode {
 
 		/* For log4j2 */
 		System.setProperty("hostName", hostname);
+		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		MessagePipeline pipeline = new MessagePipeline(this);
+
+		bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 	};
 
 	private String getHostname() {
@@ -82,18 +88,13 @@ public class StorageNode implements DFSNode {
 		}
 
 
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
-		MessagePipeline pipeline = new MessagePipeline(storageNode);
-
-		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
-				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
-
-		ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13100);
+        
+		ChannelFuture cf = storageNode.bootstrap.connect(storageNode.controllerHostName, 13100);
 		cf.syncUninterruptibly();
 
 		Channel chan = cf.channel();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageNode.buildJoinRequest(storageNode.getHostname());
+		StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildJoinRequest(storageNode.getHostname());
 
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
 
@@ -107,8 +108,7 @@ public class StorageNode implements DFSNode {
 		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make
 		 * connections
 		 **/
-		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName,
-				bootstrap);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.start();
 		logger.info("Started heartbeat thread.");
@@ -138,6 +138,8 @@ public class StorageNode implements DFSNode {
 					+ message.getStoreRequest().getFileSize());
             logger.info("Replica Assignment 1: " + message.getStoreRequest().getReplicaAssignments().getReplica1());
             logger.info("Replica Assignment 2: " + message.getStoreRequest().getReplicaAssignments().getReplica2());
+            replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica1());
+            replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica2());
 			ctx.pipeline().removeFirst();
 			ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
 					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
@@ -157,6 +159,7 @@ public class StorageNode implements DFSNode {
 				}
 				System.out.println("Directory created: " + directoryPath);
 			}
+
             
             ByteString bytes = message.getStoreChunk().getData();
 
@@ -192,53 +195,5 @@ public class StorageNode implements DFSNode {
 				logger.info("Could not write file");
 			}
 		}
-	}
-
-	/**
-	 * Build a join request protobuf with hostname/ip
-	 *
-	 * @param hostname
-	 * @param ip
-	 * @return the protobuf
-	 */
-	public static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
-		/* Store hostname in a JoinRequest protobuf */
-		StorageMessages.JoinRequest joinRequest = StorageMessages.JoinRequest
-                                        .newBuilder()
-                                        .setNodeName(hostname)
-				                        .build();
-
-		/* Wrapper */
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-                                                .newBuilder()
-				                                .setJoinRequest(joinRequest)
-                                                .build();
-
-		return msgWrapper;
-	}
-
-	/**
-	 * Build a heartbeat protobuf
-	 *
-	 * @param hostname
-	 * @param freeSpace
-	 * @return the protobuf
-	 */
-	public static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, 
-                                                                            long freeSpace) {
-
-		StorageMessages.Heartbeat heartbeat = StorageMessages.Heartbeat
-                                        .newBuilder()
-                                        .setFreeSpace(freeSpace)
-				                        .setHostname(hostname)
-                                        .setTimestamp(System.currentTimeMillis())
-                                        .build();
-
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-                                                    .newBuilder()
-                                                    .setHeartbeat(heartbeat)
-                                                    .build();
-
-		return msgWrapper;
 	}
 }

@@ -130,13 +130,8 @@ public class StorageNode implements DFSNode {
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreRequest()) {
-			/**
-			 * If we get a store request we need to change our decoder to fit the chunk size
-			 */
-			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
-					+ message.getStoreRequest().getFileSize());
 
-            /* Only accept first assignments for now */
+            /* Only accept first replica assignments for now */
             if (replicaHosts.isEmpty()) {
                 replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica1());
                 replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica2());
@@ -145,14 +140,22 @@ public class StorageNode implements DFSNode {
             } else {
                 logger.info("Rejecting Assignment");
             }
+
+			/**
+			 * If we get a store request we need to change our decoder to fit the chunk size
+			 */
+			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
+					+ message.getStoreRequest().getFileSize());
 			ctx.pipeline().removeFirst();
 			ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
 					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
 
         } else if (message.hasStoreChunk()) {
+            /* If this chunk is not being stored on its primary node, log the replication happening */
             if (!message.getStoreChunk().getOriginHost().equals(this.hostname)) {
                 logger.info("Recieved replica of " + message.getStoreChunk().getFileName() + " for " + message.getStoreChunk().getOriginHost());
             }
+
 			/* Write that shit to disk, i've hard coded my bigdata directory change that */
 			String fileName = message.getStoreChunk().getFileName();
             
@@ -160,22 +163,27 @@ public class StorageNode implements DFSNode {
              * primary routing gets switched to a different node because of a failure
              **/
             Path hostPath = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getOriginHost());
+
+            /* If we haven't stored this nodes data yet then create a directory under the primary nodes name */
             if (!Files.exists(hostPath)) {
 				try {
 					Files.createDirectory(hostPath);
+					logger.info("Created path: " + hostPath);
 				} catch (IOException e) {
 					logger.info("Problem creating path: " + hostPath);
 				}
             }
 
 			Path chunkPath = Paths.get(hostPath.toString(), fileName);
-
+            
+            /* If we haven't stored a chunk of this file yet create a directory for the chunks to go into */
 			if (!Files.exists(chunkPath)) {
 				try {
 					Files.createDirectory(chunkPath);
 				} catch (IOException e) {
 					logger.info("Problem creating path: " + chunkPath);
 				}
+			    logger.info("Created path: " + chunkPath);
 			}
             
             ByteString bytes = message.getStoreChunk().getData();
@@ -185,10 +193,11 @@ public class StorageNode implements DFSNode {
                  * Store chunks in users specified home directory 
                  *
                  * Home -
-                 *      file_chunks -
-                 *          chunk0#AD12341FFC
-                 *          chunk1#AD12341111
-                 *          chunk2#12341FFC11
+                 *      primary_holder -
+                 *          file_chunks -
+                 *              chunk0#AD12341FFC...
+                 *              chunk1#AD12341111...
+                 *              chunk2#12341FFC11...
                  *
                  *  file_chunks will be named the name of the file whose chunks we are storing
                  *  we will also append a chunks chunkid, #, and the sha1sum of the given
@@ -206,7 +215,7 @@ public class StorageNode implements DFSNode {
                 /* Write chunk to disk */
 				Files.write(path, message.getStoreChunk().getData().toByteArray());
 
-                /* */
+                /* Send to replica assignments */
                 if (replicaHosts.size() == 2) {
                     ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13111);
                     cf.syncUninterruptibly();

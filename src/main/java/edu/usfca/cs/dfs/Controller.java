@@ -75,43 +75,51 @@ public class Controller implements DFSNode {
 			} else {
 
 				synchronized (storageNodes) {
-
+                    /* StorageNode with least requests processed should be at the top */
 					StorageNodeContext storageNodePrimary = storageNodes.poll();
                     StorageNodeContext replicaAssignment1 = null;
                     StorageNodeContext replicaAssignment2 = null;
-
+                    
+                    /* If the first node in the queue doesn't have assignments pull from queue, assign and then put the assignee back in */
                     if (storageNodePrimary.replicaAssignment1 == null) {
                         replicaAssignment1 = storageNodes.poll();
                         storageNodePrimary.replicaAssignment1 = replicaAssignment1;
                         storageNodes.add(replicaAssignment1);
+                    } else {
+                        storageNodePrimary.replicaAssignment1.bumpRequests();
                     }
-
+                    /* Same here for second assignment */
                     if (storageNodePrimary.replicaAssignment2 == null) {
                         replicaAssignment2 = storageNodes.poll();
                         storageNodePrimary.replicaAssignment2 = replicaAssignment2;
                         storageNodes.add(replicaAssignment2);
+                    } else {
+                        storageNodePrimary.replicaAssignment2.bumpRequests();
                     }
                     
+                    /* Bump requests of all assignments since we are about to send a file */
                     storageNodePrimary.bumpRequests();
-
-                    /* Put that file in this nodes bloom filter */
-                    storageNodePrimary.put(message.getStoreRequest().getFileName().getBytes());
-
-                    storageNodes.add(storageNodePrimary);
-
                     storageNodePrimary.replicaAssignment1.bumpRequests();
                     storageNodePrimary.replicaAssignment2.bumpRequests();
 
-                    /*
-                    * Write back a store response to client with hostname of the node to send
-                    * chunks to
-                    */
+                    /* Put that file in this nodes bloom filter */
+                    storageNodePrimary.put(message.getStoreRequest().getFileName().getBytes());
+                    
+                    /* Put primary back in the queue */
+                    storageNodes.add(storageNodePrimary);
+
+                    /**
+                     * Write back a store response to client with hostname of the primary node to send
+                     * chunks to. This node will handle replication with the ReplicaAssignments protobuf 
+                     * nested in this store response
+                     */
                     ChannelFuture write = ctx.pipeline().writeAndFlush(Builders
                             .buildStoreResponse(message.getStoreRequest().getFileName(), storageNodePrimary.getHostName(), storageNodePrimary.replicaAssignment1.getHostName(), 
                                 storageNodePrimary.replicaAssignment2.getHostName()));
                     write.syncUninterruptibly();
-
-                    logger.info("Recieved request to put file on " + storageNodePrimary.getHostName() + " from client."
+                    
+                    /* Log controllers response */
+                    logger.info("Approving request to put file on " + storageNodePrimary.getHostName() + " from client."
                             + "This SN has processed " + storageNodePrimary.getRequests() + " requests.");
                     logger.info("Replicating to " + storageNodePrimary.replicaAssignment1.getHostName() + " and " + storageNodePrimary.replicaAssignment2.getHostName());
                     ctx.channel().close().syncUninterruptibly();
@@ -130,7 +138,7 @@ public class Controller implements DFSNode {
 
 	/**
 	 * Runnable object that iterates through the queue of storage nodes every 5
-	 * sedons checking timestamps
+	 * seconds checking timestamps
 	 */
 	private static class HeartBeatChecker implements Runnable {
 		PriorityQueue<StorageNodeContext> storageNodes;
@@ -143,6 +151,7 @@ public class Controller implements DFSNode {
 		public void run() {
 			while (true) {
 				long currentTime = System.currentTimeMillis();
+                /* This is throwing concurrent mod exception when detecting node failures at line 156 synchronized doesn't fix */
                 synchronized(storageNodes) {
                     for (StorageNodeContext node : storageNodes) {
                         long nodeTime = node.getTimestamp();

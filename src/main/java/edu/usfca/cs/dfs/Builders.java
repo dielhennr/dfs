@@ -92,6 +92,7 @@ public class Builders {
 
 	/**
 	 * Builds a store response protobuf
+     * {@link edu.usfca.cs.dfs.StorageMessages.ReplicaAssignments}
 	 * {@link edu.usfca.cs.dfs.StorageMessages.StoreResponse}
 	 * {@link edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper}
 	 *

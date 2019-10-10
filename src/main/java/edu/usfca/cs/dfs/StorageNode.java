@@ -191,6 +191,13 @@ public class StorageNode implements DFSNode {
                     cf.syncUninterruptibly();
                     Channel chan = cf.channel();
                     chan.writeAndFlush(message).syncUninterruptibly();
+                    cf.syncUninterruptibly();
+
+                    cf = bootstrap.connect(replicaHosts.get(1), 13111);
+                    cf.syncUninterruptibly();
+                    chan = cf.channel();
+                    chan.writeAndFlush(message).syncUninterruptibly();
+                    cf.syncUninterruptibly();
                 }
 				if (!filePaths.contains(path)) {
 					filePaths.add(path);

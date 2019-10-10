@@ -164,7 +164,7 @@ public class Controller implements DFSNode {
                             logger.info("Detected failure on node: " + node.getHostName());
                             /* Also need to rereplicate data here. */
                             /* We have to rereplicate this nodes replicas as well as its primarys */
-                            storageNodes.remove(node);
+                            iter.remove();
                         }
                 	}
                 	

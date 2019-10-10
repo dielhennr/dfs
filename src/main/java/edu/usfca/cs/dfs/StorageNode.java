@@ -47,7 +47,7 @@ public class StorageNode implements DFSNode {
 	ArrayList<String> replicaHosts;
 
 	HashMap<String, ArrayList<Path>> nodeFileMap;
-    Bootstrap bootstrap;
+    static Bootstrap bootstrap;
 
 	public StorageNode(String[] args) throws UnknownHostException {
 
@@ -87,9 +87,8 @@ public class StorageNode implements DFSNode {
 			System.exit(1);
 		}
 
-
         
-		ChannelFuture cf = storageNode.bootstrap.connect(storageNode.controllerHostName, 13100);
+		ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13100);
 		cf.syncUninterruptibly();
 
 		Channel chan = cf.channel();
@@ -108,7 +107,7 @@ public class StorageNode implements DFSNode {
 		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make
 		 * connections
 		 **/
-		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.start();
 		logger.info("Started heartbeat thread.");
@@ -145,11 +144,13 @@ public class StorageNode implements DFSNode {
 					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
 
         } else if (message.hasStoreChunk()) {
-
+            if (!message.getStoreChunk().getOriginHost().equals(this.hostname)) {
+                logger.info("Recieved replica of " + message.getStoreChunk().getFileName() + " for " + message.getStoreChunk().getOriginHost());
+            }
 			/* Write that shit to disk, i've hard coded my bigdata directory change that */
 			String fileName = message.getStoreChunk().getFileName();
 
-			Path directoryPath = Paths.get("/bigdata/rdielhenn", fileName);
+			Path directoryPath = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getOriginHost(),fileName);
 
 			if (!Files.exists(directoryPath)) {
 				try {
@@ -159,7 +160,6 @@ public class StorageNode implements DFSNode {
 				}
 				System.out.println("Directory created: " + directoryPath);
 			}
-
             
             ByteString bytes = message.getStoreChunk().getData();
 
@@ -179,13 +179,19 @@ public class StorageNode implements DFSNode {
                  *
                  *  This will allow us to verify to correctness of the data on retrieval 
                  */
-                Path path = Paths.get("/bigdata/rdielhenn/", fileName,
+                Path path = Paths.get(directoryPath.toString(),
                         message.getStoreChunk().getFileName() 
                         + "_chunk" 
                         + message.getStoreChunk().getChunkId() 
                         + "#" 
                         + Checksum.SHAsum(bytes.toByteArray()));
 				Files.write(path, message.getStoreChunk().getData().toByteArray());
+                if (replicaHosts.size() == 2) {
+                    ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13111);
+                    cf.syncUninterruptibly();
+                    Channel chan = cf.channel();
+                    chan.writeAndFlush(message).syncUninterruptibly();
+                }
 				if (!filePaths.contains(path)) {
 					filePaths.add(path);
 				}

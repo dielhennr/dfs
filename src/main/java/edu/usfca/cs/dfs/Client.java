@@ -163,7 +163,7 @@ public class Client implements DFSNode {
 				byte[] data = new byte[this.chunkSize];
 				for (int i = 0; i < chunks; i++) {
 					data = inputStream.readNBytes(this.chunkSize);
-					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(), i,
+					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(), message.getStoreResponse().getHostname(), i,
 							ByteString.copyFrom(data));
 					writes.add(cf.channel().write(chunk));
 				}
@@ -173,7 +173,7 @@ public class Client implements DFSNode {
 				if (leftover != 0) {
 					data = inputStream.readNBytes(leftover);
 					/* Read them and write the protobuf */
-					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(), chunks,
+					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(), message.getStoreResponse().getHostname(), chunks,
 							ByteString.copyFrom(data));
 					writes.add(cf.channel().write(chunk));
 				}

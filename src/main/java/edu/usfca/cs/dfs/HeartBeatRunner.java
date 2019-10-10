@@ -1,11 +1,13 @@
 package edu.usfca.cs.dfs;
 
+import java.io.File;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import java.io.File;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Runnable object that sends heartbeats to the Controller every 5 seconds Uses
@@ -20,11 +22,11 @@ public class HeartBeatRunner implements Runnable {
 
 	private static final Logger logger = LogManager.getLogger(StorageNode.class);
 
-	public HeartBeatRunner(String hostname, String controllerHost) {
+	public HeartBeatRunner(String hostname, String controllerHost, Bootstrap bootstrap) {
 		f = new File("/bigdata");
 		this.hostname = hostname;
 		this.controllerHost = controllerHost;
-		this.bootstrap = bootstrap;
+        this.bootstrap = bootstrap;
 	}
 
 	@Override

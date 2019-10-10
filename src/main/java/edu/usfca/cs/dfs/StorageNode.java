@@ -150,7 +150,7 @@ public class StorageNode implements DFSNode {
 			/* Write that shit to disk, i've hard coded my bigdata directory change that */
 			String fileName = message.getStoreChunk().getFileName();
 
-			Path directoryPath = Paths.get("/bigdata/rdielhenn", message.getStoreChunk().getOriginHost(),fileName);
+			Path directoryPath = Paths.get("/bigdata/rdielhenn", fileName);
 
 			if (!Files.exists(directoryPath)) {
 				try {
@@ -179,7 +179,7 @@ public class StorageNode implements DFSNode {
                  *
                  *  This will allow us to verify to correctness of the data on retrieval 
                  */
-                Path path = Paths.get(directoryPath.toString(),
+                Path path = Paths.get("/bigdata/rdielhenn", fileName,
                         message.getStoreChunk().getFileName() 
                         + "_chunk" 
                         + message.getStoreChunk().getChunkId() 

@@ -1,6 +1,7 @@
 package edu.usfca.cs.dfs;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 
 import org.apache.logging.log4j.LogManager;
@@ -153,7 +154,10 @@ public class Controller implements DFSNode {
 				long currentTime = System.currentTimeMillis();
                 /* This is throwing concurrent mod exception when detecting node failures at line 156 synchronized doesn't fix */
                 synchronized(storageNodes) {
-                    for (StorageNodeContext node : storageNodes) {
+                	
+                	Iterator<StorageNodeContext> iter = storageNodes.iterator();
+                	while (iter.hasNext()) {
+                		StorageNodeContext node = iter.next();
                         long nodeTime = node.getTimestamp();
 
                         if (currentTime - nodeTime > 5500) {
@@ -162,7 +166,19 @@ public class Controller implements DFSNode {
                             /* We have to rereplicate this nodes replicas as well as its primarys */
                             storageNodes.remove(node);
                         }
-                    }
+                	}
+                	
+//                	
+//                    for (StorageNodeContext node : storageNodes) {
+//                        long nodeTime = node.getTimestamp();
+//
+//                        if (currentTime - nodeTime > 5500) {
+//                            logger.info("Detected failure on node: " + node.getHostName());
+//                            /* Also need to rereplicate data here. */
+//                            /* We have to rereplicate this nodes replicas as well as its primarys */
+//                            storageNodes.remove(node);
+//                        }
+//                    }
                 }
 				try {
 					Thread.sleep(5000);

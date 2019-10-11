@@ -36,32 +36,29 @@ public class StorageNode implements DFSNode {
 
 	private InetAddress ip;
 
-	private String hostname;
+	String hostname;
 
 	String controllerHostName;
+    
+    Path rootDirectory;
 
 	ArgumentMap arguments;
 
-	ArrayList<Path> filePaths;
-
 	ArrayList<String> replicaHosts;
 
-	HashMap<String, ArrayList<Path>> nodeFileMap;
     static Bootstrap bootstrap;
 
 	public StorageNode(String[] args) throws UnknownHostException {
-
-		filePaths = new ArrayList<>();
-		nodeFileMap = new HashMap<>();
 		replicaHosts = new ArrayList<>();
 
 		ip = InetAddress.getLocalHost();
 		hostname = ip.getHostName();
 		arguments = new ArgumentMap(args);
-		if (arguments.hasFlag("-h")) {
+		if (arguments.hasFlag("-h") && arguments.hasFlag("-r")) {
+            rootDirectory = arguments.getPath("-r");
 			controllerHostName = arguments.getString("-h");
 		} else {
-			System.err.println("Usage: java -cp ..... -h controllerhostname");
+			System.err.println("Usage: java -cp ..... -h controllerhostname -r rootDirectory");
 			System.exit(1);
 		}
 
@@ -73,10 +70,6 @@ public class StorageNode implements DFSNode {
 		bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 	};
-
-	private String getHostname() {
-		return hostname;
-	}
 
 	public static void main(String[] args) throws IOException {
 		StorageNode storageNode = null;
@@ -93,7 +86,7 @@ public class StorageNode implements DFSNode {
 
 		Channel chan = cf.channel();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildJoinRequest(storageNode.getHostname());
+		StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildJoinRequest(storageNode.hostname);
 
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
 
@@ -107,7 +100,7 @@ public class StorageNode implements DFSNode {
 		 * Have a thread start sending heartbeats to controller. Pass bootstrap to make
 		 * connections
 		 **/
-		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.getHostname(), storageNode.controllerHostName, bootstrap);
+		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.hostname, storageNode.controllerHostName, bootstrap);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.start();
 		logger.info("Started heartbeat thread.");
@@ -130,7 +123,6 @@ public class StorageNode implements DFSNode {
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreRequest()) {
-
             /* Only accept first replica assignments for now */
             if (replicaHosts.isEmpty()) {
                 replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica1());
@@ -141,15 +133,8 @@ public class StorageNode implements DFSNode {
                 logger.info("Rejecting Assignment");
             }
 
-			/**
-			 * If we get a store request we need to change our decoder to fit the chunk size
-			 */
 			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
 					+ message.getStoreRequest().getFileSize());
-			ctx.pipeline().removeFirst();
-			ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
-					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
-
         } else if (message.hasStoreChunk()) {
             /* If this chunk is not being stored on its primary node, log the replication happening */
             if (!message.getStoreChunk().getOriginHost().equals(this.hostname)) {
@@ -159,10 +144,12 @@ public class StorageNode implements DFSNode {
 			/* Write that shit to disk, i've hard coded my bigdata directory change that */
 			String fileName = message.getStoreChunk().getFileName();
             
-            /* We will need to handle changing the path name if a 
+            /** 
+             * We will need to handle changing the path name if a 
              * primary routing gets switched to a different node because of a failure
+
              **/
-            Path hostPath = Paths.get("/bigdata/dhutchinson", message.getStoreChunk().getOriginHost());
+            Path hostPath = Paths.get(rootDirectory.toString(), message.getStoreChunk().getOriginHost());
 
             /* If we haven't stored this nodes data yet then create a directory under the primary nodes name */
             if (!Files.exists(hostPath)) {
@@ -213,28 +200,30 @@ public class StorageNode implements DFSNode {
                         + Checksum.SHAsum(bytes.toByteArray()));
 
                 /* Write chunk to disk */
-				Files.write(path, message.getStoreChunk().getData().toByteArray());
+                byte[] data = message.getStoreChunk().getData().toByteArray();
+
+				Files.write(path, data);
 
                 /* Send to replica assignments */
                 if (replicaHosts.size() == 2) {
+                    /* Connect to first assignment and send chunk*/
                     ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13111);
                     cf.syncUninterruptibly();
                     Channel chan = cf.channel();
                     chan.writeAndFlush(message).syncUninterruptibly();
                     cf.syncUninterruptibly();
+                    chan.close().syncUninterruptibly();
 
+                    /* Connect to second assignment and send chunk */
                     cf = bootstrap.connect(replicaHosts.get(1), 13111);
                     cf.syncUninterruptibly();
                     chan = cf.channel();
                     chan.writeAndFlush(message).syncUninterruptibly();
                     cf.syncUninterruptibly();
+                    chan.close().syncUninterruptibly();
                 }
-				if (!filePaths.contains(path)) {
-					filePaths.add(path);
-				}
 
 			} catch (IOException | NoSuchAlgorithmException ioe) {
-
 				logger.info("Could not write file");
 			}
 		}

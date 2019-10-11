@@ -85,7 +85,6 @@ public class Client implements DFSNode {
 	}
 
 	public static void main(String[] args) throws IOException {
-
 		/* Create this node for interfacing in the pipeline */
 
 		Client client = new Client(args);

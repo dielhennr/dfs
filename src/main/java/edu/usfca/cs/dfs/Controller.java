@@ -97,7 +97,8 @@ public class Controller implements DFSNode {
                     } else {
                         storageNodePrimary.replicaAssignment2.bumpRequests();
                     }
-                    
+                    storageNodes.forEach(e -> System.out.println(e.getHostName()));
+                    storageNodes.forEach(e -> System.out.println(e.getRequests()));                    
                     /* Bump requests of all assignments since we are about to send a file */
                     storageNodePrimary.bumpRequests();
                     storageNodePrimary.replicaAssignment1.bumpRequests();

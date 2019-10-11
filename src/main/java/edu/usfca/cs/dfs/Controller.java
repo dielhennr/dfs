@@ -86,19 +86,13 @@ public class Controller implements DFSNode {
                         replicaAssignment1 = storageNodes.poll();
                         storageNodePrimary.replicaAssignment1 = replicaAssignment1;
                         storageNodes.add(replicaAssignment1);
-                    } else {
-                        storageNodePrimary.replicaAssignment1.bumpRequests();
                     }
                     /* Same here for second assignment */
                     if (storageNodePrimary.replicaAssignment2 == null) {
                         replicaAssignment2 = storageNodes.poll();
                         storageNodePrimary.replicaAssignment2 = replicaAssignment2;
                         storageNodes.add(replicaAssignment2);
-                    } else {
-                        storageNodePrimary.replicaAssignment2.bumpRequests();
-                    }
-                    storageNodes.forEach(e -> System.out.println(e.getHostName()));
-                    storageNodes.forEach(e -> System.out.println(e.getRequests()));                    
+                    } 
                     /* Bump requests of all assignments since we are about to send a file */
                     storageNodePrimary.bumpRequests();
                     storageNodePrimary.replicaAssignment1.bumpRequests();

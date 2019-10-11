@@ -41,9 +41,9 @@ public class StorageNodeContext {
 
 
 	public boolean mightBeThere(byte[] data) {
-			if (filter.get(data)) {
-				return true;
-			}
+        if (filter.get(data)) {
+            return true;
+        }
 		
 		return false;
 	}

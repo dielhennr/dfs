@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.google.protobuf.ByteString;
 
@@ -26,7 +25,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
 public class StorageNode implements DFSNode {
 
@@ -69,7 +67,7 @@ public class StorageNode implements DFSNode {
 
 		bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
-	};
+	}
 
 	public static void main(String[] args) throws IOException {
 		StorageNode storageNode = null;
@@ -147,8 +145,7 @@ public class StorageNode implements DFSNode {
             /** 
              * We will need to handle changing the path name if a 
              * primary routing gets switched to a different node because of a failure
-
-             **/
+             */
             Path hostPath = Paths.get(rootDirectory.toString(), message.getStoreChunk().getOriginHost());
 
             /* If we haven't stored this nodes data yet then create a directory under the primary nodes name */

@@ -137,16 +137,19 @@ public class Controller implements DFSNode {
 			String fileName = message.getRetrieveFile().getFileName();
 			
 			ArrayList<String> possibleNodes = new ArrayList<>();
-			
-			Iterator<StorageNodeContext> iter = storageNodes.iterator();
-			String hosts = "";
-			while(iter.hasNext()) {
-				StorageNodeContext node = iter.next();
-				if (node.mightBeThere(fileName.getBytes())) {
-					possibleNodes.add(node.getHostName());
-					hosts += node.getHostName();
-				}
-			}
+
+            String hosts = "";
+            /* Find all storagenodes that might have the file */
+            synchronized(storageNodes) {			
+                Iterator<StorageNodeContext> iter = storageNodes.iterator();
+                while(iter.hasNext()) {
+                    StorageNodeContext node = iter.next();
+                    if (node.mightBeThere(fileName.getBytes())) {
+                        possibleNodes.add(node.getHostName());
+                        hosts += node.getHostName();
+                    }
+                }
+            }
 			
 			
 			

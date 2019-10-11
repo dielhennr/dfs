@@ -56,14 +56,14 @@ public class Client implements DFSNode {
 		this.arguments = new ArgumentMap(args);
 
 		/* Check that user entered controller to connect to and file to send */
-		if (arguments.hasFlag("-h")) {
-
+		if (arguments.hasFlag("-h") && (arguments.hasFlag("-r") ^ arguments.hasFlag("-s"))) {
 			controllerHost = arguments.getString("-h");
 		} else {
-			System.err.println("Usage: java -cp .... -h hostToContact -f fileToSend.\n"
+			System.err.println("Usage: java -cp .... -h hostToContact -[fr] fileToSend/Retrieve.\n"
 					+ "-p port and -c <chunksize(int)>  are optional flags.");
 			System.exit(1);
 		}
+
 		if (arguments.hasFlag("-r")) {
 			path = arguments.getPath("-r");
 		}
@@ -107,8 +107,6 @@ public class Client implements DFSNode {
 			System.err.println("Synced on channel after writing to controller");
 		}
 
-		/* Don't quit until we've disconnected: */
-		System.out.println("Shutting down");
 	}
 
 	/** Client's inbound duties */
@@ -209,6 +207,7 @@ public class Client implements DFSNode {
 			cf.channel().close().syncUninterruptibly();
 			/* Shutdown the workerGroup */
 			this.workerGroup.shutdownGracefully();
+            System.err.println("Shutting down");
 		}
 		else if (message.hasRetrievalHosts()) {
 			String[] possibleHosts = message.getRetrievalHosts().getHosts().split(" ");

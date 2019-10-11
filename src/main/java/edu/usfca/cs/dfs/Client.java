@@ -214,11 +214,14 @@ public class Client implements DFSNode {
 			String fileName = message.getRetrievalHosts().getFileName();
 			
 			logger.info("Possible Hosts for file " + fileName + " ---> " + Arrays.toString(possibleHosts));
-			
+		    
+
 			for (String host : possibleHosts) {
 				// Open connections for nodes and check if they have the file
+                
 			}
-			
+
+            this.workerGroup.shutdownGracefully();
 		}
 	}
 

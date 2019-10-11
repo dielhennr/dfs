@@ -77,7 +77,6 @@ public class StorageNode implements DFSNode {
 			logger.error("Could not start storage node.");
 			System.exit(1);
 		}
-
         
 		ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13100);
 		cf.syncUninterruptibly();
@@ -135,7 +134,7 @@ public class StorageNode implements DFSNode {
 					+ message.getStoreRequest().getFileSize());
         } else if (message.hasStoreChunk()) {
             /* If this chunk is not being stored on its primary node, log the replication happening */
-            if (!message.getStoreChunk().getOriginHost().equals(this.hostname)) {
+            if (!message.getStoreChunk().getOriginHost().equals(this.hostname) && message.getStoreChunk().getChunkId() == 0) {
                 logger.info("Recieved replica of " + message.getStoreChunk().getFileName() + " for " + message.getStoreChunk().getOriginHost());
             }
 
@@ -219,7 +218,6 @@ public class StorageNode implements DFSNode {
                     cf.syncUninterruptibly();
                     chan.close().syncUninterruptibly();
                 }
-
 			} catch (IOException | NoSuchAlgorithmException ioe) {
 				logger.info("Could not write file");
 			}

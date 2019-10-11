@@ -9,7 +9,7 @@ public class Builders {
 	 *
 	 * @param hostname
 	 * @param ip
-	 * @return the protobuf
+	 * @return join request
 	 */
 	public static StorageMessages.StorageMessageWrapper buildJoinRequest(String hostname) {
 		/* Store hostname in a JoinRequest protobuf */
@@ -18,13 +18,7 @@ public class Builders {
                                         .setNodeName(hostname)
 				                        .build();
 
-		/* Wrapper */
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-                                                .newBuilder()
-				                                .setJoinRequest(joinRequest)
-                                                .build();
-
-		return msgWrapper;
+		return  StorageMessages.StorageMessageWrapper.newBuilder().setJoinRequest(joinRequest).build();
 	}
 
 	/**
@@ -32,7 +26,7 @@ public class Builders {
 	 *
 	 * @param hostname
 	 * @param freeSpace
-	 * @return the protobuf
+	 * @return heartbeat
 	 */
 	public static StorageMessages.StorageMessageWrapper buildHeartBeat(String hostname, 
                                                                             long freeSpace) {
@@ -44,12 +38,7 @@ public class Builders {
                                         .setTimestamp(System.currentTimeMillis())
                                         .build();
 
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-                                                    .newBuilder()
-                                                    .setHeartbeat(heartbeat)
-                                                    .build();
-
-		return msgWrapper;
+		return StorageMessages.StorageMessageWrapper.newBuilder().setHeartbeat(heartbeat).build();
 	}
 
 	/**
@@ -62,12 +51,21 @@ public class Builders {
      * @param replicaHost1
      * @param replicaHost2
      *
-	 * @return store request for a storagenode
+	 * @return store request
 	 */
 	public static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize, String replicaHost1, String replicaHost2) {
-        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments.newBuilder().setReplica1(replicaHost1).setReplica2(replicaHost2).build();
-		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest.newBuilder().setFileName(filename)
-				.setFileSize(fileSize).setReplicaAssignments(replicaAssignments).build();
+        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments
+                                                .newBuilder()
+                                                .setReplica1(replicaHost1)
+                                                .setReplica2(replicaHost2)
+                                                .build();
+
+		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest
+                                            .newBuilder()
+                                            .setFileName(filename)
+				                            .setFileSize(fileSize)
+                                            .setReplicaAssignments(replicaAssignments)
+                                            .build();
 
 		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreRequest(storeRequest).build();
 	}
@@ -80,12 +78,17 @@ public class Builders {
 	 * @param fileName
 	 * @param id
 	 * @param data
-	 * @return
+	 * @return store chunk
 	 */
 	public static StorageMessages.StorageMessageWrapper buildStoreChunk(String fileName, String primary, int id, ByteString data) {
 
-		StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk.newBuilder().setFileName(fileName).setOriginHost(primary)
-				.setChunkId(id).setData(data).build();
+		StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk
+                                        .newBuilder()
+                                        .setFileName(fileName)
+                                        .setOriginHost(primary)
+				                        .setChunkId(id)
+                                        .setData(data)
+                                        .build();
 
 		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreChunk(storeChunk).build();
 	}
@@ -97,7 +100,7 @@ public class Builders {
 	 * {@link edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper}
 	 *
 	 * @param hostname
-	 * @return msgWrapper
+	 * @return store response
 	 */
 	public static StorageMessages.StorageMessageWrapper buildStoreResponse(String fileName, String hostname, String replicaHost1, String replicaHost2) {
     
@@ -113,11 +116,7 @@ public class Builders {
 				                            .setFileName(fileName)
                                             .setReplicaAssignments(replicaAssignments)
                                             .build();
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-                                                    .newBuilder()
-				                                    .setStoreResponse(storeRequest)
-                                                    .build();
 
-		return msgWrapper;
+		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreResponse(storeRequest).build();
 	}
 }

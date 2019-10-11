@@ -141,15 +141,8 @@ public class StorageNode implements DFSNode {
                 logger.info("Rejecting Assignment");
             }
 
-			/**
-			 * If we get a store request we need to change our decoder to fit the chunk size
-			 */
 			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
 					+ message.getStoreRequest().getFileSize());
-			ctx.pipeline().removeFirst();
-			ctx.pipeline().addFirst(new LengthFieldBasedFrameDecoder(
-					(int) message.getStoreRequest().getFileSize() + 1048576, 0, 4, 0, 4));
-
         } else if (message.hasStoreChunk()) {
             /* If this chunk is not being stored on its primary node, log the replication happening */
             if (!message.getStoreChunk().getOriginHost().equals(this.hostname)) {
@@ -214,6 +207,7 @@ public class StorageNode implements DFSNode {
 
                 /* Write chunk to disk */
                 byte[] data = message.getStoreChunk().getData().toByteArray();
+
                 if (Entropy.entropy(data) <= ( (0.6) * (1 - (data.length/8)) )) {
 				    Files.write(path, message.getStoreChunk().getData().toByteArray());
                 } else {

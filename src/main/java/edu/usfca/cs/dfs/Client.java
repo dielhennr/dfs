@@ -208,8 +208,7 @@ public class Client implements DFSNode {
 			/* Shutdown the workerGroup */
 			this.workerGroup.shutdownGracefully();
             System.err.println("Shutting down");
-		}
-		else if (message.hasRetrievalHosts()) {
+		} else if (message.hasRetrievalHosts()) {
 			String[] possibleHosts = message.getRetrievalHosts().getHosts().split(" ");
 			String fileName = message.getRetrievalHosts().getFileName();
 			
@@ -218,11 +217,15 @@ public class Client implements DFSNode {
 
 			for (String host : possibleHosts) {
 				// Open connections for nodes and check if they have the file
-                
+                ChannelFuture cf = bootstrap.connect(host, 13111);
+                cf.syncUninterruptibly();
+                Channel chan = cf.channel();
+                ChannelFuture write = chan.writeAndFlush(Builders.buildRetrievalRequest(host));
+                write.syncUninterruptibly();
 			}
+            ctx.channel().close().syncUninterruptibly();
+		} 
 
-            this.workerGroup.shutdownGracefully();
-		}
 	}
 
 }

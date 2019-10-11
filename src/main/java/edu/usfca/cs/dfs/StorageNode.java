@@ -213,7 +213,12 @@ public class StorageNode implements DFSNode {
                         + Checksum.SHAsum(bytes.toByteArray()));
 
                 /* Write chunk to disk */
-				Files.write(path, message.getStoreChunk().getData().toByteArray());
+                byte[] data = message.getStoreChunk().getData().toByteArray();
+                if (Entropy.entropy(data) <= ( (0.6) * (1 - (data.length/8)) )) {
+				    Files.write(path, message.getStoreChunk().getData().toByteArray());
+                } else {
+                    logger.info("Compressing");
+                }
 
                 /* Send to replica assignments */
                 if (replicaHosts.size() == 2) {

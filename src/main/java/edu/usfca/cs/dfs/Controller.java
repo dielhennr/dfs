@@ -66,7 +66,6 @@ public class Controller implements DFSNode {
                     if (storageNode.getHostName().equals(hostName)) {
                         storageNode.updateTimestamp(heartbeat.getTimestamp());
                         storageNode.setFreeSpace(heartbeat.getFreeSpace());
-                        logger.info("Recieved heartbeat from " + hostName);
                     } /* Otherwise ignore if join request not processed yet? */
                 }
             }

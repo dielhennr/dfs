@@ -48,7 +48,6 @@ public class HeartBeatRunner implements Runnable {
 
 			chan.close().syncUninterruptibly();
 
-			logger.debug("Sent heartbeat to " + controllerHost);
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {

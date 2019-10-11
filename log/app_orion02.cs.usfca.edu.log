@@ -1,0 +1,34 @@
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent replica request orion01 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent replica request orion01 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent replica request orion01 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent replica request orion01 
+[3 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 
+[3 IN] edu.usfca.cs.dfs.StorageNode.onMessage onMessage: Replica Assignment 1: orion04.cs.usfca.edu 
+[4 IN] edu.usfca.cs.dfs.StorageNode.onMessage onMessage: Replica Assignment 2: orion03.cs.usfca.edu 
+[5 IN] edu.usfca.cs.dfs.StorageNode.onMessage onMessage: Request to store openmpi-3.1.1.tar.gz size: 16384 
+[6 IN] edu.usfca.cs.dfs.StorageNode.onMessage onMessage: Created path: /bigdata/dhutchinson/orion02.cs.usfca.edu 
+[7 IN] edu.usfca.cs.dfs.StorageNode.onMessage onMessage: Created path: /bigdata/dhutchinson/orion02.cs.usfca.edu/openmpi-3.1.1.tar.gz 

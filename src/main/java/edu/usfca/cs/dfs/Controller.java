@@ -1,6 +1,7 @@
 package edu.usfca.cs.dfs;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
@@ -132,7 +133,27 @@ public class Controller implements DFSNode {
 			 * Here we could check each nodes bloom filter and then send the client the list
 			 * of nodes that could have it.
 			 */
-
+			
+			String fileName = message.getRetrieveFile().getFileName();
+			
+			ArrayList<String> possibleNodes = new ArrayList<>();
+			
+			Iterator<StorageNodeContext> iter = storageNodes.iterator();
+			String hosts = "";
+			while(iter.hasNext()) {
+				StorageNodeContext node = iter.next();
+				if (node.mightBeThere(fileName.getBytes())) {
+					possibleNodes.add(node.getHostName());
+					hosts += node.getHostName();
+				}
+			}
+			
+			
+			
+			ChannelFuture write = ctx.pipeline().writeAndFlush(Builders.buildPossibleRetrievalHosts(hosts, fileName));
+			write.syncUninterruptibly();
+			logger.info("Possible hosts for file: " + fileName + " ---> " + hosts);
+			ctx.channel().close().syncUninterruptibly();
 		}
 	}
 

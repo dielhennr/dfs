@@ -1,0 +1,5 @@
+[1 IN] edu.usfca.cs.dfs.Client.onMessage onMessage: Recieved permission to put file on orion03.cs.usfca.edu 
+[2 IN] edu.usfca.cs.dfs.Client.onMessage onMessage: Replicating to orion02.cs.usfca.edu and orion04.cs.usfca.edu 
+[3 IN] edu.usfca.cs.dfs.Client.onMessage onMessage: Sending chunks in size 16384 to orion03.cs.usfca.edu 
+[4 IN] edu.usfca.cs.dfs.Client.onMessage onMessage: Sent store request to node orion03.cs.usfca.edu 
+[1 IN] edu.usfca.cs.dfs.Client.onMessage onMessage: Possible Hosts for file openmpi-3.1.1.tar.gz ---> [orion02.cs.usfca.edu] 

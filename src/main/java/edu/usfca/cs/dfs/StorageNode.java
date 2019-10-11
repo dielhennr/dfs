@@ -147,7 +147,8 @@ public class StorageNode implements DFSNode {
             /** 
              * We will need to handle changing the path name if a 
              * primary routing gets switched to a different node because of a failure
-             */
+
+             **/
             Path hostPath = Paths.get(rootDirectory.toString(), message.getStoreChunk().getOriginHost());
 
             /* If we haven't stored this nodes data yet then create a directory under the primary nodes name */

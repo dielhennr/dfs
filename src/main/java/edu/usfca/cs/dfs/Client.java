@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,13 +56,19 @@ public class Client implements DFSNode {
 		this.arguments = new ArgumentMap(args);
 
 		/* Check that user entered controller to connect to and file to send */
-		if (arguments.hasFlag("-f") && arguments.hasFlag("-h")) {
-			path = arguments.getPath("-f");
+		if (arguments.hasFlag("-h")) {
+
 			controllerHost = arguments.getString("-h");
 		} else {
 			System.err.println("Usage: java -cp .... -h hostToContact -f fileToSend.\n"
 					+ "-p port and -c <chunksize(int)>  are optional flags.");
 			System.exit(1);
+		}
+		if (arguments.hasFlag("-r")) {
+			path = arguments.getPath("-r");
+		}
+		if (arguments.hasFlag("-f")) {
+			path = arguments.getPath("-f");
 		}
 
 		/* Default to port 13100 */
@@ -85,9 +92,14 @@ public class Client implements DFSNode {
 		ChannelFuture cf = client.bootstrap.connect(client.controllerHost, client.port);
 		cf.syncUninterruptibly();
         
-		StorageMessages.StorageMessageWrapper msgWrapper = Builders
+		StorageMessages.StorageMessageWrapper msgWrapper = null;
+		if (client.arguments.hasFlag("-f")) {
+			msgWrapper = Builders
 				.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, "", "");
-
+		}
+		else if (client.arguments.hasFlag("-r")) {
+			msgWrapper = Builders.buildRetrievalRequest(client.path.getFileName().toString());
+		}
 		Channel chan = cf.channel();
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
 		write.syncUninterruptibly();
@@ -197,6 +209,17 @@ public class Client implements DFSNode {
 			cf.channel().close().syncUninterruptibly();
 			/* Shutdown the workerGroup */
 			this.workerGroup.shutdownGracefully();
+		}
+		else if (message.hasRetrievalHosts()) {
+			String[] possibleHosts = message.getRetrievalHosts().getHosts().split(" ");
+			String fileName = message.getRetrievalHosts().getFileName();
+			
+			logger.info("Possible Hosts for file " + fileName + " ---> " + Arrays.toString(possibleHosts));
+			
+			for (String host : possibleHosts) {
+				// Open connections for nodes and check if they have the file
+			}
+			
 		}
 	}
 

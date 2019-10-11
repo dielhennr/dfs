@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class StorageNodeContext {
 
-	private ArrayList<BloomFilter> filters;
+	private BloomFilter filter;
 	private String hostname;
 	private long timestamp;
 	private long freeSpace;
@@ -14,8 +14,7 @@ public class StorageNodeContext {
     StorageNodeContext replicaAssignment2;
 
 	public StorageNodeContext(String hostname) {
-		this.filters = new ArrayList<BloomFilter>();
-		this.filters.add(new BloomFilter(100000, 3));
+		this.filter = new BloomFilter(100000, 3);
 		this.timestamp = System.currentTimeMillis();
 		this.freeSpace = 0;
 		this.requests = 0;
@@ -40,16 +39,12 @@ public class StorageNodeContext {
 		this.freeSpace = freeSpace;
 	}
 
-	public void addFilter(BloomFilter filter) {
-		this.filters.add(filter);
-	}
 
 	public boolean mightBeThere(byte[] data) {
-		for (BloomFilter filter : filters) {
 			if (filter.get(data)) {
 				return true;
 			}
-		}
+		
 		return false;
 	}
 
@@ -58,7 +53,7 @@ public class StorageNodeContext {
 	}
 
 	public void put(byte[] data) {
-		this.filters.get(0).put(data);
+		this.filter.put(data);
 	}
 
 	public void updateTimestamp(long timestamp) {

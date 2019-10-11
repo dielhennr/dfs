@@ -44,6 +44,12 @@ message ReplicaAssignments {
 	string replica2 = 2;
 }
 
+message PossibleRetrievalHosts {
+	string hosts = 1;
+	string fileName = 2;
+}
+
+
 message StorageMessageWrapper {
     oneof msg {
         StoreChunk storeChunk = 1;
@@ -53,5 +59,6 @@ message StorageMessageWrapper {
         StoreRequest storeRequest = 5;
         StoreResponse storeResponse = 6;
         ReplicaAssignments replicaAssignments = 7;
+        PossibleRetrievalHosts retrievalHosts = 8;
     }
 }

@@ -199,7 +199,7 @@ public class StorageNode implements DFSNode {
                     
                     /* If the reads and checksum computation was succesful, write the chunk to client */
                     if (data != null && checksumCheck != null) {
-                        String[] fileTokens = ((Path)chunkPath).toFile().toString().split("#"); 
+                        String[] fileTokens = ((Path)chunkPath).getFileName().toString().split("#"); 
                         String checksum = fileTokens[fileTokens.length - 1];
                         fileTokens = fileTokens[0].split("@");
                         logger.info("Tokens length " + fileTokens.length);

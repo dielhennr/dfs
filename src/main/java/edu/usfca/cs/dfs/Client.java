@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -251,7 +253,18 @@ public class Client implements DFSNode {
      *
      */
     public void stitchChunks() {
+        String cwd = System.getProperty("user.dir");
 
+        Path path = Paths.get(cwd, retrievalSet.first().getFileName() + "_retrieval");
 
+        for (StorageMessages.StoreChunk chunk : retrievalSet) {
+            try {
+                Files.write(path, chunk.getData().toByteArray(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+            } catch (IOException ioe) {
+                logger.info("Could not stitch chunks together");
+            }
+
+        }
+        workerGroup.shutdownGracefully();
     }
 }

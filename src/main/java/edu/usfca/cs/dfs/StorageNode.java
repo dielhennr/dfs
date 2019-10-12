@@ -213,6 +213,7 @@ public class StorageNode implements DFSNode {
                             long totalChunks = Long.parseLong(fileTokens[fileTokens.length - 1]); 
                             long chunkID = Long.parseLong(fileTokens[fileTokens.length - 2]);
                             String filename = fileTokens[0];
+                            
                             /* Build the chunks and write it to client */
                             StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(filename, this.hostname, chunkID, totalChunks, data);
                             ChannelFuture write = ctx.pipeline().writeAndFlush(chunkToSend);

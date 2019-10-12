@@ -26,7 +26,7 @@ public class HeartBeatRunner implements Runnable {
 		f = new File("/bigdata");
 		this.hostname = hostname;
 		this.controllerHost = controllerHost;
-        this.bootstrap = bootstrap;
+		this.bootstrap = bootstrap;
 	}
 
 	@Override

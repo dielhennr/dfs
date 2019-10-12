@@ -10,8 +10,8 @@ public class StorageNodeContext {
 	private long freeSpace;
 	private int requests;
 
-    StorageNodeContext replicaAssignment1;
-    StorageNodeContext replicaAssignment2;
+	StorageNodeContext replicaAssignment1;
+	StorageNodeContext replicaAssignment2;
 
 	public StorageNodeContext(String hostname) {
 		this.filter = new BloomFilter(100000, 3);
@@ -19,9 +19,9 @@ public class StorageNodeContext {
 		this.freeSpace = 0;
 		this.requests = 0;
 		this.hostname = hostname;
-        replicaAssignment1 = null;
-        replicaAssignment2 = null;
-    }
+		replicaAssignment1 = null;
+		replicaAssignment2 = null;
+	}
 
 	public String getHostName() {
 		return this.hostname;
@@ -39,12 +39,11 @@ public class StorageNodeContext {
 		this.freeSpace = freeSpace;
 	}
 
-
 	public boolean mightBeThere(byte[] data) {
-        if (filter.get(data)) {
-            return true;
-        }
-		
+		if (filter.get(data)) {
+			return true;
+		}
+
 		return false;
 	}
 

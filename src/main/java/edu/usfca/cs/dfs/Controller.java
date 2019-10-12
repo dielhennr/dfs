@@ -51,74 +51,80 @@ public class Controller implements DFSNode {
 			String storageHost = message.getJoinRequest().getNodeName();
 			logger.info("Recieved join request from " + storageHost);
 
-            /* Add new node to priority queue */
-            StorageNodeContext thisRequest = new StorageNodeContext(storageHost);
-            synchronized(storageNodes) {
-                storageNodes.add(thisRequest);
-            }
+			/* Add new node to priority queue */
+			StorageNodeContext thisRequest = new StorageNodeContext(storageHost);
+			synchronized (storageNodes) {
+				storageNodes.add(thisRequest);
+			}
 
 		} else if (message.hasHeartbeat()) {
 			/* Update metadata */
 			String hostName = message.getHeartbeat().getHostname();
 			StorageMessages.Heartbeat heartbeat = message.getHeartbeat();
 			/* This sucks but works for now maybe have a hashmap hostname -> wrapper */
-            synchronized(storageNodes) {
-                for (StorageNodeContext storageNode : storageNodes) {
-                    if (storageNode.getHostName().equals(hostName)) {
-                        storageNode.updateTimestamp(heartbeat.getTimestamp());
-                        storageNode.setFreeSpace(heartbeat.getFreeSpace());
-                    } /* Otherwise ignore if join request not processed yet? */
-                }
-            }
+			synchronized (storageNodes) {
+				for (StorageNodeContext storageNode : storageNodes) {
+					if (storageNode.getHostName().equals(hostName)) {
+						storageNode.updateTimestamp(heartbeat.getTimestamp());
+						storageNode.setFreeSpace(heartbeat.getFreeSpace());
+					} /* Otherwise ignore if join request not processed yet? */
+				}
+			}
 		} else if (message.hasStoreRequest()) {
 			if (storageNodes.size() < 3) {
 				logger.error("Not enough storage nodes in the network");
 			} else {
 
 				synchronized (storageNodes) {
-                    /* StorageNode with least requests processed should be at the top */
+					/* StorageNode with least requests processed should be at the top */
 					StorageNodeContext storageNodePrimary = storageNodes.poll();
-                    StorageNodeContext replicaAssignment1 = null;
-                    StorageNodeContext replicaAssignment2 = null;
-                    
-                    /* If the first node in the queue doesn't have assignments pull from queue, assign and then put the assignee back in */
-                    if (storageNodePrimary.replicaAssignment1 == null) {
-                        replicaAssignment1 = storageNodes.poll();
-                        storageNodePrimary.replicaAssignment1 = replicaAssignment1;
-                        storageNodes.add(replicaAssignment1);
-                    }
-                    /* Same here for second assignment */
-                    if (storageNodePrimary.replicaAssignment2 == null) {
-                        replicaAssignment2 = storageNodes.poll();
-                        storageNodePrimary.replicaAssignment2 = replicaAssignment2;
-                        storageNodes.add(replicaAssignment2);
-                    } 
-                    /* Bump requests of all assignments since we are about to send a file */
-                    storageNodePrimary.bumpRequests();
-                    storageNodePrimary.replicaAssignment1.bumpRequests();
-                    storageNodePrimary.replicaAssignment2.bumpRequests();
+					StorageNodeContext replicaAssignment1 = null;
+					StorageNodeContext replicaAssignment2 = null;
 
-                    /* Put that file in this nodes bloom filter */
-                    storageNodePrimary.put(message.getStoreRequest().getFileName().getBytes());
-                    
-                    /* Put primary back in the queue */
-                    storageNodes.add(storageNodePrimary);
+					/*
+					 * If the first node in the queue doesn't have assignments pull from queue,
+					 * assign and then put the assignee back in
+					 */
+					if (storageNodePrimary.replicaAssignment1 == null) {
+						replicaAssignment1 = storageNodes.poll();
+						storageNodePrimary.replicaAssignment1 = replicaAssignment1;
+						storageNodes.add(replicaAssignment1);
+					}
+					/* Same here for second assignment */
+					if (storageNodePrimary.replicaAssignment2 == null) {
+						replicaAssignment2 = storageNodes.poll();
+						storageNodePrimary.replicaAssignment2 = replicaAssignment2;
+						storageNodes.add(replicaAssignment2);
+					}
+					/* Bump requests of all assignments since we are about to send a file */
+					storageNodePrimary.bumpRequests();
+					storageNodePrimary.replicaAssignment1.bumpRequests();
+					storageNodePrimary.replicaAssignment2.bumpRequests();
 
-                    /**
-                     * Write back a store response to client with hostname of the primary node to send
-                     * chunks to. This node will handle replication with the ReplicaAssignments protobuf 
-                     * nested in this store response
-                     */
-                    ChannelFuture write = ctx.pipeline().writeAndFlush(Builders
-                            .buildStoreResponse(message.getStoreRequest().getFileName(), storageNodePrimary.getHostName(), storageNodePrimary.replicaAssignment1.getHostName(), 
-                                storageNodePrimary.replicaAssignment2.getHostName()));
-                    write.syncUninterruptibly();
-                    
-                    /* Log controllers response */
-                    logger.info("Approving request to put file on " + storageNodePrimary.getHostName() + " from client."
-                            + "This SN has processed " + storageNodePrimary.getRequests() + " requests.");
-                    logger.info("Replicating to " + storageNodePrimary.replicaAssignment1.getHostName() + " and " + storageNodePrimary.replicaAssignment2.getHostName());
-                    ctx.channel().close().syncUninterruptibly();
+					/* Put that file in this nodes bloom filter */
+					storageNodePrimary.put(message.getStoreRequest().getFileName().getBytes());
+
+					/* Put primary back in the queue */
+					storageNodes.add(storageNodePrimary);
+
+					/**
+					 * Write back a store response to client with hostname of the primary node to
+					 * send chunks to. This node will handle replication with the ReplicaAssignments
+					 * protobuf nested in this store response
+					 */
+					ChannelFuture write = ctx.pipeline()
+							.writeAndFlush(Builders.buildStoreResponse(message.getStoreRequest().getFileName(),
+									storageNodePrimary.getHostName(),
+									storageNodePrimary.replicaAssignment1.getHostName(),
+									storageNodePrimary.replicaAssignment2.getHostName()));
+					write.syncUninterruptibly();
+
+					/* Log controllers response */
+					logger.info("Approving request to put file on " + storageNodePrimary.getHostName() + " from client."
+							+ "This SN has processed " + storageNodePrimary.getRequests() + " requests.");
+					logger.info("Replicating to " + storageNodePrimary.replicaAssignment1.getHostName() + " and "
+							+ storageNodePrimary.replicaAssignment2.getHostName());
+					ctx.channel().close().syncUninterruptibly();
 				}
 
 			}
@@ -128,26 +134,24 @@ public class Controller implements DFSNode {
 			 * Here we could check each nodes bloom filter and then send the client the list
 			 * of nodes that could have it.
 			 */
-			
+
 			String fileName = message.getRetrieveFile().getFileName();
-			
+
 			ArrayList<String> possibleNodes = new ArrayList<>();
 
-            String hosts = "";
-            /* Find all storagenodes that might have the file */
-            synchronized(storageNodes) {			
-                Iterator<StorageNodeContext> iter = storageNodes.iterator();
-                while(iter.hasNext()) {
-                    StorageNodeContext node = iter.next();
-                    if (node.mightBeThere(fileName.getBytes())) {
-                        possibleNodes.add(node.getHostName());
-                        hosts += node.getHostName() + " ";
-                    }
-                }
-            }
-			
-			
-			
+			String hosts = "";
+			/* Find all storagenodes that might have the file */
+			synchronized (storageNodes) {
+				Iterator<StorageNodeContext> iter = storageNodes.iterator();
+				while (iter.hasNext()) {
+					StorageNodeContext node = iter.next();
+					if (node.mightBeThere(fileName.getBytes())) {
+						possibleNodes.add(node.getHostName());
+						hosts += node.getHostName() + " ";
+					}
+				}
+			}
+
 			ChannelFuture write = ctx.pipeline().writeAndFlush(Builders.buildPossibleRetrievalHosts(hosts, fileName));
 			write.syncUninterruptibly();
 			logger.info("Possible hosts for file: " + fileName + " ---> " + hosts);
@@ -170,23 +174,26 @@ public class Controller implements DFSNode {
 		public void run() {
 			while (true) {
 				long currentTime = System.currentTimeMillis();
-                /* This is throwing concurrent mod exception when detecting node failures at line 156 synchronized doesn't fix */
-                synchronized(storageNodes) {
-                	
-                	Iterator<StorageNodeContext> iter = storageNodes.iterator();
-                	while (iter.hasNext()) {
-                		StorageNodeContext node = iter.next();
-                        long nodeTime = node.getTimestamp();
+				/*
+				 * This is throwing concurrent mod exception when detecting node failures at
+				 * line 156 synchronized doesn't fix
+				 */
+				synchronized (storageNodes) {
 
-                        if (currentTime - nodeTime > 5500) {
-                            logger.info("Detected failure on node: " + node.getHostName());
-                            /* Also need to rereplicate data here. */
-                            /* We have to rereplicate this nodes replicas as well as its primarys */
-                            iter.remove();
-                        }
-                	}
-                	
-                }
+					Iterator<StorageNodeContext> iter = storageNodes.iterator();
+					while (iter.hasNext()) {
+						StorageNodeContext node = iter.next();
+						long nodeTime = node.getTimestamp();
+
+						if (currentTime - nodeTime > 5500) {
+							logger.info("Detected failure on node: " + node.getHostName());
+							/* Also need to rereplicate data here. */
+							/* We have to rereplicate this nodes replicas as well as its primarys */
+							iter.remove();
+						}
+					}
+
+				}
 				try {
 					Thread.sleep(5000);
 				} catch (InterruptedException e) {

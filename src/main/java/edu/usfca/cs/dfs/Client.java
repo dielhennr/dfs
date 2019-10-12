@@ -54,7 +54,7 @@ public class Client implements DFSNode {
 
 	EventLoopGroup workerGroup;
 
-    SortedSet<StorageMessages.StoreChunk> retrievalSet;
+	SortedSet<StorageMessages.StoreChunk> retrievalSet;
 
 	/**
 	 * Constructs a client given the command line arguments
@@ -76,7 +76,8 @@ public class Client implements DFSNode {
 
 		if (arguments.hasFlag("-r")) {
 			path = arguments.getPath("-r");
-            retrievalSet = Collections.synchronizedSortedSet(new TreeSet<StorageMessages.StoreChunk>(new StoreChunkComparator()));
+			retrievalSet = Collections
+					.synchronizedSortedSet(new TreeSet<StorageMessages.StoreChunk>(new StoreChunkComparator()));
 		}
 		if (arguments.hasFlag("-f")) {
 			path = arguments.getPath("-f");
@@ -102,13 +103,11 @@ public class Client implements DFSNode {
 
 		ChannelFuture cf = client.bootstrap.connect(client.controllerHost, client.port);
 		cf.syncUninterruptibly();
-        
+
 		StorageMessages.StorageMessageWrapper msgWrapper = null;
 		if (client.arguments.hasFlag("-f")) {
-			msgWrapper = Builders
-				.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, "", "");
-		}
-		else if (client.arguments.hasFlag("-r")) {
+			msgWrapper = Builders.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, "", "");
+		} else if (client.arguments.hasFlag("-r")) {
 			msgWrapper = Builders.buildRetrievalRequest(client.path.getFileName().toString());
 		}
 		Channel chan = cf.channel();
@@ -129,8 +128,8 @@ public class Client implements DFSNode {
 		 */
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
-            String replica1 = message.getStoreResponse().getReplicaAssignments().getReplica1();
-            String replica2 = message.getStoreResponse().getReplicaAssignments().getReplica2();
+			String replica1 = message.getStoreResponse().getReplicaAssignments().getReplica1();
+			String replica2 = message.getStoreResponse().getReplicaAssignments().getReplica2();
 			logger.info("Replicating to " + replica1 + " and " + replica2);
 
 			/*
@@ -138,11 +137,7 @@ public class Client implements DFSNode {
 			 * decoder
 			 */
 			StorageMessages.StorageMessageWrapper storeRequest = Builders
-					.buildStoreRequest(
-                                        message.getStoreResponse().getFileName(), 
-                                        this.chunkSize, 
-                                        replica1,
-                                        replica2);
+					.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize, replica1, replica2);
 
 			logger.info("Sending chunks in size " + this.chunkSize + " to " + message.getStoreResponse().getHostname());
 
@@ -176,7 +171,7 @@ public class Client implements DFSNode {
 			/* We will add one extra chunk for leftover bytes */
 			int leftover = (int) (length % this.chunkSize);
 
-            int totalChunks = leftover == 0 ? chunks : chunks + 1;
+			int totalChunks = leftover == 0 ? chunks : chunks + 1;
 
 			/* Asynch writes and input stream */
 			List<ChannelFuture> writes = new ArrayList<>();
@@ -186,8 +181,8 @@ public class Client implements DFSNode {
 				byte[] data = new byte[this.chunkSize];
 				for (int i = 0; i < chunks; i++) {
 					data = inputStream.readNBytes(this.chunkSize);
-					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(), message.getStoreResponse().getHostname(), i, totalChunks,
-							ByteString.copyFrom(data));
+					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(),
+							message.getStoreResponse().getHostname(), i, totalChunks, ByteString.copyFrom(data));
 					writes.add(cf.channel().write(chunk));
 				}
 
@@ -196,8 +191,8 @@ public class Client implements DFSNode {
 				if (leftover != 0) {
 					data = inputStream.readNBytes(leftover);
 					/* Read them and write the protobuf */
-					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(), message.getStoreResponse().getHostname(), chunks, totalChunks,
-							ByteString.copyFrom(data));
+					StorageMessageWrapper chunk = Builders.buildStoreChunk(path.getFileName().toString(),
+							message.getStoreResponse().getHostname(), chunks, totalChunks, ByteString.copyFrom(data));
 					writes.add(cf.channel().write(chunk));
 				}
 
@@ -221,52 +216,52 @@ public class Client implements DFSNode {
 			cf.channel().close().syncUninterruptibly();
 			/* Shutdown the workerGroup */
 			this.workerGroup.shutdownGracefully();
-            System.err.println("Shutting down");
+			System.err.println("Shutting down");
 		} else if (message.hasRetrievalHosts()) {
 			String[] possibleHosts = message.getRetrievalHosts().getHosts().split(" ");
 			String fileName = message.getRetrievalHosts().getFileName();
-			
+
 			logger.info("Possible Hosts for file " + fileName + " ---> " + Arrays.toString(possibleHosts));
-            /* Sending retrieval requests to notes with the file we want */		    
+			/* Sending retrieval requests to notes with the file we want */
 			for (String host : possibleHosts) {
 				// Open connections for nodes and check if they have the file
-                ChannelFuture cf = bootstrap.connect(host, 13114);
-                cf.syncUninterruptibly();
-                Channel chan = cf.channel();
-                ChannelFuture write = chan.writeAndFlush(Builders.buildRetrievalRequest(path.toFile().toString()));
-                write.syncUninterruptibly();
+				ChannelFuture cf = bootstrap.connect(host, 13114);
+				cf.syncUninterruptibly();
+				Channel chan = cf.channel();
+				ChannelFuture write = chan.writeAndFlush(Builders.buildRetrievalRequest(path.toFile().toString()));
+				write.syncUninterruptibly();
 			}
 		} else if (message.hasStoreChunk()) {
-            /* Add chunk to our set sorted by chunkID */
-            retrievalSet.add(message.getStoreChunk());
-            logger.info("Recieved retrieval chunk. So far we retrieved " + retrievalSet.size());
-            if (retrievalSet.size() == message.getStoreChunk().getTotalChunks()) {
-                logger.info("Done with retrieval");
-                this.stitchChunks();
-                ctx.channel().close().syncUninterruptibly();
-            }
-        } 
+			/* Add chunk to our set sorted by chunkID */
+			retrievalSet.add(message.getStoreChunk());
+			logger.info("Recieved retrieval chunk. So far we retrieved " + retrievalSet.size());
+			if (retrievalSet.size() == message.getStoreChunk().getTotalChunks()) {
+				logger.info("Done with retrieval");
+				this.stitchChunks();
+				ctx.channel().close().syncUninterruptibly();
+			}
+		}
 
 	}
 
-    /**
-     * Stitch together retrieved chunks
-     *
-     */
-    public void stitchChunks() {
-        String cwd = System.getProperty("user.dir");
-        logger.info("cwd: " + cwd);
-        Path path = Paths.get(cwd, retrievalSet.first().getFileName() + "_retrieval");
-        logger.info("file: " + retrievalSet.first().getFileName());
+	/**
+	 * Stitch together retrieved chunks
+	 *
+	 */
+	public void stitchChunks() {
+		String cwd = System.getProperty("user.dir");
+		logger.info("cwd: " + cwd);
+		Path path = Paths.get(cwd, retrievalSet.first().getFileName() + "_retrieval");
+		logger.info("file: " + retrievalSet.first().getFileName());
 
-        for (StorageMessages.StoreChunk chunk : retrievalSet) {
-            try {
-                Files.write(path, chunk.getData().toByteArray(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
-            } catch (IOException ioe) {
-                logger.info("Could not stitch chunks together");
-            }
+		for (StorageMessages.StoreChunk chunk : retrievalSet) {
+			try {
+				Files.write(path, chunk.getData().toByteArray(), StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+			} catch (IOException ioe) {
+				logger.info("Could not stitch chunks together");
+			}
 
-        }
-        workerGroup.shutdownGracefully();
-    }
+		}
+		workerGroup.shutdownGracefully();
+	}
 }

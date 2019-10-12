@@ -127,13 +127,12 @@ public class Builders {
      * @return
      */
 	public static StorageMessages.StorageMessageWrapper buildRetrievalRequest(String fileName) {
-		StorageMessages.RetrieveFile retrievalRequest = StorageMessages.RetrieveFile.newBuilder()
-				.setFileName(fileName).build();
+		StorageMessages.RetrieveFile retrievalRequest = StorageMessages.RetrieveFile
+											.newBuilder()
+											.setFileName(fileName)
+											.build();
 		
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-				.newBuilder().setRetrieveFile(retrievalRequest).build();
-		
-		return msgWrapper;
+		return StorageMessages.StorageMessageWrapper.newBuilder().setRetrieveFile(retrievalRequest).build();
 	}
 	
     /**
@@ -144,11 +143,10 @@ public class Builders {
      */
 	public static StorageMessages.StorageMessageWrapper buildPossibleRetrievalHosts(String hosts, String fileName) {
 		StorageMessages.PossibleRetrievalHosts hostsResponse = StorageMessages.PossibleRetrievalHosts.newBuilder()
-				.setHosts(hosts).setFileName(fileName).build();
+													.setHosts(hosts)
+													.setFileName(fileName)
+													.build();
 		
-		StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper
-				.newBuilder().setRetrievalHosts(hostsResponse).build();
-		
-		return msgWrapper;
+		return StorageMessages.StorageMessageWrapper.newBuilder().setRetrievalHosts(hostsResponse).build();
 	}
 }

@@ -36,7 +36,10 @@ public class MessagePipeline extends ChannelInitializer<SocketChannel> {
 		 * of frame length, which should be plenty for the future...
 		 */
 
-        /* Make this integer.MAXVAL, add logic in client to ensure protobuf chunks do not exceed this size */
+		/*
+		 * Make this integer.MAXVAL, add logic in client to ensure protobuf chunks do
+		 * not exceed this size
+		 */
 		pipeline.addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
 		pipeline.addLast(new ProtobufDecoder(StorageMessages.StorageMessageWrapper.getDefaultInstance()));
 

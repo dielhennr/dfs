@@ -10,13 +10,13 @@ import java.util.Comparator;
  */
 public class StoreChunkComparator implements Comparator<StorageMessages.StoreChunk> {
 	public int compare(StorageMessages.StoreChunk chunk1, StorageMessages.StoreChunk chunk2) {
-        long difference = chunk1.getChunkId() - chunk2.getChunkId();
-        int out = 0;
-        if (difference < 0) {
-            out = -1;
-        } else if (difference > 0) {
-            out = 1;
-        }
-        return out;
+		long difference = chunk1.getChunkId() - chunk2.getChunkId();
+		int out = 0;
+		if (difference < 0) {
+			out = -1;
+		} else if (difference > 0) {
+			out = 1;
+		}
+		return out;
 	}
 }

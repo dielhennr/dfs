@@ -83,7 +83,7 @@ public class Client implements DFSNode {
 		}
 
 		/* Default to port 13100 */
-		port = arguments.getInteger("-p", 13100);
+		port = arguments.getInteger("-p", 13112);
 
 		/* Default Chunk size to 16kb */
 		this.chunkSize = arguments.getInteger("-c", 16384);
@@ -157,7 +157,7 @@ public class Client implements DFSNode {
 			 * listen on 13111. Meanwhile controller is listening on 13000 for heartbeats
 			 * from SNs HeartBeatRunner.
 			 */
-			ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13111).syncUninterruptibly();
+			ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13114).syncUninterruptibly();
 
 			/*
 			 * Write the request to change the SNs decoder so that it can start receiving
@@ -230,7 +230,7 @@ public class Client implements DFSNode {
             /* Sending retrieval requests to notes with the file we want */		    
 			for (String host : possibleHosts) {
 				// Open connections for nodes and check if they have the file
-                ChannelFuture cf = bootstrap.connect(host, 13111);
+                ChannelFuture cf = bootstrap.connect(host, 13114);
                 cf.syncUninterruptibly();
                 Channel chan = cf.channel();
                 ChannelFuture write = chan.writeAndFlush(Builders.buildRetrievalRequest(path.toFile().toString()));

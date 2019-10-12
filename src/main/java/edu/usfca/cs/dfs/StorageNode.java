@@ -80,7 +80,7 @@ public class StorageNode implements DFSNode {
 			System.exit(1);
 		}
         
-		ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13100);
+		ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13112);
 		cf.syncUninterruptibly();
 
 		Channel chan = cf.channel();
@@ -114,7 +114,7 @@ public class StorageNode implements DFSNode {
 	public void start() throws IOException {
 		/* Pass a reference of the controller to our message router */
 		messageRouter = new ServerMessageRouter(this);
-		messageRouter.listen(13111);
+		messageRouter.listen(13114);
 		System.out.println("Listening for connections on port 13100");
 	}
 
@@ -142,7 +142,7 @@ public class StorageNode implements DFSNode {
             /* Send to replica assignments */
             if (replicaHosts.size() == 2) {
                 /* Connect to first assignment and send chunk*/
-                ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13111);
+                ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13114);
                 cf.syncUninterruptibly();
                 Channel chan = cf.channel();
                 chan.writeAndFlush(message).syncUninterruptibly();
@@ -150,7 +150,7 @@ public class StorageNode implements DFSNode {
                 chan.close().syncUninterruptibly();
 
                 /* Connect to second assignment and send chunk */
-                cf = bootstrap.connect(replicaHosts.get(1), 13111);
+                cf = bootstrap.connect(replicaHosts.get(1), 13114);
                 cf.syncUninterruptibly();
                 chan = cf.channel();
                 chan.writeAndFlush(message).syncUninterruptibly();

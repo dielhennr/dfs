@@ -25,7 +25,7 @@ public class Controller implements DFSNode {
 	public Controller(String[] args) {
 		storageNodes = new PriorityQueue<>(new StorageNodeComparator());
 		this.arguments = new ArgumentMap(args);
-		this.port = arguments.getInteger("-p", 13100);
+		this.port = arguments.getInteger("-p", 13112);
 	}
 
 	public void start() throws IOException {

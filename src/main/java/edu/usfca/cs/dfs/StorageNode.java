@@ -201,6 +201,7 @@ public class StorageNode implements DFSNode {
                     if (data != null && checksumCheck != null) {
                         String[] fileTokens = ((Path)chunkPath).toFile().toString().split("#@"); 
                         String checksum = fileTokens[fileTokens.length - 1];
+                        logger.info("Tokens length " + fileTokens.length);
                         logger.info("Checksum " + checksum);
                         logger.info("Pathname " + ((Path) chunkPath).toString());
                         /* If checksums don't match send request to replica assignment for healing */

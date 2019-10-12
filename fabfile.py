@@ -16,7 +16,7 @@ Make sure you have Controller started before you run this, and also make sure yo
 '''
 from fabric.api import task, parallel, run, execute
 
-hosts = ['orion02', 'orion03', 'orion04', 'orion05', 'orion06', 'orion07',
+hosts = ['orion01', 'orion02', 'orion03', 'orion04', 'orion05', 'orion06', 'orion07',
          'orion08', 'orion09', 'orion10', 'orion11', 'orion12']
 
 
@@ -27,6 +27,6 @@ def start():
 
 @parallel
 def start_nodes():
-    cmd = 'java -cp /home4/dhutchinson/P1-ryan/target/dfs-1.0.jar edu.usfca.cs.dfs.StorageNode'
+    cmd = 'java -cp /home4/rdielhenn/cs677/P1-ryan/target/dfs-1.0.jar edu.usfca.cs.dfs.StorageNode -h kudlick08 -r /bigdata/rdielhenn'
     run(cmd)
 

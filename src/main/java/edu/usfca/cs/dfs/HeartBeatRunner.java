@@ -38,7 +38,7 @@ public class HeartBeatRunner implements Runnable {
 
 			StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildHeartBeat(hostname, freeSpace);
 
-			ChannelFuture cf = this.bootstrap.connect(controllerHost, 13100);
+			ChannelFuture cf = this.bootstrap.connect(controllerHost, 13112);
 			cf.syncUninterruptibly();
 
 			Channel chan = cf.channel();

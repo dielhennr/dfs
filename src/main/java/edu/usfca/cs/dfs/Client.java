@@ -255,8 +255,9 @@ public class Client implements DFSNode {
      */
     public void stitchChunks() {
         String cwd = System.getProperty("user.dir");
-
+        logger.info("cwd: " + cwd);
         Path path = Paths.get(cwd, retrievalSet.first().getFileName() + "_retrieval");
+        logger.info("file: " + retrievalSet.first().getFileName());
 
         for (StorageMessages.StoreChunk chunk : retrievalSet) {
             try {

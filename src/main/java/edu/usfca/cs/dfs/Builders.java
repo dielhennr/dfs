@@ -80,13 +80,14 @@ public class Builders {
 	 * @param data
 	 * @return store chunk
 	 */
-	public static StorageMessages.StorageMessageWrapper buildStoreChunk(String fileName, String primary, int id, ByteString data) {
+	public static StorageMessages.StorageMessageWrapper buildStoreChunk(String fileName, String primary, long id, long totalChunks, ByteString data) {
 
 		StorageMessages.StoreChunk storeChunk = StorageMessages.StoreChunk
                                         .newBuilder()
                                         .setFileName(fileName)
                                         .setOriginHost(primary)
 				                        .setChunkId(id)
+                                        .setTotalChunks(totalChunks)
                                         .setData(data)
                                         .build();
 
@@ -119,7 +120,12 @@ public class Builders {
 
 		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreResponse(storeRequest).build();
 	}
-	
+    
+    /**
+     * 
+     * @param fileName
+     * @return
+     */
 	public static StorageMessages.StorageMessageWrapper buildRetrievalRequest(String fileName) {
 		StorageMessages.RetrieveFile retrievalRequest = StorageMessages.RetrieveFile.newBuilder()
 				.setFileName(fileName).build();
@@ -130,6 +136,12 @@ public class Builders {
 		return msgWrapper;
 	}
 	
+    /**
+     * 
+     * @param hosts
+     * @param fileName
+     * @return
+     */
 	public static StorageMessages.StorageMessageWrapper buildPossibleRetrievalHosts(String hosts, String fileName) {
 		StorageMessages.PossibleRetrievalHosts hostsResponse = StorageMessages.PossibleRetrievalHosts.newBuilder()
 				.setHosts(hosts).setFileName(fileName).build();

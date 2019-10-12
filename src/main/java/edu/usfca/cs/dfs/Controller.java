@@ -141,7 +141,7 @@ public class Controller implements DFSNode {
                     StorageNodeContext node = iter.next();
                     if (node.mightBeThere(fileName.getBytes())) {
                         possibleNodes.add(node.getHostName());
-                        hosts += node.getHostName();
+                        hosts += node.getHostName() + " ";
                     }
                 }
             }

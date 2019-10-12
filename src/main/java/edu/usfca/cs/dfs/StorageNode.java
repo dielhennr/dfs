@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
 
 import com.google.protobuf.ByteString;
 
@@ -133,94 +135,161 @@ public class StorageNode implements DFSNode {
 			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
 					+ message.getStoreRequest().getFileSize());
         } else if (message.hasStoreChunk()) {
-            /* If this chunk is not being stored on its primary node, log the replication happening */
-            if (!message.getStoreChunk().getOriginHost().equals(this.hostname) && message.getStoreChunk().getChunkId() == 0) {
-                logger.info("Recieved replica of " + message.getStoreChunk().getFileName() + " for " + message.getStoreChunk().getOriginHost());
+
+            /* Write that shit to disk*/
+            this.writeChunk(message);
+
+            /* Send to replica assignments */
+            if (replicaHosts.size() == 2) {
+                /* Connect to first assignment and send chunk*/
+                ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13111);
+                cf.syncUninterruptibly();
+                Channel chan = cf.channel();
+                chan.writeAndFlush(message).syncUninterruptibly();
+                cf.syncUninterruptibly();
+                chan.close().syncUninterruptibly();
+
+                /* Connect to second assignment and send chunk */
+                cf = bootstrap.connect(replicaHosts.get(1), 13111);
+                cf.syncUninterruptibly();
+                chan = cf.channel();
+                chan.writeAndFlush(message).syncUninterruptibly();
+                cf.syncUninterruptibly();
+                chan.close().syncUninterruptibly();
+            }
+		} else if (message.hasRetrieveFile()) {
+            Path filePath = Paths.get(rootDirectory.toString(), message.getRetrieveFile().getFileName());
+            if (Files.exists(filePath)) {
+                this.shootChunks(ctx, filePath);
             }
 
-			/* Write that shit to disk, i've hard coded my bigdata directory change that */
-			String fileName = message.getStoreChunk().getFileName();
-            
-            /** 
-             * We will need to handle changing the path name if a 
-             * primary routing gets switched to a different node because of a failure
-             */
-            Path hostPath = Paths.get(rootDirectory.toString(), message.getStoreChunk().getOriginHost());
-
-            /* If we haven't stored this nodes data yet then create a directory under the primary nodes name */
-            if (!Files.exists(hostPath)) {
-				try {
-					Files.createDirectory(hostPath);
-					logger.info("Created path: " + hostPath);
-				} catch (IOException e) {
-					logger.info("Problem creating path: " + hostPath);
-				}
-            }
-
-			Path chunkPath = Paths.get(hostPath.toString(), fileName);
-            
-            /* If we haven't stored a chunk of this file yet create a directory for the chunks to go into */
-			if (!Files.exists(chunkPath)) {
-				try {
-					Files.createDirectory(chunkPath);
-				} catch (IOException e) {
-					logger.info("Problem creating path: " + chunkPath);
-				}
-			    logger.info("Created path: " + chunkPath);
-			}
-            
-            ByteString bytes = message.getStoreChunk().getData();
-
-            try {
-                /** 
-                 * Store chunks in users specified home directory 
-                 *
-                 * Home -
-                 *      primary_holder -
-                 *          file_chunks -
-                 *              chunk0#AD12341FFC...
-                 *              chunk1#AD12341111...
-                 *              chunk2#12341FFC11...
-                 *
-                 *  file_chunks will be named the name of the file whose chunks we are storing
-                 *  we will also append a chunks chunkid, #, and the sha1sum of the given
-                 *  file's bytes.
-                 *
-                 *  This will allow us to verify to correctness of the data on retrieval 
-                 */
-                Path path = Paths.get(chunkPath.toString(),
-                        message.getStoreChunk().getFileName() 
-                        + "_chunk" 
-                        + message.getStoreChunk().getChunkId() 
-                        + "#" 
-                        + Checksum.SHAsum(bytes.toByteArray()));
-
-                /* Write chunk to disk */
-                byte[] data = message.getStoreChunk().getData().toByteArray();
-
-				Files.write(path, data);
-
-                /* Send to replica assignments */
-                if (replicaHosts.size() == 2) {
-                    /* Connect to first assignment and send chunk*/
-                    ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13111);
-                    cf.syncUninterruptibly();
-                    Channel chan = cf.channel();
-                    chan.writeAndFlush(message).syncUninterruptibly();
-                    cf.syncUninterruptibly();
-                    chan.close().syncUninterruptibly();
-
-                    /* Connect to second assignment and send chunk */
-                    cf = bootstrap.connect(replicaHosts.get(1), 13111);
-                    cf.syncUninterruptibly();
-                    chan = cf.channel();
-                    chan.writeAndFlush(message).syncUninterruptibly();
-                    cf.syncUninterruptibly();
-                    chan.close().syncUninterruptibly();
-                }
-			} catch (IOException | NoSuchAlgorithmException ioe) {
-				logger.info("Could not write file");
-			}
-		}
+        }
 	}
+    
+    /**
+     * 
+     * @param ctx
+     * @param filePath
+     */
+    public void shootChunks(ChannelHandlerContext ctx, Path filePath) {
+    
+        /** Get stream over directory's files */
+        Stream<Path> chunks = null;
+        try {
+            chunks = Files.walk(filePath);
+        } catch (IOException ioe) {
+            logger.info("Could not send chunks back to client");
+        }
+        
+        /* If we got a stream iterate over it and write the chunks back to client */
+        if (chunks != null) {
+            List<ChannelFuture> writes = new ArrayList<>();
+            for (Object chunkPath : chunks.toArray()) {
+                if (chunkPath instanceof Path) {
+                    ByteString data = null;
+                    String checksumCheck = null;
+
+                    /* Read the chunk and compute it's checksum */
+                    try {
+                        data = ByteString.copyFrom(Files.readAllBytes( (Path) chunkPath ));
+                        checksumCheck = Checksum.SHAsum(data.toByteArray());
+                    } catch (IOException | NoSuchAlgorithmException ioe) {
+                        logger.info("Could not read chunk to send to client");
+                    }
+                    
+                    /* If the reads and checksum computation was succesful, write the chunk to client */
+                    if (data != null && checksumCheck != null) {
+                        String[] fileTokens = ((Path)chunkPath).toFile().toString().split("#@"); 
+                        String checksum = fileTokens[fileTokens.length - 1];
+
+                        /* If checksums don't match send request to replica assignment for healing */
+                        if (!checksum.equals(checksumCheck)) {
+                            logger.info("Chunk " + chunkPath.toString() + "needs healing");
+                        } else {
+                            /* Get chunk metadata from path */
+                            long totalChunks = Long.parseLong(fileTokens[fileTokens.length - 2]); 
+                            long chunkID = Long.parseLong(fileTokens[fileTokens.length - 3]);
+                            String filename = fileTokens[0];
+                            /* Build the chunks and write it to client */
+                            StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(filename, this.hostname, chunkID, totalChunks, data);
+                            ChannelFuture write = ctx.pipeline().writeAndFlush(chunkToSend);
+                            writes.add(write);
+                        }
+
+                    }
+
+                }
+
+            }
+
+            for (ChannelFuture write : writes) {
+                write.syncUninterruptibly();
+            }
+            
+        }
+
+    }
+
+    /**
+      * Writes a StoreChunk to disk and appends its checksum to the filename
+      * The chunk will be stored under the root/home directory entered in the command line on storage node startup
+      * This is done with the -r flag
+      *
+      * Home -
+      *          file_chunks -
+      *              chunk0#AD12341FFC...
+      *              chunk1#AD12341111...
+      *              chunk2#12341FFC11...
+      *
+      *  file_chunks will be named the name of the file whose chunks we are storing
+      *  we will also append a chunks chunkid, #, and the sha1sum of the given
+      *  file's bytes.
+      *
+      *  This will allow us to verify to correctness of the data on retrieval 
+      *
+      * @param message
+      */
+    public void writeChunk(StorageMessages.StorageMessageWrapper message) {
+        /* If this chunk is not being stored on its primary node, log the replication happening */
+        if (!message.getStoreChunk().getOriginHost().equals(this.hostname) && message.getStoreChunk().getChunkId() == 0) {
+            logger.info("Recieved replica of " + message.getStoreChunk().getFileName() + " for " + message.getStoreChunk().getOriginHost());
+        }
+
+        String fileName = message.getStoreChunk().getFileName();
+        
+        Path chunkPath = Paths.get(rootDirectory.toString(), fileName);
+        
+        /* If we haven't stored a chunk of this file yet create a directory for the chunks to go into */
+        if (!Files.exists(chunkPath)) {
+            try {
+                Files.createDirectory(chunkPath);
+            } catch (IOException e) {
+                logger.info("Problem creating path: " + chunkPath);
+            }
+            logger.info("Created path: " + chunkPath);
+        }
+        
+        ByteString bytes = message.getStoreChunk().getData();
+
+        try {
+            /** 
+             * Store chunks in users specified home directory 
+             */
+            Path path = Paths.get(chunkPath.toString(),
+                    message.getStoreChunk().getFileName() 
+                    + "_chunk@" 
+                    + message.getStoreChunk().getChunkId() 
+                    + "@"
+                    + message.getStoreChunk().getTotalChunks()
+                    + "#" 
+                    + Checksum.SHAsum(bytes.toByteArray()));
+
+            /* Write chunk to disk */
+            byte[] data = message.getStoreChunk().getData().toByteArray();
+
+            Files.write(path, data);
+        } catch (IOException | NoSuchAlgorithmException ioe) {
+            logger.info("Could not write file/sha1sum not computed properly");
+        }
+    }
 }

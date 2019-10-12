@@ -3,9 +3,10 @@ option java_package = "edu.usfca.cs.dfs";
 
 message StoreChunk {
     string fileName = 1;
-    int32 chunkId = 2;
-    bytes data = 3;
-    string originHost = 4;
+    int64 chunkId = 2;
+    int64 totalChunks = 3;
+    bytes data = 4;
+    string originHost = 5;
 }
 
 message RetrieveFile {
@@ -19,7 +20,6 @@ message JoinRequest {
 message Heartbeat {
 	string hostname = 1;
 	int64 freeSpace = 2;
-	int32 requests = 3;
 	int64 timestamp = 4;
 }
 

@@ -242,6 +242,7 @@ public class Client implements DFSNode {
             logger.info("Recieved retrieval chunk. So far we retrieved " + retrievalSet.size());
             if (retrievalSet.size() == message.getStoreChunk().getTotalChunks()) {
                 logger.info("Done with retrieval");
+                this.stitchChunks();
                 ctx.channel().close().syncUninterruptibly();
             }
         } 

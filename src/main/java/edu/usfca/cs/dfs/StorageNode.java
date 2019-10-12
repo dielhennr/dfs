@@ -199,8 +199,9 @@ public class StorageNode implements DFSNode {
                     
                     /* If the reads and checksum computation was succesful, write the chunk to client */
                     if (data != null && checksumCheck != null) {
-                        String[] fileTokens = ((Path)chunkPath).toFile().toString().split("#@"); 
+                        String[] fileTokens = ((Path)chunkPath).toFile().toString().split("#"); 
                         String checksum = fileTokens[fileTokens.length - 1];
+                        fileTokens = fileTokens[0].split("@");
                         logger.info("Tokens length " + fileTokens.length);
                         logger.info("Checksum " + checksum);
                         logger.info("Pathname " + ((Path) chunkPath).toString());
@@ -209,8 +210,8 @@ public class StorageNode implements DFSNode {
                             logger.info("Chunk " + chunkPath.toString() + "needs healing");
                         } else {
                             /* Get chunk metadata from path */
-                            long totalChunks = Long.parseLong(fileTokens[fileTokens.length - 2]); 
-                            long chunkID = Long.parseLong(fileTokens[fileTokens.length - 3]);
+                            long totalChunks = Long.parseLong(fileTokens[fileTokens.length - 1]); 
+                            long chunkID = Long.parseLong(fileTokens[fileTokens.length - 2]);
                             String filename = fileTokens[0];
                             /* Build the chunks and write it to client */
                             StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(filename, this.hostname, chunkID, totalChunks, data);

@@ -233,7 +233,7 @@ public class StorageNode implements DFSNode {
 			} 
 
 			for (ChannelFuture write : writes) {
-				write.syncUninterruptibly();
+				write.awaitUninterruptibly();
 			}
 
 		} else {

@@ -56,8 +56,6 @@ public class Client implements DFSNode {
 
 	SortedSet<StorageMessages.StoreChunk> retrievalSet;
 
-    boolean doneRetrievingChunks;
-
 	/**
 	 * Constructs a client given the command line arguments
 	 *
@@ -75,8 +73,6 @@ public class Client implements DFSNode {
 					+ "-p port and -c <chunksize(int)>  are optional flags.");
 			System.exit(1);
 		}
-
-        doneRetrievingChunks = false;
 
 		if (arguments.hasFlag("-r")) {
 			path = arguments.getPath("-r");
@@ -239,17 +235,11 @@ public class Client implements DFSNode {
 			/* Add chunk to our set sorted by chunkID */
 			retrievalSet.add(message.getStoreChunk());
 			logger.info("Recieved retrieval chunk. So far we retrieved " + retrievalSet.size());
-            if (doneRetrievingChunks) {
-                ctx.channel().close();
-                
-            }
-			if (retrievalSet.size() == message.getStoreChunk().getTotalChunks() && !doneRetrievingChunks) {
+			if (retrievalSet.size() == message.getStoreChunk().getTotalChunks()) {
 				logger.info("Done with retrieval");
 				this.stitchChunks();
-                doneRetrievingChunks = true;
 			}
-
-		    workerGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
 		}
 
 	}

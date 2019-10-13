@@ -23,16 +23,11 @@ public class InboundHandler extends SimpleChannelInboundHandler<StorageMessages.
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) {
 		/* A connection has been established */
-		InetSocketAddress addr = (InetSocketAddress) ctx.channel().remoteAddress();
-		System.out.println("Connection established: " + addr);
 	}
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) {
 		/* A channel has been disconnected */
-		InetSocketAddress addr = (InetSocketAddress) ctx.channel().remoteAddress();
-		String host = addr.getHostName();
-		System.out.println("Connection lost: " + addr);
 	}
 
 	@Override

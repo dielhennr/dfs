@@ -165,6 +165,7 @@ public class StorageNode implements DFSNode {
 				chan.close().syncUninterruptibly();
 			}
 		} else if (message.hasRetrieveFile()) {
+            logger.info("Attempting to shoot chunks of " + message.getRetrieveFile().getFileName());
 			Path filePath = Paths.get(rootDirectory.toString(), message.getRetrieveFile().getFileName());
 			if (Files.exists(filePath)) {
 				this.shootChunks(ctx, filePath);
@@ -191,10 +192,12 @@ public class StorageNode implements DFSNode {
 //		}
 		
 		TreeSet<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
-		
-
+        logger.info("File chunks path: " + filePath);
 		/* If we got a stream iterate over it and write the chunks back to client */
 		if (chunks != null) {
+            System.out.println("Chunk paths");
+            chunks.stream().forEach(chunk -> System.out.println(chunk.getPath().getFileName().toString()));
+
 			List<ChannelFuture> writes = new ArrayList<>();
 			for (ChunkWrapper chunk : chunks) {
 				Path chunkPath = chunk.getPath();
@@ -234,13 +237,15 @@ public class StorageNode implements DFSNode {
 
 				}
 
-			}
+			} 
 
 			for (ChannelFuture write : writes) {
 				write.syncUninterruptibly();
 			}
 
-		}
+		} else {
+            logger.info("Could not find chunks");
+        }
 
 	}
 

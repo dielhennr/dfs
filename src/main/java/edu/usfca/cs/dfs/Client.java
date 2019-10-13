@@ -239,7 +239,6 @@ public class Client implements DFSNode {
 				logger.info("Done with retrieval");
 				this.stitchChunks();
 			}
-            workerGroup.shutdownGracefully();
 		}
 
 	}
@@ -262,5 +261,6 @@ public class Client implements DFSNode {
 			}
 
 		}
+		workerGroup.shutdownGracefully();
 	}
 }

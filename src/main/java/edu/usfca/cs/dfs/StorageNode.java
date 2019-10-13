@@ -183,17 +183,10 @@ public class StorageNode implements DFSNode {
 	 */
 	public void shootChunks(ChannelHandlerContext ctx, Path filePath) {
 
-		/** Get stream over directory's files */
-//		List<Path> chunks = null;
-//		try {
-//			chunks = ChunkFinder.list(filePath);
-//		} catch (IOException ioe) {
-//			logger.info("Could not send chunks back to client");
-//		}
-		
+	    /* Get chunks of the file requested */	
 		TreeSet<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
         logger.info("File chunks path: " + filePath);
-		/* If we got a stream iterate over it and write the chunks back to client */
+		/* Write the chunks back to client */
 		if (chunks != null) {
             System.out.println("Chunk paths");
             chunks.stream().forEach(chunk -> System.out.println(chunk.getPath().getFileName().toString()));
@@ -243,10 +236,10 @@ public class StorageNode implements DFSNode {
 				write.syncUninterruptibly();
 			}
             
-            ctx.channel().close();
 		} else {
             logger.info("Could not find chunks");
         }
+        ctx.channel().close();
 
 	}
 
@@ -303,8 +296,7 @@ public class StorageNode implements DFSNode {
 			 */
             String checksum = Checksum.SHAsum(data);
 			Path path = Paths.get(chunkPath.toString(),
-					message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId()
-							+ "#" + checksum);
+					message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId()							+ "#" + checksum);
             /* Add this path to the mapping of hosts to thier paths, we will use this to handle node failures and re-replication */
             synchronized(hostnameToChunks) {
                 hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(path);

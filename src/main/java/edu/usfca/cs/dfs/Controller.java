@@ -201,5 +201,9 @@ public class Controller implements DFSNode {
 				}
 			}
 		}
+
+        public void rereplicate(StorageNodeContext node) {
+            
+        }
 	}
 }

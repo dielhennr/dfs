@@ -5,17 +5,17 @@ import java.nio.file.Path;
 public class ChunkWrapper {
 	
 	Path pathToChunk;
-	int totalChunks;
-	int chunkID;
+	long chunkID;
+	long totalChunks;
 	
-	
-    public ChunkWrapper(Path pathToChunk, int totalChunks, int chunkID) {
+    public ChunkWrapper(Path pathToChunk, long chunkID, long totalChunks) {
     	this.pathToChunk = pathToChunk;
-    	this.totalChunks = totalChunks;
     	this.chunkID = chunkID;
+    	this.totalChunks = totalChunks;
     }
     
     public Path getPath() { return this.pathToChunk; }
-    public int getChunkID() { return this.chunkID; }
+    public long getChunkID() { return this.chunkID; }
+    public long getTotalChunks() { return this.totalChunks; }
     
 }

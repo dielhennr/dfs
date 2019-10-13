@@ -49,11 +49,13 @@ public class StorageNode implements DFSNode {
 
 	static Bootstrap bootstrap;
 	
-	HashMap<String, TreeSet<ChunkWrapper>> chunkMap;
+	HashMap<String, TreeSet<ChunkWrapper>> chunkMap;   // Mapping filenames to the chunks
+	HashMap<String, ArrayList<Path>> hostnameToChunks;	   // Mapping hostnames to Paths of chunks
 
 	public StorageNode(String[] args) throws UnknownHostException {
 		replicaHosts = new ArrayList<>();
 		chunkMap = new HashMap<>();
+		hostnameToChunks = new HashMap<>();
 		ip = InetAddress.getLocalHost();
 		hostname = ip.getHostName();
 		arguments = new ArgumentMap(args);
@@ -126,6 +128,7 @@ public class StorageNode implements DFSNode {
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreRequest()) {
+			
 			/* Only accept first replica assignments for now */
 			if (replicaHosts.isEmpty()) {
 				replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica1());
@@ -136,14 +139,16 @@ public class StorageNode implements DFSNode {
 				logger.info("Rejecting Assignment");
 			}
 
+			chunkMap.put(message.getStoreRequest().getFileName(), new TreeSet<ChunkWrapper>(new ChunkWrapperComparator()));
+			
 			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
 					+ message.getStoreRequest().getFileSize());
 		} else if (message.hasStoreChunk()) {
 			/* Write that shit to disk */
 			this.writeChunk(message);
-
+			hostnameToChunks.putIfAbsent(message.getStoreChunk().getOriginHost(), new ArrayList<Path>());
 			/* Send to replica assignments */
-			if (replicaHosts.size() == 2) {
+			if (replicaHosts.size() == 2 && message.getStoreChunk().getOriginHost().equals(this.hostname)) {
 				/* Connect to first assignment and send chunk */
 				ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13114);
 				cf.syncUninterruptibly();
@@ -179,17 +184,21 @@ public class StorageNode implements DFSNode {
 	public void shootChunks(ChannelHandlerContext ctx, Path filePath) {
 
 		/** Get stream over directory's files */
-		List<Path> chunks = null;
-		try {
-			chunks = ChunkFinder.list(filePath);
-		} catch (IOException ioe) {
-			logger.info("Could not send chunks back to client");
-		}
+//		List<Path> chunks = null;
+//		try {
+//			chunks = ChunkFinder.list(filePath);
+//		} catch (IOException ioe) {
+//			logger.info("Could not send chunks back to client");
+//		}
+		
+		TreeSet<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
+		
 
 		/* If we got a stream iterate over it and write the chunks back to client */
 		if (chunks != null) {
 			List<ChannelFuture> writes = new ArrayList<>();
-			for (Path chunkPath : chunks) {
+			for (ChunkWrapper chunk : chunks) {
+				Path chunkPath = chunk.getPath();
 				ByteString data = null;
 				String checksumCheck = null;
 
@@ -208,10 +217,9 @@ public class StorageNode implements DFSNode {
 				if (data != null && checksumCheck != null) {
 					String[] fileTokens = chunkPath.getFileName().toString().split("#");
 					String checksum = fileTokens[fileTokens.length - 1];
-					fileTokens = fileTokens[0].split("@");
-					logger.info("Tokens length " + fileTokens.length);
+
 					logger.info("Checksum " + checksum);
-					logger.info("Pathname " + ((Path) chunkPath).toString());
+					logger.info("Pathname " + chunkPath.toString());
 					/* If checksums don't match send request to replica assignment for healing */
 					if (!checksum.equals(checksumCheck)) {
 						logger.info("Chunk " + chunkPath.toString() + "needs healing");
@@ -271,6 +279,9 @@ public class StorageNode implements DFSNode {
 
 		Path chunkPath = Paths.get(rootDirectory.toString(), fileName);
 
+		hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(chunkPath);
+		chunkMap.get(fileName).add(new ChunkWrapper(chunkPath, message.getStoreChunk().getChunkId()
+				,message.getStoreChunk().getTotalChunks()));
 		/*
 		 * If we haven't stored a chunk of this file yet create a directory for the
 		 * chunks to go into

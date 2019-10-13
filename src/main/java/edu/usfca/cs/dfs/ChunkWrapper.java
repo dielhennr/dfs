@@ -18,6 +18,4 @@ public class ChunkWrapper {
     public Path getPath() { return this.pathToChunk; }
     public int getChunkID() { return this.chunkID; }
     
-    
-    
 }

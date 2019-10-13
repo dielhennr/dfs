@@ -243,10 +243,10 @@ public class StorageNode implements DFSNode {
 				write.syncUninterruptibly();
 			}
             
+            ctx.channel().close();
 		} else {
             logger.info("Could not find chunks");
         }
-        ctx.channel().close();
 
 	}
 

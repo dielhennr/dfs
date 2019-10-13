@@ -8,7 +8,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.TreeSet;
 
 import com.google.protobuf.ByteString;
 
@@ -46,10 +48,12 @@ public class StorageNode implements DFSNode {
 	ArrayList<String> replicaHosts;
 
 	static Bootstrap bootstrap;
+	
+	HashMap<String, TreeSet<ChunkWrapper>> chunkMap;
 
 	public StorageNode(String[] args) throws UnknownHostException {
 		replicaHosts = new ArrayList<>();
-
+		chunkMap = new HashMap<>();
 		ip = InetAddress.getLocalHost();
 		hostname = ip.getHostName();
 		arguments = new ArgumentMap(args);

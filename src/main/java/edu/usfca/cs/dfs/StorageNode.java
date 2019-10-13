@@ -232,15 +232,9 @@ public class StorageNode implements DFSNode {
 
 			} 
 
-			for (ChannelFuture write : writes) {
-				write.awaitUninterruptibly();
-			}
-
 		} else {
             logger.info("Could not find chunks");
         }
-        ctx.channel().close();
-
 	}
 
 	/**

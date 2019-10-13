@@ -186,6 +186,7 @@ public class Controller implements DFSNode {
 						long nodeTime = node.getTimestamp();
 
 						if (currentTime - nodeTime > 5500) {
+							handleNodeFailure(node);
 							logger.info("Detected failure on node: " + node.getHostName());
 							/* Also need to rereplicate data here. */
 							/* We have to rereplicate this nodes replicas as well as its primarys */
@@ -202,7 +203,7 @@ public class Controller implements DFSNode {
 			}
 		}
 
-        public void rereplicate(StorageNodeContext node) {
+        public void handleNodeFailure(StorageNodeContext node) {
             
         }
 	}

@@ -224,14 +224,11 @@ public class StorageNode implements DFSNode {
 					if (!checksum.equals(checksumCheck)) {
 						logger.info("Chunk " + chunkPath.toString() + "needs healing");
 					} else {
-						/* Get chunk metadata from path */
-						long totalChunks = Long.parseLong(fileTokens[fileTokens.length - 1]);
-						long chunkID = Long.parseLong(fileTokens[fileTokens.length - 2]);
 						String filename = fileTokens[0];
 
 						/* Build the chunks and write it to client */
 						StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(filename,
-								this.hostname, chunkID, totalChunks, data);
+								this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), data);
 						ChannelFuture write = ctx.pipeline().writeAndFlush(chunkToSend);
 						writes.add(write);
 					}
@@ -279,9 +276,6 @@ public class StorageNode implements DFSNode {
 
 		Path chunkPath = Paths.get(rootDirectory.toString(), fileName);
 
-		hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(chunkPath);
-		chunkMap.get(fileName).add(new ChunkWrapper(chunkPath, message.getStoreChunk().getChunkId()
-				,message.getStoreChunk().getTotalChunks()));
 		/*
 		 * If we haven't stored a chunk of this file yet create a directory for the
 		 * chunks to go into
@@ -295,22 +289,33 @@ public class StorageNode implements DFSNode {
 			logger.info("Created path: " + chunkPath);
 		}
 
-		ByteString bytes = message.getStoreChunk().getData();
-
 		try {
+
+			byte[] data = message.getStoreChunk().getData().toByteArray();
+
 			/**
 			 * Store chunks in users specified home directory
 			 */
+            String checksum = Checksum.SHAsum(data);
 			Path path = Paths.get(chunkPath.toString(),
-					message.getStoreChunk().getFileName() + "_chunk@" + message.getStoreChunk().getChunkId() + "@"
-							+ message.getStoreChunk().getTotalChunks() + "#" + Checksum.SHAsum(bytes.toByteArray()));
+					message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId()
+							+ "#" + checksum);
+            /* Add this path to the mapping of hosts to thier paths, we will use this to handle node failures and re-replication */
+            synchronized(hostnameToChunks) {
+                hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(chunkPath);
+            }
+
+            /* Add this chunk to it's files set */
+            synchronized(chunkMap) {
+                chunkMap.get(fileName).add(new ChunkWrapper(chunkPath, message.getStoreChunk().getChunkId()
+                        ,message.getStoreChunk().getTotalChunks(), checksum));
+            }
 
 			/* Write chunk to disk */
-			byte[] data = message.getStoreChunk().getData().toByteArray();
-
 			Files.write(path, data);
 		} catch (IOException | NoSuchAlgorithmException ioe) {
 			logger.info("Could not write file/sha1sum not computed properly");
 		}
+
 	}
 }

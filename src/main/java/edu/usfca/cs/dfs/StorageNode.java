@@ -306,13 +306,13 @@ public class StorageNode implements DFSNode {
 							+ "#" + checksum);
             /* Add this path to the mapping of hosts to thier paths, we will use this to handle node failures and re-replication */
             synchronized(hostnameToChunks) {
-                hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(chunkPath);
+                hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(path);
             }
 
             /* Add this chunk to it's files set */
             synchronized(chunkMap) {
-                chunkMap.get(fileName).add(new ChunkWrapper(chunkPath, message.getStoreChunk().getChunkId()
-                        ,message.getStoreChunk().getTotalChunks(), checksum));
+                chunkMap.get(fileName).add(new ChunkWrapper(path, message.getStoreChunk().getChunkId()
+                        , message.getStoreChunk().getTotalChunks(), checksum));
             }
 
 			/* Write chunk to disk */

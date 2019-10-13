@@ -139,14 +139,13 @@ public class StorageNode implements DFSNode {
 				logger.info("Rejecting Assignment");
 			}
 
-			chunkMap.put(message.getStoreRequest().getFileName(), new TreeSet<ChunkWrapper>(new ChunkWrapperComparator()));
-			
 			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
 					+ message.getStoreRequest().getFileSize());
 		} else if (message.hasStoreChunk()) {
 			/* Write that shit to disk */
-			this.writeChunk(message);
 			hostnameToChunks.putIfAbsent(message.getStoreChunk().getOriginHost(), new ArrayList<Path>());
+            chunkMap.putIfAbsent(message.getStoreChunk().getFileName(), new TreeSet<ChunkWrapper>(new ChunkWrapperComparator()));
+			this.writeChunk(message);
 			/* Send to replica assignments */
 			if (replicaHosts.size() == 2 && message.getStoreChunk().getOriginHost().equals(this.hostname)) {
 				/* Connect to first assignment and send chunk */

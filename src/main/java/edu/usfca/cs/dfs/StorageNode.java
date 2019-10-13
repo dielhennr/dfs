@@ -182,22 +182,11 @@ public class StorageNode implements DFSNode {
 	 *                 file directory
 	 */
 	public void shootChunks(ChannelHandlerContext ctx, Path filePath) {
-
-		/** Get stream over directory's files */
-//		List<Path> chunks = null;
-//		try {
-//			chunks = ChunkFinder.list(filePath);
-//		} catch (IOException ioe) {
-//			logger.info("Could not send chunks back to client");
-//		}
-		
+        
+        /* Get chunks of the requested file from our map */
 		TreeSet<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
-        logger.info("File chunks path: " + filePath);
-		/* If we got a stream iterate over it and write the chunks back to client */
+        /* If we find chunks send back to client */
 		if (chunks != null) {
-            System.out.println("Chunk paths");
-            chunks.stream().forEach(chunk -> System.out.println(chunk.getPath().getFileName().toString()));
-
 			List<ChannelFuture> writes = new ArrayList<>();
 			for (ChunkWrapper chunk : chunks) {
 				Path chunkPath = chunk.getPath();
@@ -243,7 +232,6 @@ public class StorageNode implements DFSNode {
 				write.syncUninterruptibly();
 			}
             
-            ctx.channel().close();
 		} else {
             logger.info("Could not find chunks");
         }

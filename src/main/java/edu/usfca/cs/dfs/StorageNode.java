@@ -227,7 +227,6 @@ public class StorageNode implements DFSNode {
 						ChannelFuture write = ctx.pipeline().writeAndFlush(chunkToSend);
 						writes.add(write);
 					}
-
 				}
 
 			} 

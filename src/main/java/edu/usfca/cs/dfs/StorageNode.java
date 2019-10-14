@@ -209,6 +209,7 @@ public class StorageNode implements DFSNode {
             }
         } else if (message.hasHealResponse()) {
             logger.info("recieved healed chunk on " + this.hostname);
+            ctx.channel().close().syncUninterruptibly();
             if (!message.getHealResponse().getPassTo().equals(this.hostname)) {
                 logger.info("passing to " + message.getHealResponse().getPassTo());
                 ChannelFuture cf = this.bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();

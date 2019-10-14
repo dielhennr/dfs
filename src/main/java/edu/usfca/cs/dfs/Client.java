@@ -86,8 +86,8 @@ public class Client implements DFSNode {
 		/* Default to port 13100 */
 		port = arguments.getInteger("-p", 13112);
 
-		/* Default Chunk size to 16kb */
-		this.chunkSize = arguments.getInteger("-c", 16384);
+		/* Default Chunk size to 50mb */
+		this.chunkSize = arguments.getInteger("-c", 50000000);
 
 		workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline(this);

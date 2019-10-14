@@ -296,6 +296,7 @@ public class StorageNode implements DFSNode {
             ArrayList<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
             /* Write the chunks back to client */
             if (chunks != null) {
+                ArrayList<ChunkWrapper> chunksToRemove = new ArrayList<>();
                 synchronized(chunks) {               
                     for (ChunkWrapper chunk : chunks) {
                         Path chunkPath = chunk.getPath();
@@ -329,7 +330,7 @@ public class StorageNode implements DFSNode {
                                     /* Delete the corrupted chunk */
                                     Files.deleteIfExists(chunkPath);
                                     /* Remove the chunk from our list, we will put it back when we get a heal response */
-                                    chunks.remove(chunk);
+                                    chunksToRemove.add(chunk);
                                 } catch (IOException ioe) {
                                     logger.info("Could not delete corrupted chunk");
                                 }
@@ -351,7 +352,7 @@ public class StorageNode implements DFSNode {
                                 }
                         } else {
                             /* If this chunk got deleted we will just remove it from our list and send a heal request to our first replica assignment */
-                            chunks.remove(chunk);
+                            chunksToRemove.add(chunk);
                             ChannelFuture healRequest = this.bootstrap.connect(replicaHosts.get(0), 13114);
                             healRequest.syncUninterruptibly();
                             ChannelFuture write = healRequest.channel().writeAndFlush(
@@ -360,6 +361,9 @@ public class StorageNode implements DFSNode {
                             write.syncUninterruptibly();
 
                         }
+                    }
+                    for (ChunkWrapper chunk : chunksToRemove) {
+                        chunks.remove(chunk);
                     }
                 }
             } else {

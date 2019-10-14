@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.TreeSet;
 
 import com.google.protobuf.ByteString;
 
@@ -48,7 +47,7 @@ public class StorageNode implements DFSNode {
 
 	Bootstrap bootstrap;
 	
-	HashMap<String, TreeSet<ChunkWrapper>> chunkMap;   // Mapping filenames to the chunks
+	HashMap<String, ArrayList<ChunkWrapper>> chunkMap;   // Mapping filenames to the chunks
 	HashMap<String, ArrayList<Path>> hostnameToChunks;	   // Mapping hostnames to Paths of chunks
 
 	public StorageNode(String[] args) throws UnknownHostException {
@@ -127,23 +126,23 @@ public class StorageNode implements DFSNode {
 	@Override
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreRequest()) {
-			
+            StorageMessages.StoreRequest storeRequest = message.getStoreRequest();			
 			/* Only accept first replica assignments for now */
 			if (replicaHosts.isEmpty()) {
-				replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica1());
-				replicaHosts.add(message.getStoreRequest().getReplicaAssignments().getReplica2());
-				logger.info("Replica Assignment 1: " + message.getStoreRequest().getReplicaAssignments().getReplica1());
-				logger.info("Replica Assignment 2: " + message.getStoreRequest().getReplicaAssignments().getReplica2());
+				replicaHosts.add(storeRequest.getReplicaAssignments().getReplica1());
+				replicaHosts.add(storeRequest.getReplicaAssignments().getReplica2());
+				logger.info("Replica Assignment 1: " + storeRequest.getReplicaAssignments().getReplica1());
+				logger.info("Replica Assignment 2: " + storeRequest.getReplicaAssignments().getReplica2());
 			} else {
 				logger.info("Rejecting Assignment");
 			}
 
-			logger.info("Request to store " + message.getStoreRequest().getFileName() + " size: "
-					+ message.getStoreRequest().getFileSize());
+			logger.info("Request to store " + storeRequest.getFileName() + " size: "
+					+ storeRequest.getFileSize());
 		} else if (message.hasStoreChunk()) {
 			/* Write that shit to disk */
 			hostnameToChunks.putIfAbsent(message.getStoreChunk().getOriginHost(), new ArrayList<Path>());
-            chunkMap.putIfAbsent(message.getStoreChunk().getFileName(), new TreeSet<ChunkWrapper>(new ChunkWrapperComparator()));
+            chunkMap.putIfAbsent(message.getStoreChunk().getFileName(), new ArrayList<ChunkWrapper>());
 			this.writeChunk(message);
 			/* Send to replica assignments */
 			if (replicaHosts.size() == 2 && message.getStoreChunk().getOriginHost().equals(this.hostname)) {
@@ -174,21 +173,7 @@ public class StorageNode implements DFSNode {
             /* If we get a heal request we need to write back a healed chunk if we have it, 
              * otherwise we need  to send a request to the final location of the chunk 
              */
-
-            StorageMessages.HealRequest heal = message.getHealRequest();
-            logger.info("Request to heal " + heal.getFileName() + " chunk " + heal.getChunkId());
-            logger.info("Origin location " + heal.getInitialLocation());
-            if (heal.getIntermediateLocation().equals(this.hostname)) {
-
-                logger.info("At Intermediate location: " + heal.getIntermediateLocation());
-                /* If our chunk matches its checksum we can send it back to client, otherwise send request to the final replica location */
-                ChannelFuture requestAgain = this.bootstrap.connect(heal.getFinalLocation(), 13114).syncUninterruptibly();
-                requestAgain.channel().writeAndFlush(message).syncUninterruptibly();
-            } else if (heal.getFinalLocation().equals(this.hostname)) {
-                logger.info("At Final location: " + heal.getFinalLocation());
-                /* Need to find the chunk, read it and send it back to intermediateLocation */
-            }
-
+            StorageMessages.StorageMessageWrapper healResonse = this.getChunkAsHealResponse(message); 
         } else if (message.hasHealResponse()) {
             logger.info("recieved healed chunk on " + this.hostname);
             if (!message.getHealResponse().getPassTo().equals(this.hostname)) {
@@ -200,6 +185,27 @@ public class StorageNode implements DFSNode {
 
         }
 	}
+    
+
+    public StorageMessages.StorageMessageWrapper getChunkAsHealResponse(StorageMessages.StorageMessageWrapper healRequestWrapper)  {
+        StorageMessages.HealRequest healRequest = healRequestWrapper.getHealRequest();
+
+        logger.info("Request to heal " + healRequest.getFileName() + " chunk " + healRequest.getChunkId());
+        logger.info("Origin location " + healRequest.getInitialLocation());
+        if (healRequest.getIntermediateLocation().equals(this.hostname)) {
+            logger.info("At Intermediate location: " + healRequest.getIntermediateLocation());
+
+            /* If our chunk matches its checksum we can send it back to client, otherwise send request to the final replica location */
+            ChannelFuture requestAgain = this.bootstrap.connect(healRequest.getFinalLocation(), 13114).syncUninterruptibly();
+            requestAgain.channel().writeAndFlush(healRequestWrapper).syncUninterruptibly();
+        } else if (healRequest.getFinalLocation().equals(this.hostname)) {
+            logger.info("At Final location: " + healRequest.getFinalLocation());
+            /* Need to find the chunk, read it and send it back to intermediateLocation */
+        }
+
+        return null;
+
+    }
 
 	/**
 	 * Find all chunks // tokenize them check metadata // heal if neccessary // send
@@ -212,7 +218,7 @@ public class StorageNode implements DFSNode {
 	public void shootChunks(ChannelHandlerContext ctx, Path filePath) {
 
 	    /* Get chunks of the file requested */	
-		TreeSet<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
+		ArrayList<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
 		/* Write the chunks back to client */
 		if (chunks != null) {
             
@@ -238,7 +244,7 @@ public class StorageNode implements DFSNode {
 					String[] fileTokens = chunkPath.getFileName().toString().split("#");
 					String checksum = fileTokens[fileTokens.length - 1];
 
-					/* If checksums don't match send request to replica assignment for healing */
+					/* If checksums don't match, send request to first replica assignment for healing */
 					if (!checksum.equals(checksumCheck)) {
 
                         /**

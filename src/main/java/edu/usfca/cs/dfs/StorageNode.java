@@ -228,7 +228,10 @@ public class StorageNode implements DFSNode {
             if (message.getHealResponse().getPassTo().equals(this.hostname)) {
                 logger.info("Shooting healed chunk to client.");
                 this.clientCtx.pipeline().writeAndFlush(chunk).syncUninterruptibly();
-            } 
+            } else {
+                ChannelFuture cf = bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();
+                cf.channel().writeAndFlush(message).syncUninterruptibly();
+            }
 
             /* Intermediate node and primary node write healed chunk to disk */
             this.writeChunk(chunk);

@@ -169,7 +169,22 @@ public class StorageNode implements DFSNode {
 			if (Files.exists(filePath)) {
 				this.shootChunks(ctx, filePath);
 			}
-		}
+		} else if (message.hasHealRequest()) {
+            StorageMessages.HealRequest heal = message.getHealRequest();
+            logger.info("Request to heal " + heal.getFileName() + " chunk " + heal.getChunkId());
+            logger.info("Origin location " + heal.getInitialLocation());
+            ctx.channel().close().syncUninterruptibly();
+            if (heal.getIntermediateLocation().equals(this.hostname)) {
+
+                logger.info("At Intermediate location: " + heal.getIntermediateLocation());
+                ChannelFuture requestAgain = this.bootstrap.connect(heal.getFinalLocation(), 13114);
+                ChannelFuture write = requestAgain.channel().writeAndFlush(message);
+                write.syncUninterruptibly();
+            } else if (heal.getFinalLocation().equals(this.hostname)) {
+                logger.info("At Final location: " + heal.getFinalLocation());
+            }
+
+        }
 	}
 
 	/**
@@ -192,6 +207,7 @@ public class StorageNode implements DFSNode {
 
 			for (ChunkWrapper chunk : chunks) {
 				Path chunkPath = chunk.getPath();
+                String filename = chunkPath.getFileName().toString();
 				ByteString data = null;
 				String checksumCheck = null;
 
@@ -205,7 +221,7 @@ public class StorageNode implements DFSNode {
 
 				/*
 				 * If the reads and checksum computation was succesful, write the chunk to
-				 * client
+				 * client or request a healed chunk depending on wether or not checksums match
 				 */
 				if (data != null && checksumCheck != null) {
 					String[] fileTokens = chunkPath.getFileName().toString().split("#");
@@ -215,13 +231,30 @@ public class StorageNode implements DFSNode {
 					logger.info("Pathname " + chunkPath.toString());
 					/* If checksums don't match send request to replica assignment for healing */
 					if (!checksum.equals(checksumCheck)) {
+
+                        /**
+                         * If our the checksum of a chunk no longer matches we will send a request
+                         * To our first replica assignment to send back a valid chunk
+                         */
 						logger.info("Chunk " + chunkPath.toString() + "needs healing");
+                        try {
+                            /* Delete the corrupted chunk */
+                            Files.deleteIfExists(chunkPath);
+                        } catch (IOException ioe) {
+                            logger.info("Could not delete corrupted chunk");
+                        }
+
+                        /* Build the heal request and send it the our first replica assignment with the 
+                         * hostname of the last replica assignment  
+                         **/
                         ChannelFuture healRequest = this.bootstrap.connect(replicaHosts.get(0), 13114);
                         healRequest.syncUninterruptibly();
+                        ChannelFuture write = healRequest.channel().writeAndFlush(
+                            Builders.buildHealRequest(filename, chunk.getChunkID(), this.hostname, 
+                                replicaHosts.get(0), replicaHosts.get(1)));
+                        write.syncUninterruptibly();
 					} else {
-						String filename = fileTokens[0];
-
-						/* Build the chunks and write it to client */
+						/* Build the store chunks and write it to client */
 						StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(filename,
 								this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), data);
 						ctx.pipeline().writeAndFlush(chunkToSend);

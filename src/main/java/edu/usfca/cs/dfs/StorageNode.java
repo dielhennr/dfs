@@ -261,6 +261,8 @@ public class StorageNode implements DFSNode {
 
                             if (healRequest.getFinalLocation().equals(this.hostname)) {
                                 passTo = healRequest.getInitialLocation();
+                            } else {
+                                passTo = "";
                             }
 
                             StorageMessages.HealResponse validChunk = StorageMessages.HealResponse

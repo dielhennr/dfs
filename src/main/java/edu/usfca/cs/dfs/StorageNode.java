@@ -46,6 +46,8 @@ public class StorageNode implements DFSNode {
 	ArrayList<String> replicaHosts;
 
 	Bootstrap bootstrap;
+
+    ChannelHandlerContext clientCtx;
 	
 	HashMap<String, ArrayList<ChunkWrapper>> chunkMap;   // Mapping filenames to the chunks
 	HashMap<String, ArrayList<Path>> hostnameToChunks;	   // Mapping hostnames to Paths of chunks
@@ -55,6 +57,7 @@ public class StorageNode implements DFSNode {
 		chunkMap = new HashMap<>();
 		hostnameToChunks = new HashMap<>();
 		ip = InetAddress.getLocalHost();
+        clientCtx = null;
 		hostname = ip.getHostName();
 		arguments = new ArgumentMap(args);
 		if (arguments.hasFlag("-h") && arguments.hasFlag("-r")) {
@@ -165,11 +168,11 @@ public class StorageNode implements DFSNode {
 		} else if (message.hasRetrieveFile()) {
             logger.info("Attempting to shoot chunks of " + message.getRetrieveFile().getFileName() + " to client");
 			Path filePath = Paths.get(rootDirectory.toString(), message.getRetrieveFile().getFileName());
+            clientCtx = ctx;
 			if (Files.exists(filePath)) {
-				this.shootChunks(ctx, filePath);
+				this.shootChunks(filePath);
 			}
 		} else if (message.hasHealRequest()) {
-
             /** 
              * If we get a heal request we need to write back a healed chunk if we have it, 
              * otherwise we need  to send a request to the final location of the chunk 
@@ -209,14 +212,26 @@ public class StorageNode implements DFSNode {
             }
         } else if (message.hasHealResponse()) {
             logger.info("recieved healed chunk on " + this.hostname);
+            StorageMessages.HealResponse healResponse = message.getHealResponse();
             ctx.channel().close().syncUninterruptibly();
-            if (!message.getHealResponse().getPassTo().equals(this.hostname)) {
-                logger.info("passing to " + message.getHealResponse().getPassTo());
-                ChannelFuture cf = this.bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();
-                cf.channel().writeAndFlush(message).syncUninterruptibly();
-            } else {
-                /* If we don't have to send this to anyone we can send it back to client */
+            long totalChunks = 0;
+            synchronized(chunkMap) {
+                totalChunks = chunkMap.get(healResponse.getFileName()).size();
             }
+
+            StorageMessages.StorageMessageWrapper chunk = Builders.buildStoreChunk( healResponse.getFileName(), 
+                                                                                    healResponse.getPassTo(), 
+                                                                                    healResponse.getChunkId(), 
+                                                                                    totalChunks, 
+                                                                                    healResponse.getData() );
+            /* Shoot the healed chunk back to client if we are done healing */
+            if (message.getHealResponse().getPassTo().equals(this.hostname)) {
+                logger.info("Shooting healed chunk to client.");
+                this.clientCtx.pipeline().writeAndFlush(chunk).syncUninterruptibly();
+            } 
+
+            /* Intermediate node and primary node write healed chunk to disk */
+            this.writeChunk(chunk);
         }
 	}
     
@@ -272,11 +287,10 @@ public class StorageNode implements DFSNode {
 	 * Find all chunks // tokenize them check metadata // heal if neccessary // send
 	 * chunks to client
 	 *
-	 * @param ctx      {@link ChannelHandlerContext}
 	 * @param filePath {@link ChunkFinder} Produce a list of all chunks from root
 	 *                 file directory
 	 */
-	public void shootChunks(ChannelHandlerContext ctx, Path filePath) {
+	public void shootChunks(Path filePath) {
 
 	    /* Get chunks of the file requested */	
 		ArrayList<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
@@ -332,7 +346,7 @@ public class StorageNode implements DFSNode {
 						/* Build the store chunks and write it to client */
 						StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(chunk.getFileName(),
 								this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), data);
-						ctx.pipeline().writeAndFlush(chunkToSend);
+						this.clientCtx.pipeline().writeAndFlush(chunkToSend);
 					}
 				}
 			} 
@@ -395,6 +409,7 @@ public class StorageNode implements DFSNode {
             String checksum = Checksum.SHAsum(data);
 			Path path = Paths.get(chunkPath.toString(),
 					message.getStoreChunk().getFileName() + "_chunk" + message.getStoreChunk().getChunkId()							+ "#" + checksum);
+
             /* Add this path to the mapping of hosts to thier paths, we will use this to handle node failures and re-replication */
             synchronized(hostnameToChunks) {
                 hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(path);
@@ -411,6 +426,5 @@ public class StorageNode implements DFSNode {
 		} catch (IOException | NoSuchAlgorithmException ioe) {
 			logger.info("Could not write file/sha1sum not computed properly");
 		}
-
 	}
 }

@@ -183,7 +183,7 @@ public class StorageNode implements DFSNode {
             if (healRequest.getIntermediateLocation().equals(this.hostname)) {
                 logger.info("At Intermediate location: " + healRequest.getIntermediateLocation());
                 /* If our chunk matches its checksum we can send it back to client, otherwise send request to the final replica location */
-                if ( (healResponse = this.getChunkAsHealResponse(message)) != null ) {
+                if ( (healResponse = this.getChunkAsHealResponse(message.getHealRequest())) != null ) {
                     logger.info("Found valid chunk here for " + healRequest.getInitialLocation());
                     ChannelFuture cf = bootstrap.connect(healRequest.getInitialLocation(), 13114).syncUninterruptibly();
                     cf.channel().writeAndFlush(healResponse).syncUninterruptibly();
@@ -200,7 +200,7 @@ public class StorageNode implements DFSNode {
                  * If our chunk matches its checksum we can send it back to intermediate location, 
                  * Otherwise all of our data is corrupted and we cannot retrieve it
                  */
-                if ( (healResponse = this.getChunkAsHealResponse(message)) != null) {
+                if ( (healResponse = this.getChunkAsHealResponse(message.getHealRequest())) != null) {
                     ChannelFuture cf = bootstrap.connect(healRequest.getIntermediateLocation(), 13114).syncUninterruptibly();
                     cf.channel().writeAndFlush(healResponse).syncUninterruptibly();
                 } else {
@@ -214,13 +214,19 @@ public class StorageNode implements DFSNode {
                 logger.info("passing to " + message.getHealResponse().getPassTo());
                 ChannelFuture cf = this.bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();
                 cf.channel().writeAndFlush(message).syncUninterruptibly();
+            } else {
+                /* If we don't have to send this to anyone we can send it back to client */
             }
         }
 	}
     
-
-    public StorageMessages.StorageMessageWrapper getChunkAsHealResponse(StorageMessages.StorageMessageWrapper healRequestWrapper)  {
-        StorageMessages.HealRequest healRequest = healRequestWrapper.getHealRequest();
+    /**
+     * Attempts to find a healed chunk in the filesystem for the request
+     *
+     * @param healRequestWrapper
+     * @return healedchunk
+     */
+    public StorageMessages.StorageMessageWrapper getChunkAsHealResponse(StorageMessages.HealRequest healRequest)  {
         StorageMessages.StorageMessageWrapper healedChunk = null; 
         String filename = healRequest.getFileName();
         int chunkID = (int) healRequest.getChunkId();

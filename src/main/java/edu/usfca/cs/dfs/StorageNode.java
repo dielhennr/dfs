@@ -164,7 +164,7 @@ public class StorageNode implements DFSNode {
 				chan.close().syncUninterruptibly();
 			}
 		} else if (message.hasRetrieveFile()) {
-            logger.info("Attempting to shoot chunks of " + message.getRetrieveFile().getFileName());
+            logger.info("Attempting to shoot chunks of " + message.getRetrieveFile().getFileName() + " to client");
 			Path filePath = Paths.get(rootDirectory.toString(), message.getRetrieveFile().getFileName());
 			if (Files.exists(filePath)) {
 				this.shootChunks(ctx, filePath);
@@ -199,12 +199,9 @@ public class StorageNode implements DFSNode {
 
 	    /* Get chunks of the file requested */	
 		TreeSet<ChunkWrapper> chunks = chunkMap.get(filePath.getFileName().toString());
-        logger.info("File chunks path: " + filePath);
 		/* Write the chunks back to client */
 		if (chunks != null) {
-            System.out.println("Chunk paths");
-            chunks.stream().forEach(chunk -> System.out.println(chunk.getPath().getFileName().toString()));
-
+            
 			for (ChunkWrapper chunk : chunks) {
 				Path chunkPath = chunk.getPath();
                 String filename = chunkPath.getFileName().toString();
@@ -227,8 +224,6 @@ public class StorageNode implements DFSNode {
 					String[] fileTokens = chunkPath.getFileName().toString().split("#");
 					String checksum = fileTokens[fileTokens.length - 1];
 
-					logger.info("Checksum " + checksum);
-					logger.info("Pathname " + chunkPath.toString());
 					/* If checksums don't match send request to replica assignment for healing */
 					if (!checksum.equals(checksumCheck)) {
 
@@ -260,9 +255,7 @@ public class StorageNode implements DFSNode {
 						ctx.pipeline().writeAndFlush(chunkToSend);
 					}
 				}
-
 			} 
-
 		} else {
             logger.info("Could not find chunks");
         }

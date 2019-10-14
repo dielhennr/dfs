@@ -170,40 +170,94 @@ public class StorageNode implements DFSNode {
 			}
 		} else if (message.hasHealRequest()) {
 
-            /* If we get a heal request we need to write back a healed chunk if we have it, 
+            /** 
+             * If we get a heal request we need to write back a healed chunk if we have it, 
              * otherwise we need  to send a request to the final location of the chunk 
              */
-            StorageMessages.StorageMessageWrapper healResonse = this.getChunkAsHealResponse(message); 
+            StorageMessages.HealRequest healRequest = message.getHealRequest();
+            StorageMessages.StorageMessageWrapper healResponse = null;
+
+            /* Close the request channel */
+            ctx.channel().close().syncUninterruptibly();
+
+            if (healRequest.getIntermediateLocation().equals(this.hostname)) {
+                logger.info("At Intermediate location: " + healRequest.getIntermediateLocation());
+                /* If our chunk matches its checksum we can send it back to client, otherwise send request to the final replica location */
+                if ( (healResponse = this.getChunkAsHealResponse(message)) != null ) {
+                    logger.info("Found valid chunk here for " + healRequest.getInitialLocation());
+                    ChannelFuture cf = bootstrap.connect(healRequest.getInitialLocation(), 13114).syncUninterruptibly();
+                    cf.channel().writeAndFlush(healResponse).syncUninterruptibly();
+                } else {
+                    logger.info("Did not find valid chunk here for " + healRequest.getInitialLocation());
+                    logger.info("Requesting from " + healRequest.getFinalLocation());
+                    ChannelFuture requestAgain = this.bootstrap.connect(healRequest.getFinalLocation(), 13114).syncUninterruptibly();
+                    requestAgain.channel().writeAndFlush(message).syncUninterruptibly();
+                }
+
+            } else if (healRequest.getFinalLocation().equals(this.hostname)) {
+                logger.info("At Final location: " + healRequest.getFinalLocation());
+                /** 
+                 * If our chunk matches its checksum we can send it back to intermediate location, 
+                 * Otherwise all of our data is corrupted and we cannot retrieve it
+                 */
+                if ( (healResponse = this.getChunkAsHealResponse(message)) != null) {
+                    ChannelFuture cf = bootstrap.connect(healRequest.getIntermediateLocation(), 13114).syncUninterruptibly();
+                    cf.channel().writeAndFlush(healResponse).syncUninterruptibly();
+                } else {
+                    logger.info("All data corrupted for " + healRequest.getFileName() + " chunk " + healRequest.getChunkId());
+                }
+            }
         } else if (message.hasHealResponse()) {
             logger.info("recieved healed chunk on " + this.hostname);
             if (!message.getHealResponse().getPassTo().equals(this.hostname)) {
                 logger.info("passing to " + message.getHealResponse().getPassTo());
                 ChannelFuture cf = this.bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();
                 cf.channel().writeAndFlush(message).syncUninterruptibly();
-                
             }
-
         }
 	}
     
 
     public StorageMessages.StorageMessageWrapper getChunkAsHealResponse(StorageMessages.StorageMessageWrapper healRequestWrapper)  {
         StorageMessages.HealRequest healRequest = healRequestWrapper.getHealRequest();
-
+        StorageMessages.StorageMessageWrapper healedChunk = null; 
+        String filename = healRequest.getFileName();
+        int chunkID = (int) healRequest.getChunkId();
         logger.info("Request to heal " + healRequest.getFileName() + " chunk " + healRequest.getChunkId());
         logger.info("Origin location " + healRequest.getInitialLocation());
-        if (healRequest.getIntermediateLocation().equals(this.hostname)) {
-            logger.info("At Intermediate location: " + healRequest.getIntermediateLocation());
 
-            /* If our chunk matches its checksum we can send it back to client, otherwise send request to the final replica location */
-            ChannelFuture requestAgain = this.bootstrap.connect(healRequest.getFinalLocation(), 13114).syncUninterruptibly();
-            requestAgain.channel().writeAndFlush(healRequestWrapper).syncUninterruptibly();
-        } else if (healRequest.getFinalLocation().equals(this.hostname)) {
-            logger.info("At Final location: " + healRequest.getFinalLocation());
-            /* Need to find the chunk, read it and send it back to intermediateLocation */
+        synchronized (chunkMap) {
+            for (ChunkWrapper chunk : chunkMap.get(filename)) {
+                if (chunk.chunkID == chunkID) {
+                    try {
+                        byte[] data = Files.readAllBytes(chunk.getPath());
+                        if (chunk.checksum.equals(Checksum.SHAsum(data))) {
+                            String passTo = null;
+
+                            if (healRequest.getFinalLocation().equals(this.hostname)) {
+                                passTo = healRequest.getInitialLocation();
+                            }
+
+                            StorageMessages.HealResponse validChunk = StorageMessages.HealResponse
+                                                            .newBuilder()
+                                                            .setFileName(filename)
+                                                            .setChunkId(chunkID)
+                                                            .setPassTo(passTo)
+                                                            .setData(ByteString.copyFrom(data))
+                                                            .build();
+
+                            healedChunk = StorageMessages.StorageMessageWrapper.newBuilder().setHealResponse(validChunk).build();
+                               
+                        }
+                    } catch (IOException | NoSuchAlgorithmException ioe) {
+                        logger.info("Could not read chunk for heal request");
+                    }
+                    break;
+                }
+            }
         }
-
-        return null;
+        
+        return healedChunk;
 
     }
 

@@ -216,7 +216,7 @@ public class StorageNode implements DFSNode {
             ctx.channel().close().syncUninterruptibly();
             long totalChunks = 0;
             synchronized(chunkMap) {
-                totalChunks = chunkMap.get(healResponse.getFileName()).size();
+                totalChunks = chunkMap.get(healResponse.getFileName()).get(0).getTotalChunks();
             }
 
             StorageMessages.StorageMessageWrapper chunk = Builders.buildStoreChunk( healResponse.getFileName(), 

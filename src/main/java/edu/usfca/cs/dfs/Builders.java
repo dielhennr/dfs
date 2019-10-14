@@ -21,6 +21,55 @@ public class Builders {
 		return  StorageMessages.StorageMessageWrapper.newBuilder().setJoinRequest(joinRequest).build();
 	}
 
+
+    /**
+     * Builds a heal request
+     *
+     * @param fileName - Filename of chunk that needs healing
+     * @param chunkId  - chunk that needs healing
+     * @param originLocation - First host sending this request
+     * @param intermediate   - originLocation's first replication assignment
+     * @param finalLocation  - originLocation's second replication assignment
+     * @return heal request
+     */
+	public static StorageMessages.StorageMessageWrapper buildHealRequest(String fileName, long chunkId, 
+            String originLocation, String intermediate, String finalLocation) {
+		/* Store hostname in a JoinRequest protobuf */
+		StorageMessages.HealRequest healRequest = StorageMessages.HealRequest
+                                        .newBuilder()
+                                        .setFileName(fileName)
+                                        .setChunkId(chunkId)
+                                        .setInitialLocation(originLocation)
+                                        .setIntermediateLocation(intermediate)
+                                        .setFinalLocation(finalLocation)
+				                        .build();
+
+		return  StorageMessages.StorageMessageWrapper.newBuilder().setHealRequest(healRequest).build();
+	}
+    
+    /**
+     * Builds a heal response with a healed chunk (or failure bool?)
+     *
+     * @param filename - Filename of this chunk 
+     * @param chunkId  - Chunk of file being sent
+     * @param passTo   - additional hosts to pass the response to
+     * @param data     - data to send
+     * @return
+     */
+	public static StorageMessages.StorageMessageWrapper buildHealResponse(String filename, long chunkId, 
+            String passTo, ByteString data) {
+		/* Store hostname in a JoinRequest protobuf */
+		StorageMessages.HealResponse joinRequest = StorageMessages.HealResponse
+                                        .newBuilder()
+                                        .setFileName(filename)
+                                        .setChunkId(chunkId)
+                                        .setPassTo(passTo)
+                                        .setData(data)
+				                        .build();
+
+		return  StorageMessages.StorageMessageWrapper.newBuilder().setHealResponse(joinRequest).build();
+	}
+
 	/**
 	 * Build a heartbeat protobuf
 	 *

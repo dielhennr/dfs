@@ -216,6 +216,8 @@ public class StorageNode implements DFSNode {
 					/* If checksums don't match send request to replica assignment for healing */
 					if (!checksum.equals(checksumCheck)) {
 						logger.info("Chunk " + chunkPath.toString() + "needs healing");
+                        ChannelFuture healRequest = this.bootstrap.connect(replicaHosts.get(0), 13114);
+                        healRequest.syncUninterruptibly();
 					} else {
 						String filename = fileTokens[0];
 

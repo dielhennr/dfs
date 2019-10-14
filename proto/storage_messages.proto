@@ -49,6 +49,20 @@ message PossibleRetrievalHosts {
 	string fileName = 2;
 }
 
+message HealRequest {
+    string fileName = 1;
+    int64 chunkId = 2;
+    string initialLocation = 3;
+    string intermediateLocation = 4;
+    string finalLocation = 5;
+}
+
+message HealResponse {
+    string fileName = 1;
+    int64 chunkId = 2;
+    string passTo = 3; 
+    bytes data = 4;
+}
 
 message StorageMessageWrapper {
     oneof msg {
@@ -60,5 +74,7 @@ message StorageMessageWrapper {
         StoreResponse storeResponse = 6;
         ReplicaAssignments replicaAssignments = 7;
         PossibleRetrievalHosts retrievalHosts = 8;
+        HealRequest healRequest = 9;
+        HealResponse healResponse = 10;
     }
 }

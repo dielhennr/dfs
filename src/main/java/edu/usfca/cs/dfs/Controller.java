@@ -39,7 +39,7 @@ public class Controller implements DFSNode {
 		/* Pass a reference of the controller to our message router */
 		messageRouter = new ServerMessageRouter(this);
 		messageRouter.listen(this.port);
-		System.out.println("Listening for connections on port 13100");
+		System.out.println("Listening for connections on port " + this.port);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -248,7 +248,7 @@ public class Controller implements DFSNode {
     		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
     				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
-    		ChannelFuture cf = bootstrap.connect(hostname1, 13114);
+    		ChannelFuture cf = bootstrap.connect(hostname1, 13112);
     		cf.syncUninterruptibly();
     		
     		Channel chan = cf.channel();
@@ -260,7 +260,7 @@ public class Controller implements DFSNode {
     		
     		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
     			String nodeName = node.getHostName();
-    			cf = bootstrap.connect(hostname1, 13114);
+    			cf = bootstrap.connect(hostname1, 13112);
     			cf.syncUninterruptibly();
     			chan = cf.channel();
     			

@@ -235,6 +235,7 @@ public class Client implements DFSNode {
 			/* Add chunk to our set sorted by chunkID */
 			retrievalSet.add(message.getStoreChunk());
 			logger.info("Recieved retrieval chunk. So far we retrieved " + retrievalSet.size());
+            logger.info("This chunks says that there are " + message.getStoreChunk().getTotalChunks() + " total chunks");
 			if (retrievalSet.size() == message.getStoreChunk().getTotalChunks()) {
 				logger.info("Done with retrieval");
 				this.stitchChunks();

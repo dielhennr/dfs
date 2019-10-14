@@ -199,9 +199,10 @@ public class Builders {
 		return StorageMessages.StorageMessageWrapper.newBuilder().setRetrievalHosts(hostsResponse).build();
 	}
 	
-	public static StorageMessages.StorageMessageWrapper buildReplicaRequest(String targetHost, String downNodeHost) {
+	public static StorageMessages.StorageMessageWrapper buildReplicaRequest(String targetHost, String downNodeHost, boolean reReplicate) {
+		
 		StorageMessages.ReplicateOnFailure replicaRequest = StorageMessages.ReplicateOnFailure.newBuilder()
-				.setDownNodeHostName(downNodeHost).setTargetHost(targetHost).build();
+				.setDownNodeHostName(downNodeHost).setTargetHost(targetHost).setReAssign(reReplicate).build();
 		
 		return StorageMessages.StorageMessageWrapper.newBuilder().setReplicaRequest(replicaRequest).build();
 	}

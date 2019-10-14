@@ -8,9 +8,16 @@ import java.util.PriorityQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.usfca.cs.dfs.net.MessagePipeline;
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class Controller implements DFSNode {
 
@@ -209,8 +216,8 @@ public class Controller implements DFSNode {
             StorageNodeContext downNodeReplicaAssignment1 = downNode.replicaAssignment1;
             StorageNodeContext downNodeReplicaAssignment2 = downNode.replicaAssignment2;
 
-
-
+            
+            String targetHost = "";
 
 
             ArrayList<StorageNodeContext> nodesThatNeedNewReplicaAssignments = new ArrayList<>();
@@ -224,18 +231,47 @@ public class Controller implements DFSNode {
 					if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
 						nodesThatNeedNewReplicaAssignments.add(currNode);
 					}
-
+					else if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
+						targetHost = currNode.getHostName();
+					}
 				}
             }
-            
+            logger.info("Target Host for replication: " + targetHost);
             // Send message to one of the nodes that handles the down node's replicas
             String hostname1 = downNodeReplicaAssignment1.getHostName();
             String downHost = downNode.getHostName();
-            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(hostname1, downHost);
             
+            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(targetHost, downHost, false);
             
-        	
-        	
+            EventLoopGroup workerGroup = new NioEventLoopGroup();
+            MessagePipeline pipeline = new MessagePipeline();
+    		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+    				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
+
+    		ChannelFuture cf = bootstrap.connect(hostname1, 13114);
+    		cf.syncUninterruptibly();
+    		
+    		Channel chan = cf.channel();
+    		ChannelFuture write = chan.writeAndFlush(replicaRequest);
+    		write.syncUninterruptibly();
+    		
+    		
+    		// Now hit up the nodes that had the down node as its replica assignments
+    		
+    		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
+    			String nodeName = node.getHostName();
+    			cf = bootstrap.connect(hostname1, 13114);
+    			cf.syncUninterruptibly();
+    			chan = cf.channel();
+    			
+    			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(nodeName, downHost, true);
+    			write = chan.writeAndFlush(replicaAssignmentChange);
+    			
+    		}
+    		
+    		
+    		
+    		
         }
 	}
 }

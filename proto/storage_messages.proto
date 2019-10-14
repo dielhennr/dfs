@@ -67,6 +67,7 @@ message HealResponse {
 message ReplicateOnFailure {
 	string downNodeHostName = 1;
 	string targetHost = 2;
+	bool reAssign = 3;
 }
 
 message StorageMessageWrapper {

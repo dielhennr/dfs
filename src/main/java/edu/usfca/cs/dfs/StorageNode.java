@@ -236,6 +236,17 @@ public class StorageNode implements DFSNode {
             /* Intermediate node and primary node write healed chunk to disk */
             this.writeChunk(chunk);
         }
+		
+        else if (message.hasReplicaRequest()) {
+        	StorageMessages.ReplicateOnFailure replicaRequest = message.getReplicaRequest();
+        	
+        	String downNode = replicaRequest.getDownNodeHostName();
+        	String targetHost = replicaRequest.getTargetHost();
+        	boolean reReplicate = replicaRequest.getReAssign();
+        	
+        	logger.info("Recieved Replication Request: Down Node: " + downNode + " target host for rereplication: " +
+        				targetHost + " reassignment flag: " + reReplicate);
+        }
 	}
     
     /**

@@ -7826,6 +7826,11 @@ public final class StorageMessages {
      */
     com.google.protobuf.ByteString
         getTargetHostBytes();
+
+    /**
+     * <code>bool reAssign = 3;</code>
+     */
+    boolean getReAssign();
   }
   /**
    * Protobuf type {@code ReplicateOnFailure}
@@ -7884,6 +7889,11 @@ public final class StorageMessages {
               java.lang.String s = input.readStringRequireUtf8();
 
               targetHost_ = s;
+              break;
+            }
+            case 24: {
+
+              reAssign_ = input.readBool();
               break;
             }
             default: {
@@ -7986,6 +7996,15 @@ public final class StorageMessages {
       }
     }
 
+    public static final int REASSIGN_FIELD_NUMBER = 3;
+    private boolean reAssign_;
+    /**
+     * <code>bool reAssign = 3;</code>
+     */
+    public boolean getReAssign() {
+      return reAssign_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8006,6 +8025,9 @@ public final class StorageMessages {
       if (!getTargetHostBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, targetHost_);
       }
+      if (reAssign_ != false) {
+        output.writeBool(3, reAssign_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -8020,6 +8042,10 @@ public final class StorageMessages {
       }
       if (!getTargetHostBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, targetHost_);
+      }
+      if (reAssign_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(3, reAssign_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -8040,6 +8066,8 @@ public final class StorageMessages {
           .equals(other.getDownNodeHostName())) return false;
       if (!getTargetHost()
           .equals(other.getTargetHost())) return false;
+      if (getReAssign()
+          != other.getReAssign()) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -8055,6 +8083,9 @@ public final class StorageMessages {
       hash = (53 * hash) + getDownNodeHostName().hashCode();
       hash = (37 * hash) + TARGETHOST_FIELD_NUMBER;
       hash = (53 * hash) + getTargetHost().hashCode();
+      hash = (37 * hash) + REASSIGN_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getReAssign());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8192,6 +8223,8 @@ public final class StorageMessages {
 
         targetHost_ = "";
 
+        reAssign_ = false;
+
         return this;
       }
 
@@ -8220,6 +8253,7 @@ public final class StorageMessages {
         edu.usfca.cs.dfs.StorageMessages.ReplicateOnFailure result = new edu.usfca.cs.dfs.StorageMessages.ReplicateOnFailure(this);
         result.downNodeHostName_ = downNodeHostName_;
         result.targetHost_ = targetHost_;
+        result.reAssign_ = reAssign_;
         onBuilt();
         return result;
       }
@@ -8275,6 +8309,9 @@ public final class StorageMessages {
         if (!other.getTargetHost().isEmpty()) {
           targetHost_ = other.targetHost_;
           onChanged();
+        }
+        if (other.getReAssign() != false) {
+          setReAssign(other.getReAssign());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -8439,6 +8476,32 @@ public final class StorageMessages {
   checkByteStringIsUtf8(value);
         
         targetHost_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean reAssign_ ;
+      /**
+       * <code>bool reAssign = 3;</code>
+       */
+      public boolean getReAssign() {
+        return reAssign_;
+      }
+      /**
+       * <code>bool reAssign = 3;</code>
+       */
+      public Builder setReAssign(boolean value) {
+        
+        reAssign_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool reAssign = 3;</code>
+       */
+      public Builder clearReAssign() {
+        
+        reAssign_ = false;
         onChanged();
         return this;
       }
@@ -11457,21 +11520,22 @@ public final class StorageMessages {
       "\024intermediateLocation\030\004 \001(\t\022\025\n\rfinalLoca" +
       "tion\030\005 \001(\t\"O\n\014HealResponse\022\020\n\010fileName\030\001" +
       " \001(\t\022\017\n\007chunkId\030\002 \001(\003\022\016\n\006passTo\030\003 \001(\t\022\014\n" +
-      "\004data\030\004 \001(\014\"B\n\022ReplicateOnFailure\022\030\n\020dow" +
-      "nNodeHostName\030\001 \001(\t\022\022\n\ntargetHost\030\002 \001(\t\"" +
-      "\337\003\n\025StorageMessageWrapper\022!\n\nstoreChunk\030" +
-      "\001 \001(\0132\013.StoreChunkH\000\022%\n\014retrieveFile\030\002 \001" +
-      "(\0132\r.RetrieveFileH\000\022#\n\013joinRequest\030\003 \001(\013" +
-      "2\014.JoinRequestH\000\022\037\n\theartbeat\030\004 \001(\0132\n.He" +
-      "artbeatH\000\022%\n\014storeRequest\030\005 \001(\0132\r.StoreR" +
-      "equestH\000\022\'\n\rstoreResponse\030\006 \001(\0132\016.StoreR" +
-      "esponseH\000\0221\n\022replicaAssignments\030\007 \001(\0132\023." +
-      "ReplicaAssignmentsH\000\0221\n\016retrievalHosts\030\010" +
-      " \001(\0132\027.PossibleRetrievalHostsH\000\022#\n\013healR" +
-      "equest\030\t \001(\0132\014.HealRequestH\000\022%\n\014healResp" +
-      "onse\030\n \001(\0132\r.HealResponseH\000\022-\n\016replicaRe" +
-      "quest\030\013 \001(\0132\023.ReplicateOnFailureH\000B\005\n\003ms" +
-      "gB\022\n\020edu.usfca.cs.dfsb\006proto3"
+      "\004data\030\004 \001(\014\"T\n\022ReplicateOnFailure\022\030\n\020dow" +
+      "nNodeHostName\030\001 \001(\t\022\022\n\ntargetHost\030\002 \001(\t\022" +
+      "\020\n\010reAssign\030\003 \001(\010\"\337\003\n\025StorageMessageWrap" +
+      "per\022!\n\nstoreChunk\030\001 \001(\0132\013.StoreChunkH\000\022%" +
+      "\n\014retrieveFile\030\002 \001(\0132\r.RetrieveFileH\000\022#\n" +
+      "\013joinRequest\030\003 \001(\0132\014.JoinRequestH\000\022\037\n\the" +
+      "artbeat\030\004 \001(\0132\n.HeartbeatH\000\022%\n\014storeRequ" +
+      "est\030\005 \001(\0132\r.StoreRequestH\000\022\'\n\rstoreRespo" +
+      "nse\030\006 \001(\0132\016.StoreResponseH\000\0221\n\022replicaAs" +
+      "signments\030\007 \001(\0132\023.ReplicaAssignmentsH\000\0221" +
+      "\n\016retrievalHosts\030\010 \001(\0132\027.PossibleRetriev" +
+      "alHostsH\000\022#\n\013healRequest\030\t \001(\0132\014.HealReq" +
+      "uestH\000\022%\n\014healResponse\030\n \001(\0132\r.HealRespo" +
+      "nseH\000\022-\n\016replicaRequest\030\013 \001(\0132\023.Replicat" +
+      "eOnFailureH\000B\005\n\003msgB\022\n\020edu.usfca.cs.dfsb" +
+      "\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -11542,7 +11606,7 @@ public final class StorageMessages {
     internal_static_ReplicateOnFailure_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ReplicateOnFailure_descriptor,
-        new java.lang.String[] { "DownNodeHostName", "TargetHost", });
+        new java.lang.String[] { "DownNodeHostName", "TargetHost", "ReAssign", });
     internal_static_StorageMessageWrapper_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_StorageMessageWrapper_fieldAccessorTable = new

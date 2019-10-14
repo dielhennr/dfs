@@ -203,8 +203,39 @@ public class Controller implements DFSNode {
 			}
 		}
 
-        public void handleNodeFailure(StorageNodeContext node) {
+        public void handleNodeFailure(StorageNodeContext downNode) {
             
+        	// send message to these nodes to rereplicate the data belonging to the DOWN NODE
+            StorageNodeContext downNodeReplicaAssignment1 = downNode.replicaAssignment1;
+            StorageNodeContext downNodeReplicaAssignment2 = downNode.replicaAssignment2;
+
+
+
+
+
+            ArrayList<StorageNodeContext> nodesThatNeedNewReplicaAssignments = new ArrayList<>();
+
+            synchronized (storageNodes) {
+
+				Iterator<StorageNodeContext> iter = storageNodes.iterator();
+				while (iter.hasNext()) {
+					StorageNodeContext currNode = iter.next();
+
+					if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
+						nodesThatNeedNewReplicaAssignments.add(currNode);
+					}
+
+				}
+            }
+            
+            // Send message to one of the nodes that handles the down node's replicas
+            String hostname1 = downNodeReplicaAssignment1.getHostName();
+            String downHost = downNode.getHostName();
+            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(hostname1, downHost);
+            
+            
+        	
+        	
         }
 	}
 }

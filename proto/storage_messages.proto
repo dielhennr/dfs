@@ -64,6 +64,11 @@ message HealResponse {
     bytes data = 4;
 }
 
+message ReplicateOnFailure {
+	string downNodeHostName = 1;
+	string targetHost = 2;
+}
+
 message StorageMessageWrapper {
     oneof msg {
         StoreChunk storeChunk = 1;
@@ -76,5 +81,6 @@ message StorageMessageWrapper {
         PossibleRetrievalHosts retrievalHosts = 8;
         HealRequest healRequest = 9;
         HealResponse healResponse = 10;
+        ReplicateOnFailure replicaRequest = 11;
     }
 }

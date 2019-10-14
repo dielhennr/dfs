@@ -181,10 +181,21 @@ public class StorageNode implements DFSNode {
             if (heal.getIntermediateLocation().equals(this.hostname)) {
 
                 logger.info("At Intermediate location: " + heal.getIntermediateLocation());
-                ChannelFuture requestAgain = this.bootstrap.connect(heal.getFinalLocation(), 13114);
-                ChannelFuture write = requestAgain.channel().writeAndFlush(message);
+                /* If our chunk matches its checksum we can send it back to client, otherwise send request to the final replica location */
+                ChannelFuture requestAgain = this.bootstrap.connect(heal.getFinalLocation(), 13114).syncUninterruptibly();
+                requestAgain.channel().writeAndFlush(message).syncUninterruptibly();
             } else if (heal.getFinalLocation().equals(this.hostname)) {
                 logger.info("At Final location: " + heal.getFinalLocation());
+                /* Need to find the chunk, read it and send it back to intermediateLocation */
+            }
+
+        } else if (message.hasHealResponse()) {
+            logger.info("recieved healed chunk on " + this.hostname);
+            if (!message.getHealResponse().getPassTo().equals(this.hostname)) {
+                logger.info("passing to " + message.getHealResponse().getPassTo());
+                ChannelFuture cf = this.bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();
+                cf.channel().writeAndFlush(message).syncUninterruptibly();
+                
             }
 
         }

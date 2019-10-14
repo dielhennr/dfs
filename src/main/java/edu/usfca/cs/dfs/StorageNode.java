@@ -83,6 +83,7 @@ public class StorageNode implements DFSNode {
 			storageNode = new StorageNode(args);
 		} catch (UnknownHostException e) {
 			logger.error("Could not start storage node.");
+			System.out.println("somethings wrong");
 			System.exit(1);
 		}
 

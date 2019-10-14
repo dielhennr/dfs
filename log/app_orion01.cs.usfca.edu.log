@@ -1,0 +1,5 @@
+[1 IN] edu.usfca.cs.dfs.Controller.onMessage onMessage: Recieved join request from orion02.cs.usfca.edu 
+[2 IN] edu.usfca.cs.dfs.Controller.onMessage onMessage: Recieved join request from orion03.cs.usfca.edu 
+[3 IN] edu.usfca.cs.dfs.Controller.onMessage onMessage: Recieved join request from orion04.cs.usfca.edu 
+[4 IN] edu.usfca.cs.dfs.Controller.onMessage onMessage: Recieved join request from orion05.cs.usfca.edu 
+[5 IN] edu.usfca.cs.dfs.Controller$HeartBeatChecker.handleNodeFailure handleNodeFailure: Target Host for replication: orion05.cs.usfca.edu 

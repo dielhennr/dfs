@@ -170,16 +170,19 @@ public class StorageNode implements DFSNode {
 				this.shootChunks(ctx, filePath);
 			}
 		} else if (message.hasHealRequest()) {
+
+            /* If we get a heal request we need to write back a healed chunk if we have it, 
+             * otherwise we need  to send a request to the final location of the chunk 
+             */
+
             StorageMessages.HealRequest heal = message.getHealRequest();
             logger.info("Request to heal " + heal.getFileName() + " chunk " + heal.getChunkId());
             logger.info("Origin location " + heal.getInitialLocation());
-            ctx.channel().close().syncUninterruptibly();
             if (heal.getIntermediateLocation().equals(this.hostname)) {
 
                 logger.info("At Intermediate location: " + heal.getIntermediateLocation());
                 ChannelFuture requestAgain = this.bootstrap.connect(heal.getFinalLocation(), 13114);
                 ChannelFuture write = requestAgain.channel().writeAndFlush(message);
-                write.syncUninterruptibly();
             } else if (heal.getFinalLocation().equals(this.hostname)) {
                 logger.info("At Final location: " + heal.getFinalLocation());
             }

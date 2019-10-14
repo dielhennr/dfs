@@ -224,7 +224,6 @@ public class StorageNode implements DFSNode {
             
 			for (ChunkWrapper chunk : chunks) {
 				Path chunkPath = chunk.getPath();
-                String filename = chunkPath.getFileName().toString();
 				ByteString data = null;
 				String checksumCheck = null;
 
@@ -265,12 +264,12 @@ public class StorageNode implements DFSNode {
                         ChannelFuture healRequest = this.bootstrap.connect(replicaHosts.get(0), 13114);
                         healRequest.syncUninterruptibly();
                         ChannelFuture write = healRequest.channel().writeAndFlush(
-                            Builders.buildHealRequest(filename, chunk.getChunkID(), this.hostname, 
+                            Builders.buildHealRequest(chunk.getFileName(), chunk.getChunkID(), this.hostname, 
                                 replicaHosts.get(0), replicaHosts.get(1)));
                         write.syncUninterruptibly();
 					} else {
 						/* Build the store chunks and write it to client */
-						StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(filename,
+						StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(chunk.getFileName(),
 								this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), data);
 						ctx.pipeline().writeAndFlush(chunkToSend);
 					}
@@ -342,7 +341,7 @@ public class StorageNode implements DFSNode {
 
             /* Add this chunk to it's files set */
             synchronized(chunkMap) {
-                chunkMap.get(fileName).add(new ChunkWrapper(path, message.getStoreChunk().getChunkId()
+                chunkMap.get(fileName).add(new ChunkWrapper(path, fileName, message.getStoreChunk().getChunkId()
                         , message.getStoreChunk().getTotalChunks(), checksum));
             }
 

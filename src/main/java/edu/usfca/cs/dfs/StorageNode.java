@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.TreeSet;
 
 import com.google.protobuf.ByteString;
@@ -47,7 +46,7 @@ public class StorageNode implements DFSNode {
 
 	ArrayList<String> replicaHosts;
 
-	static Bootstrap bootstrap;
+	Bootstrap bootstrap;
 	
 	HashMap<String, TreeSet<ChunkWrapper>> chunkMap;   // Mapping filenames to the chunks
 	HashMap<String, ArrayList<Path>> hostnameToChunks;	   // Mapping hostnames to Paths of chunks
@@ -85,7 +84,7 @@ public class StorageNode implements DFSNode {
 			System.exit(1);
 		}
 
-		ChannelFuture cf = bootstrap.connect(storageNode.controllerHostName, 13112);
+		ChannelFuture cf = storageNode.bootstrap.connect(storageNode.controllerHostName, 13112);
 		cf.syncUninterruptibly();
 
 		Channel chan = cf.channel();
@@ -105,7 +104,7 @@ public class StorageNode implements DFSNode {
 		 * connections
 		 **/
 		HeartBeatRunner heartBeat = new HeartBeatRunner(storageNode.hostname, storageNode.controllerHostName,
-				bootstrap);
+				storageNode.bootstrap);
 		Thread heartThread = new Thread(heartBeat);
 		heartThread.start();
 		logger.info("Started heartbeat thread.");

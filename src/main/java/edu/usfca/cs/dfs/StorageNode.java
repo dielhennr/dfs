@@ -191,7 +191,6 @@ public class StorageNode implements DFSNode {
             System.out.println("Chunk paths");
             chunks.stream().forEach(chunk -> System.out.println(chunk.getPath().getFileName().toString()));
 
-			List<ChannelFuture> writes = new ArrayList<>();
 			for (ChunkWrapper chunk : chunks) {
 				Path chunkPath = chunk.getPath();
 				ByteString data = null;
@@ -224,8 +223,7 @@ public class StorageNode implements DFSNode {
 						/* Build the chunks and write it to client */
 						StorageMessages.StorageMessageWrapper chunkToSend = Builders.buildStoreChunk(filename,
 								this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), data);
-						ChannelFuture write = ctx.pipeline().writeAndFlush(chunkToSend);
-						writes.add(write);
+						ctx.pipeline().writeAndFlush(chunkToSend);
 					}
 				}
 

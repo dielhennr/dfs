@@ -257,13 +257,7 @@ public class StorageNode implements DFSNode {
                     try {
                         byte[] data = Files.readAllBytes(chunk.getPath());
                         if (chunk.checksum.equals(Checksum.SHAsum(data))) {
-                            String passTo = null;
-
-                            if (healRequest.getFinalLocation().equals(this.hostname)) {
-                                passTo = healRequest.getInitialLocation();
-                            } else {
-                                passTo = "";
-                            }
+                            String passTo = healRequest.getInitialLocation();
 
                             StorageMessages.HealResponse validChunk = StorageMessages.HealResponse
                                                             .newBuilder()

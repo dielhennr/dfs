@@ -94,16 +94,30 @@ public class Controller implements DFSNode {
 					 * assign and then put the assignee back in
 					 */
 					if (storageNodePrimary.replicaAssignment1 == null) {
-						replicaAssignment1 = storageNodes.poll();
+						Iterator<StorageNodeContext> iter = storageNodes.iterator();
+						StorageNodeContext snctx = iter.next();
+						while (snctx.equals(storageNodePrimary.replicaAssignment2)) {
+							snctx = iter.next();
+							
+						}
+						replicaAssignment1 = snctx;
+						iter.remove();
 						storageNodePrimary.replicaAssignment1 = replicaAssignment1;
-						storageNodes.add(replicaAssignment1);
+
 					}
 					/* Same here for second assignment */
 					if (storageNodePrimary.replicaAssignment2 == null) {
-						replicaAssignment2 = storageNodes.poll();
+						Iterator<StorageNodeContext> iter = storageNodes.iterator();
+						StorageNodeContext snctx = iter.next();
+						while (snctx.equals(storageNodePrimary.replicaAssignment1)) {
+							snctx = iter.next();
+							
+						}
+						replicaAssignment2 = snctx;
+						iter.remove();
 						storageNodePrimary.replicaAssignment2 = replicaAssignment2;
-						storageNodes.add(replicaAssignment2);
 					}
+					
 					/* Bump requests of all assignments since we are about to send a file */
 					storageNodePrimary.bumpRequests();
 					storageNodePrimary.replicaAssignment1.bumpRequests();
@@ -114,7 +128,12 @@ public class Controller implements DFSNode {
 
 					/* Put primary back in the queue */
 					storageNodes.add(storageNodePrimary);
-
+					if (replicaAssignment1 != null) {
+					storageNodes.add(replicaAssignment1);
+					}
+					if (replicaAssignment2 != null) {
+					storageNodes.add(replicaAssignment2);
+					}
 					/**
 					 * Write back a store response to client with hostname of the primary node to
 					 * send chunks to. This node will handle replication with the ReplicaAssignments
@@ -233,7 +252,7 @@ public class Controller implements DFSNode {
 					if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
 						nodesThatNeedNewReplicaAssignments.add(currNode);
 					}
-					if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
+					else if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
 						targetHost = currNode.getHostName();
 					}
 				}

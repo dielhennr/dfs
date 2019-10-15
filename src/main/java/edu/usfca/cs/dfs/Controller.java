@@ -287,6 +287,20 @@ public class Controller implements DFSNode {
     		logger.info("Nodes that need new assignments: " + nodesThatNeedNewReplicaAssignments.toString());
     		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
     			String nodeName = node.getHostName();
+    			
+    			synchronized (storageNodes) {
+    			Iterator<StorageNodeContext> iter = storageNodes.iterator();
+    			while (iter.hasNext()) {
+    				StorageNodeContext storageNode = iter.next();
+    				
+    				if (storageNode != node.replicaAssignment1 && storageNode != node.replicaAssignment2) {
+    					targetHost = storageNode.getHostName();
+    				}
+    				
+    				
+    			}
+    			
+    			}	
     			cf = bootstrap.connect(nodeName, 13114);
     			cf.syncUninterruptibly();
     			chan = cf.channel();
@@ -294,10 +308,10 @@ public class Controller implements DFSNode {
     			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(targetHost, downHost, true);
     			write = chan.writeAndFlush(replicaAssignmentChange);
     			
+    		
+    		
+    		
     		}
-    		
-    		
-    		
     		
         }
 	}

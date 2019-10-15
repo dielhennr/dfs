@@ -48,6 +48,8 @@ public class StorageNode implements DFSNode {
 	Bootstrap bootstrap;
 
     ChannelHandlerContext clientCtx;
+
+    long totalChunks;
 	
 	HashMap<String, ArrayList<ChunkWrapper>> chunkMap;   // Mapping filenames to the chunks
 	HashMap<String, ArrayList<Path>> hostnameToChunks;	   // Mapping hostnames to Paths of chunks
@@ -58,6 +60,7 @@ public class StorageNode implements DFSNode {
 		hostnameToChunks = new HashMap<>();
 		ip = InetAddress.getLocalHost();
         clientCtx = null;
+        totalChunks = 0;
 		hostname = ip.getHostName();
 		arguments = new ArgumentMap(args);
 		if (arguments.hasFlag("-h") && arguments.hasFlag("-r")) {
@@ -212,15 +215,11 @@ public class StorageNode implements DFSNode {
             logger.info("recieved healed chunk on " + this.hostname);
             StorageMessages.HealResponse healResponse = message.getHealResponse();
             ctx.channel().close().syncUninterruptibly();
-            long totalChunks = 0;
-            synchronized(chunkMap) {
-                totalChunks = chunkMap.get(healResponse.getFileName()).get(0).getTotalChunks();
-            }
 
             StorageMessages.StorageMessageWrapper chunk = Builders.buildStoreChunk( healResponse.getFileName(), 
                                                                                     healResponse.getPassTo(), 
                                                                                     healResponse.getChunkId(), 
-                                                                                    totalChunks, 
+                                                                                    this.totalChunks, 
                                                                                     healResponse.getData() );
             /* Shoot the healed chunk back to client if we are done healing */
             if (message.getHealResponse().getPassTo().equals(this.hostname)) {
@@ -361,6 +360,7 @@ public class StorageNode implements DFSNode {
 
                         }
                     }
+                    totalChunks = chunks.get(0).getTotalChunks();
                     for (ChunkWrapper chunk : chunksToRemove) {
                         chunks.remove(chunk);
                     }

@@ -68,6 +68,7 @@ message ReplicateOnFailure {
 	string downNodeHostName = 1;
 	string targetHost = 2;
 	bool reAssign = 3;
+	string replicaAssignment2FromDownNode = 4;
 }
 message NodeState {
 	string nodeName = 1;

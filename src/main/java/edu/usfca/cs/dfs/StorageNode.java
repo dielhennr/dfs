@@ -238,11 +238,55 @@ public class StorageNode implements DFSNode {
         	StorageMessages.ReplicateOnFailure replicaRequest = message.getReplicaRequest();
         	
         	String downNode = replicaRequest.getDownNodeHostName();
-        	String targetHost = replicaRequest.getTargetHost();
+        	String newReplicaAssignment = replicaRequest.getTargetHost();
         	boolean reReplicate = replicaRequest.getReAssign();
         	
-        	logger.info("Recieved Replication Request: Down Node: " + downNode + " target host for rereplication: " +
-        				targetHost + " reassignment flag: " + reReplicate);
+        	logger.info("Recieved Replication Request: Down Node: " + downNode + " new replica assignment: " +
+        				newReplicaAssignment + " reassignment flag: " + reReplicate);
+        	
+        	if (reReplicate) {
+        		
+        		/*
+        		 	When this boolean flag is true, it means that we are dealing with a node that was 
+        		 	REPLICATING to the DOWN NODE. This means that this storage node needs to change its
+        		 	assignment that was the down node to the newReplicaAssignment, and send its chunks 
+        		 	to the new node assignment.
+        		 	
+        		 	TODO:
+        		 	
+        		 	CHange this nodes replica assignment that was the down node, to the new replicaAssignment
+        		 	and send chunks on this node that are this node's primary chunks to the newReplicaAssignment
+        		 	
+        		 	
+        		 */
+        		
+
+        		
+        	} else {
+        		
+        		/*
+        		 	When this boolean flag is false, it means that we are dealing with a storage node that was 
+        		 	receiving replicas from the down node. In this case, this node needs to be designated the
+        		 	new primary for the down nodes data, and it needs to replicate it's down nodes data to the 
+        		 	new replicaAssignment. 
+        		 	
+        		 	TODO:
+        		 	
+        		 	Send a message to the newReplicaAssignment with the chunks from the down node, and put them
+        		 	in the map on that node as belonging to this storage node. 
+        		 	Also send a message to the other 
+        		 	replica assignment from the down node to merge the down node's mapping with this storage node's mapping
+        		 	
+        		 	(AKA) telling the other replica assignment of the down node that we are now the new primary holder of
+        		 	that data and it belongs to this storage node.
+        		*/
+        		
+        		String downNodeReplicaAssignment2 = replicaRequest.getReplicaAssignment2FromDownNode();
+        		
+        	}
+        	
+        	
+        	
         }
 	}
     

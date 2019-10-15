@@ -7831,6 +7831,16 @@ public final class StorageMessages {
      * <code>bool reAssign = 3;</code>
      */
     boolean getReAssign();
+
+    /**
+     * <code>string replicaAssignment2FromDownNode = 4;</code>
+     */
+    java.lang.String getReplicaAssignment2FromDownNode();
+    /**
+     * <code>string replicaAssignment2FromDownNode = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getReplicaAssignment2FromDownNodeBytes();
   }
   /**
    * Protobuf type {@code ReplicateOnFailure}
@@ -7847,6 +7857,7 @@ public final class StorageMessages {
     private ReplicateOnFailure() {
       downNodeHostName_ = "";
       targetHost_ = "";
+      replicaAssignment2FromDownNode_ = "";
     }
 
     @java.lang.Override
@@ -7894,6 +7905,12 @@ public final class StorageMessages {
             case 24: {
 
               reAssign_ = input.readBool();
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              replicaAssignment2FromDownNode_ = s;
               break;
             }
             default: {
@@ -8005,6 +8022,40 @@ public final class StorageMessages {
       return reAssign_;
     }
 
+    public static final int REPLICAASSIGNMENT2FROMDOWNNODE_FIELD_NUMBER = 4;
+    private volatile java.lang.Object replicaAssignment2FromDownNode_;
+    /**
+     * <code>string replicaAssignment2FromDownNode = 4;</code>
+     */
+    public java.lang.String getReplicaAssignment2FromDownNode() {
+      java.lang.Object ref = replicaAssignment2FromDownNode_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        replicaAssignment2FromDownNode_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string replicaAssignment2FromDownNode = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getReplicaAssignment2FromDownNodeBytes() {
+      java.lang.Object ref = replicaAssignment2FromDownNode_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        replicaAssignment2FromDownNode_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -8028,6 +8079,9 @@ public final class StorageMessages {
       if (reAssign_ != false) {
         output.writeBool(3, reAssign_);
       }
+      if (!getReplicaAssignment2FromDownNodeBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, replicaAssignment2FromDownNode_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -8046,6 +8100,9 @@ public final class StorageMessages {
       if (reAssign_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, reAssign_);
+      }
+      if (!getReplicaAssignment2FromDownNodeBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, replicaAssignment2FromDownNode_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -8068,6 +8125,8 @@ public final class StorageMessages {
           .equals(other.getTargetHost())) return false;
       if (getReAssign()
           != other.getReAssign()) return false;
+      if (!getReplicaAssignment2FromDownNode()
+          .equals(other.getReplicaAssignment2FromDownNode())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -8086,6 +8145,8 @@ public final class StorageMessages {
       hash = (37 * hash) + REASSIGN_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getReAssign());
+      hash = (37 * hash) + REPLICAASSIGNMENT2FROMDOWNNODE_FIELD_NUMBER;
+      hash = (53 * hash) + getReplicaAssignment2FromDownNode().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -8225,6 +8286,8 @@ public final class StorageMessages {
 
         reAssign_ = false;
 
+        replicaAssignment2FromDownNode_ = "";
+
         return this;
       }
 
@@ -8254,6 +8317,7 @@ public final class StorageMessages {
         result.downNodeHostName_ = downNodeHostName_;
         result.targetHost_ = targetHost_;
         result.reAssign_ = reAssign_;
+        result.replicaAssignment2FromDownNode_ = replicaAssignment2FromDownNode_;
         onBuilt();
         return result;
       }
@@ -8312,6 +8376,10 @@ public final class StorageMessages {
         }
         if (other.getReAssign() != false) {
           setReAssign(other.getReAssign());
+        }
+        if (!other.getReplicaAssignment2FromDownNode().isEmpty()) {
+          replicaAssignment2FromDownNode_ = other.replicaAssignment2FromDownNode_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -8502,6 +8570,75 @@ public final class StorageMessages {
       public Builder clearReAssign() {
         
         reAssign_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object replicaAssignment2FromDownNode_ = "";
+      /**
+       * <code>string replicaAssignment2FromDownNode = 4;</code>
+       */
+      public java.lang.String getReplicaAssignment2FromDownNode() {
+        java.lang.Object ref = replicaAssignment2FromDownNode_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          replicaAssignment2FromDownNode_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string replicaAssignment2FromDownNode = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getReplicaAssignment2FromDownNodeBytes() {
+        java.lang.Object ref = replicaAssignment2FromDownNode_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          replicaAssignment2FromDownNode_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string replicaAssignment2FromDownNode = 4;</code>
+       */
+      public Builder setReplicaAssignment2FromDownNode(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        replicaAssignment2FromDownNode_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string replicaAssignment2FromDownNode = 4;</code>
+       */
+      public Builder clearReplicaAssignment2FromDownNode() {
+        
+        replicaAssignment2FromDownNode_ = getDefaultInstance().getReplicaAssignment2FromDownNode();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string replicaAssignment2FromDownNode = 4;</code>
+       */
+      public Builder setReplicaAssignment2FromDownNodeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        replicaAssignment2FromDownNode_ = value;
         onChanged();
         return this;
       }
@@ -13432,9 +13569,10 @@ public final class StorageMessages {
       "\024intermediateLocation\030\004 \001(\t\022\025\n\rfinalLoca" +
       "tion\030\005 \001(\t\"O\n\014HealResponse\022\020\n\010fileName\030\001" +
       " \001(\t\022\017\n\007chunkId\030\002 \001(\003\022\016\n\006passTo\030\003 \001(\t\022\014\n" +
-      "\004data\030\004 \001(\014\"T\n\022ReplicateOnFailure\022\030\n\020dow" +
+      "\004data\030\004 \001(\014\"|\n\022ReplicateOnFailure\022\030\n\020dow" +
       "nNodeHostName\030\001 \001(\t\022\022\n\ntargetHost\030\002 \001(\t\022" +
-      "\020\n\010reAssign\030\003 \001(\010\"B\n\tNodeState\022\020\n\010nodeNa" +
+      "\020\n\010reAssign\030\003 \001(\010\022&\n\036replicaAssignment2F" +
+      "romDownNode\030\004 \001(\t\"B\n\tNodeState\022\020\n\010nodeNa" +
       "me\030\001 \001(\t\022\020\n\010requests\030\002 \001(\005\022\021\n\tdiskSpace\030" +
       "\003 \001(\003\".\n\021PrintNodesRequest\022\031\n\005nodes\030\001 \003(" +
       "\0132\n.NodeState\"\254\004\n\025StorageMessageWrapper\022" +
@@ -13522,7 +13660,7 @@ public final class StorageMessages {
     internal_static_ReplicateOnFailure_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ReplicateOnFailure_descriptor,
-        new java.lang.String[] { "DownNodeHostName", "TargetHost", "ReAssign", });
+        new java.lang.String[] { "DownNodeHostName", "TargetHost", "ReAssign", "ReplicaAssignment2FromDownNode", });
     internal_static_NodeState_descriptor =
       getDescriptor().getMessageTypes().get(11);
     internal_static_NodeState_fieldAccessorTable = new

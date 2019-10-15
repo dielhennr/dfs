@@ -246,7 +246,7 @@ public class Controller implements DFSNode {
             
             String targetHost = "";
 
-
+            // this list contains nodes that were replicating to the down node
             ArrayList<StorageNodeContext> nodesThatNeedNewReplicaAssignments = new ArrayList<>();
 
             synchronized (storageNodes) {
@@ -255,21 +255,41 @@ public class Controller implements DFSNode {
 				while (iter.hasNext()) {
 					StorageNodeContext currNode = iter.next();
 
+					/*
+					 	This if statement finds nodes that were replicating to the down node
+					*/
+					
 					if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
 						logger.info("Node that needs new assignment: " + currNode.getHostName());
 						nodesThatNeedNewReplicaAssignments.add(currNode);
 					}
+					/*
+					 		This else if statement finds a node that the down node was not replicating to
+					 		so we can use it as a target node for when we tell the nodes that the 
+					 		down node was replicating to which node they can now replicate the down node's
+					 		data to. This targetHost is sent in the first message to the first replica
+					 		of the down node that we use as a new primary.
+					 */
+					
+					
 					else if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
 						targetHost = currNode.getHostName();
 					}
 				}
             }
-            logger.info("Target Host for replication: " + targetHost);
-            // Send message to one of the nodes that handles the down node's replicas
+            logger.info("Target Host for replication for nodes that the down node was replicating to: " + targetHost);
+            
             String hostname1 = downNodeReplicaAssignment1.getHostName();
+            String downNodeReplicaAssignment2Hostname = downNodeReplicaAssignment2.getHostName();
             String downHost = downNode.getHostName();
-            //this is fine
-            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(targetHost, downHost, false);
+            
+            /*
+             		Send message to the down nodes first replica assignment, telling it which node went down, and
+             		which node it can use re-replicate the down nodes chunks to. 
+             */
+            
+            
+            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(targetHost, downHost, false, downNodeReplicaAssignment2Hostname);
             
             EventLoopGroup workerGroup = new NioEventLoopGroup();
             MessagePipeline pipeline = new MessagePipeline();
@@ -284,13 +304,31 @@ public class Controller implements DFSNode {
     		write.syncUninterruptibly();
     		
     		
-    		// Now hit up the nodes that had the down node as its replica assignments
+    		/*
+    		 		Now we iterate through the list of nodes that were replicating TO the down node,
+    		 		but we need to find a new targetNode for their new replica assignment, since 
+    		 		the down node was one of their assignments.
+    		 */
     		
     		
     		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
     			String nodeName = node.getHostName();
     			
     			synchronized (storageNodes) {
+    				
+    				/*
+    				 	Here we iterate through the storagenode queue to find a new node that they can use 
+    				 	as a new replica assignment. The logic is such:
+    				 	
+    				 	Find a node that that is not an assignment of the current
+    				 	node we are iterating on, and also make sure that the current node
+    				 	we are looking at is not the same node as the node we are trying to
+    				 	find a new replica for. Otherwise it is possible that the target
+    				 	node (new node assignment) can be the same as the node itself
+    				 								 	
+    				 */
+    				
+    				
     			Iterator<StorageNodeContext> iter = storageNodes.iterator();
     			while (iter.hasNext()) {
     				StorageNodeContext currNode = iter.next();
@@ -307,7 +345,7 @@ public class Controller implements DFSNode {
     			cf.syncUninterruptibly();
     			chan = cf.channel();
     			
-    			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(targetHost, downHost, true);
+    			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(targetHost, downHost, true, null);
     			write = chan.writeAndFlush(replicaAssignmentChange);
     			
     		

@@ -169,9 +169,7 @@ public class StorageNode implements DFSNode {
             logger.info("Attempting to shoot chunks of " + message.getRetrieveFile().getFileName() + " to client");
 			Path filePath = Paths.get(rootDirectory.toString(), message.getRetrieveFile().getFileName());
             clientCtx = ctx;
-			if (Files.exists(filePath)) {
-				this.shootChunks(filePath);
-			}
+			this.shootChunks(filePath);
 		} else if (message.hasHealRequest()) {
             /** 
              * If we get a heal request we need to write back a healed chunk if we have it, 

@@ -67,7 +67,7 @@ public class Client implements DFSNode {
 		this.arguments = new ArgumentMap(args);
 
 		/* Check that user entered controller to connect to and file to send */
-		if (arguments.hasFlag("-h") && (((arguments.hasFlag("-r") || arguments.hasFlag("-f")) || arguments.hasValue("-l")))) {
+		if (arguments.hasFlag("-h") && (((arguments.hasFlag("-r") || arguments.hasFlag("-f")) || arguments.hasFlag("-l")))) {
 			controllerHost = arguments.getString("-h");
 		} else {
 			System.err.println("Usage: java -cp .... -h hostToContact -[fr] fileToSend/Retrieve.\n"

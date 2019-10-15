@@ -269,7 +269,7 @@ public class Controller implements DFSNode {
             // Send message to one of the nodes that handles the down node's replicas
             String hostname1 = downNodeReplicaAssignment1.getHostName();
             String downHost = downNode.getHostName();
-            
+            //this is fine
             StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(targetHost, downHost, false);
             
             EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -289,11 +289,11 @@ public class Controller implements DFSNode {
     		logger.info("Nodes that need new assignments: " + nodesThatNeedNewReplicaAssignments.toString());
     		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
     			String nodeName = node.getHostName();
-    			cf = bootstrap.connect(hostname1, 13114);
+    			cf = bootstrap.connect(nodeName, 13114);
     			cf.syncUninterruptibly();
     			chan = cf.channel();
     			
-    			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(nodeName, downHost, true);
+    			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(targetHost, downHost, true);
     			write = chan.writeAndFlush(replicaAssignmentChange);
     			
     		}

@@ -18,6 +18,7 @@ import com.google.protobuf.ByteString;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.usfca.cs.dfs.StorageMessages.NodeState;
 import edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper;
 import edu.usfca.cs.dfs.net.MessagePipeline;
 import io.netty.bootstrap.Bootstrap;
@@ -66,7 +67,7 @@ public class Client implements DFSNode {
 		this.arguments = new ArgumentMap(args);
 
 		/* Check that user entered controller to connect to and file to send */
-		if (arguments.hasFlag("-h") && (arguments.hasFlag("-r") ^ arguments.hasFlag("-f"))) {
+		if (arguments.hasFlag("-h") && (((arguments.hasFlag("-r") ^ arguments.hasFlag("-f")) ^ arguments.hasValue("-l")))) {
 			controllerHost = arguments.getString("-h");
 		} else {
 			System.err.println("Usage: java -cp .... -h hostToContact -[fr] fileToSend/Retrieve.\n"
@@ -82,6 +83,8 @@ public class Client implements DFSNode {
 		if (arguments.hasFlag("-f")) {
 			path = arguments.getPath("-f");
 		}
+		
+
 
 		/* Default to port 13100 */
 		port = arguments.getInteger("-p", 13112);
@@ -109,6 +112,8 @@ public class Client implements DFSNode {
 			msgWrapper = Builders.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, "", "");
 		} else if (client.arguments.hasFlag("-r")) {
 			msgWrapper = Builders.buildRetrievalRequest(client.path.getFileName().toString());
+		} else if (client.arguments.hasFlag("-l")) {
+			msgWrapper = Builders.buildPrintRequest(null);
 		}
 		Channel chan = cf.channel();
 		ChannelFuture write = chan.writeAndFlush(msgWrapper);
@@ -241,6 +246,24 @@ public class Client implements DFSNode {
 				this.stitchChunks();
                 ctx.channel().close().syncUninterruptibly();
 			}
+		} else if(message.hasPrintRequest()) {
+			StorageMessages.PrintNodesRequest printRequest = message.getPrintRequest();
+			
+			List<NodeState> nodeStateList = printRequest.getNodesList();
+			
+			for (StorageMessages.NodeState node : nodeStateList) {
+				long freeSpace = node.getDiskSpace();
+				String nodename = node.getNodeName();
+				int requests = node.getRequests();
+				
+				System.out.println("Node Name: " + nodename + " --->");
+				System.out.println("Total requests: " + requests);
+				System.out.println("Free Disk Space: " + freeSpace);
+				System.out.println("------------------------------");
+			}
+			
+			ctx.channel().close().syncUninterruptibly();
+			
 		}
 
 	}

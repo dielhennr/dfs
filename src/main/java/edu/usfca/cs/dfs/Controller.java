@@ -277,7 +277,7 @@ public class Controller implements DFSNode {
     		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
     				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 
-    		ChannelFuture cf = bootstrap.connect(hostname1, 13112);
+    		ChannelFuture cf = bootstrap.connect(hostname1, 13114);
     		cf.syncUninterruptibly();
     		
     		Channel chan = cf.channel();
@@ -289,7 +289,7 @@ public class Controller implements DFSNode {
     		logger.info("Nodes that need new assignments: " + nodesThatNeedNewReplicaAssignments.toString());
     		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
     			String nodeName = node.getHostName();
-    			cf = bootstrap.connect(hostname1, 13112);
+    			cf = bootstrap.connect(hostname1, 13114);
     			cf.syncUninterruptibly();
     			chan = cf.channel();
     			

@@ -230,7 +230,7 @@ public class Client implements DFSNode {
 			/* Sending retrieval requests to notes with the file we want */
 			for (String host : possibleHosts) {
 				// Open connections for nodes and check if they have the file
-				ChannelFuture cf = bootstrap.connect(host, 13112);
+				ChannelFuture cf = bootstrap.connect(host, 13114);
 				cf.syncUninterruptibly();
 				Channel chan = cf.channel();
 				ChannelFuture write = chan.writeAndFlush(Builders.buildRetrievalRequest(path.toFile().toString()));

@@ -183,7 +183,6 @@ public class StorageNode implements DFSNode {
 
             /* Close the request channel */
             ctx.channel().close().syncUninterruptibly();
-
             if (healRequest.getIntermediateLocation().equals(this.hostname)) {
                 logger.info("At Intermediate location: " + healRequest.getIntermediateLocation());
                 /* If our chunk matches its checksum we can send it back to client, otherwise send request to the final replica location */
@@ -224,7 +223,7 @@ public class StorageNode implements DFSNode {
             /* Shoot the healed chunk back to client if we are done healing */
             if (message.getHealResponse().getPassTo().equals(this.hostname)) {
                 logger.info("Shooting healed chunk to client.");
-                this.clientCtx.pipeline().writeAndFlush(chunk).syncUninterruptibly();
+                this.clientCtx.pipeline().writeAndFlush(chunk);
             } else {
                 ChannelFuture cf = bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();
                 cf.channel().writeAndFlush(message).syncUninterruptibly();

@@ -352,6 +352,7 @@ public class StorageNode implements DFSNode {
                                 }
                         } else {
                             /* If this chunk got deleted we will just remove it from our list and send a heal request to our first replica assignment */
+                            logger.info("Chunk for " + chunk.getFileName() + " id " + chunk.getChunkID() + " needs healing");
                             chunksToRemove.add(chunk);
                             ChannelFuture healRequest = this.bootstrap.connect(replicaHosts.get(0), 13114);
                             healRequest.syncUninterruptibly();

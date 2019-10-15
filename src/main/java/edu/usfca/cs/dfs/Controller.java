@@ -233,7 +233,7 @@ public class Controller implements DFSNode {
 					if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
 						nodesThatNeedNewReplicaAssignments.add(currNode);
 					}
-					else if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
+					if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
 						targetHost = currNode.getHostName();
 					}
 				}
@@ -259,7 +259,7 @@ public class Controller implements DFSNode {
     		
     		
     		// Now hit up the nodes that had the down node as its replica assignments
-    		
+    		logger.info("Nodes that need new assignments: " + nodesThatNeedNewReplicaAssignments.toString());
     		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
     			String nodeName = node.getHostName();
     			cf = bootstrap.connect(hostname1, 13112);

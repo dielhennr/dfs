@@ -64,6 +64,15 @@ message HealResponse {
     bytes data = 4;
 }
 
+message NodeState {
+	string nodeName = 1;
+	int32 requests = 2;
+	int64 diskSpace = 3;
+}
+message PrintNodesRequest {
+	repeated NodeState nodes = 1;
+}
+
 message StorageMessageWrapper {
     oneof msg {
         StoreChunk storeChunk = 1;
@@ -76,5 +85,6 @@ message StorageMessageWrapper {
         PossibleRetrievalHosts retrievalHosts = 8;
         HealRequest healRequest = 9;
         HealResponse healResponse = 10;
+        PrintNodesRequest printRequest = 11;
     }
 }

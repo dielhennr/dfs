@@ -1,5 +1,7 @@
 package edu.usfca.cs.dfs;
 
+import java.util.ArrayList;
+
 import com.google.protobuf.ByteString;
 
 public class Builders {
@@ -197,5 +199,25 @@ public class Builders {
 													.build();
 		
 		return StorageMessages.StorageMessageWrapper.newBuilder().setRetrievalHosts(hostsResponse).build();
+	}
+	
+	public static StorageMessages.StorageMessageWrapper buildPrintRequest(ArrayList<StorageNodeContext> listOfNodes) {
+		StorageMessages.PrintNodesRequest printRequest;
+		if (listOfNodes == null) {
+			printRequest = StorageMessages.PrintNodesRequest.newBuilder().build();
+		} else {
+			ArrayList<StorageMessages.NodeState> nodeList = new ArrayList<>();
+			StorageMessages.NodeState nodeState;
+			for (StorageNodeContext node : listOfNodes) {
+				nodeState = StorageMessages.NodeState.newBuilder().setDiskSpace(node.getFreeSpace())
+						.setNodeName(node.getHostName()).setRequests(node.getRequests()).build();
+				nodeList.add(nodeState);
+						
+			}
+			printRequest = StorageMessages.PrintNodesRequest.newBuilder().addAllNodes(nodeList).build();
+			
+		}
+		
+		return StorageMessages.StorageMessageWrapper.newBuilder().setPrintRequest(printRequest).build();
 	}
 }

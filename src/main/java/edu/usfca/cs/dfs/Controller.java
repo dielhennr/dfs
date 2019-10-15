@@ -194,11 +194,12 @@ public class Controller implements DFSNode {
 						long nodeTime = node.getTimestamp();
 
 						if (currentTime - nodeTime > 5500) {
+							iter.remove();
 							handleNodeFailure(node);
 							logger.info("Detected failure on node: " + node.getHostName());
 							/* Also need to rereplicate data here. */
 							/* We have to rereplicate this nodes replicas as well as its primarys */
-							iter.remove();
+							
 						}
 					}
 

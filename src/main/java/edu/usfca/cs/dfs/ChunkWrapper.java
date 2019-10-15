@@ -20,6 +20,7 @@ public class ChunkWrapper {
     
     public Path getPath() { return this.pathToChunk; }
     public String getFileName() { return this.fileName; }
+    public String getChecksum() { return this.checksum; }
     public long getChunkID() { return this.chunkID; }
     public long getTotalChunks() { return this.totalChunks; }
     

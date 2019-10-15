@@ -183,6 +183,14 @@ public class Controller implements DFSNode {
 			write.syncUninterruptibly();
 			logger.info("Possible hosts for file: " + fileName + " ---> " + hosts);
 			ctx.channel().close().syncUninterruptibly();
+		} else if (message.hasPrintRequest()) {
+			ArrayList<StorageNodeContext> nodeList = new ArrayList<>();
+			nodeList.addAll(storageNodes);
+			StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildPrintRequest(nodeList);
+			ChannelFuture write = ctx.pipeline().writeAndFlush(msgWrapper);
+			write.syncUninterruptibly();
+			
+			
 		}
 	}
 

@@ -335,7 +335,6 @@ public class StorageNode implements DFSNode {
         		ArrayList<ChunkWrapper> chunks = chunkMap.get(ChunkFileName);
 				
 				for (ChunkWrapper chunk : chunks) {
-					chunk.get
 				}
 				
         		

@@ -157,7 +157,7 @@ public class Client implements DFSNode {
 			 * listen on 13111. Meanwhile controller is listening on 13000 for heartbeats
 			 * from SNs HeartBeatRunner.
 			 */
-			ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13112).syncUninterruptibly();
+			ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13114).syncUninterruptibly();
 
 			/*
 			 * Write the request to change the SNs decoder so that it can start receiving

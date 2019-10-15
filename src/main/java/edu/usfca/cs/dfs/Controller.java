@@ -120,8 +120,6 @@ public class Controller implements DFSNode {
 					
 					/* Bump requests of all assignments since we are about to send a file */
 					storageNodePrimary.bumpRequests();
-					storageNodePrimary.replicaAssignment1.bumpRequests();
-					storageNodePrimary.replicaAssignment2.bumpRequests();
 
 					/* Put that file in this nodes bloom filter */
 					storageNodePrimary.put(message.getStoreRequest().getFileName().getBytes());

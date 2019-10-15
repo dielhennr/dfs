@@ -70,13 +70,21 @@ message ReplicateOnFailure {
 	bool reAssign = 3;
 	string replicaAssignment2FromDownNode = 4;
 }
+
 message NodeState {
 	string nodeName = 1;
 	int32 requests = 2;
 	int64 diskSpace = 3;
 }
+
 message PrintNodesRequest {
 	repeated NodeState nodes = 1;
+}
+
+
+message ReplicateToNewAssignment {
+	string primaryNodeName = 1;
+	string paths = 2;
 }
 
 message StorageMessageWrapper {
@@ -94,6 +102,7 @@ message StorageMessageWrapper {
         ReplicateOnFailure replicaRequest = 11;
         PrintNodesRequest printRequest = 12;
         NodeState nodeState = 13;
+        ReplicateToNewAssignment replicaToNewAssignment = 14;
 
     }
 }

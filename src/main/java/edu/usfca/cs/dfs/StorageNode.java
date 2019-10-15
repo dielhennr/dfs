@@ -79,6 +79,12 @@ public class StorageNode implements DFSNode {
 		bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 	}
+	
+	public HashMap<String, ArrayList<Path>> getHostNameToChunksMap() {
+		return this.hostnameToChunks;
+	}
+	
+	
 
 	public static void main(String[] args) throws IOException {
 		StorageNode storageNode = null;
@@ -89,7 +95,7 @@ public class StorageNode implements DFSNode {
 			System.out.println("somethings wrong");
 			System.exit(1);
 		}
-
+		
 		ChannelFuture cf = storageNode.bootstrap.connect(storageNode.controllerHostName, 13112);
 		cf.syncUninterruptibly();
 
@@ -117,6 +123,8 @@ public class StorageNode implements DFSNode {
 		storageNode.start();
 	}
 
+	
+	
 	/**
 	 * Start listening for requests and inbound chunks
 	 *
@@ -256,9 +264,33 @@ public class StorageNode implements DFSNode {
         		 	
         		 	CHange this nodes replica assignment that was the down node, to the new replicaAssignment
         		 	and send chunks on this node that are this node's primary chunks to the newReplicaAssignment
-        		 	
+        		 	Also add the chunks to the nodes bloom filter when it gets it
         		 	
         		 */
+        		
+        		if (this.replicaHosts.get(0) == downNode) {
+        			this.replicaHosts.remove(0);
+        			this.replicaHosts.add(0, newReplicaAssignment);
+        		} else if (replicaHosts.get(1) == downNode) {
+        			this.replicaHosts.remove(1);
+        			this.replicaHosts.add(1, newReplicaAssignment);
+        		}
+        		
+        		// All chunks that belong to this nodes as primaries
+        		
+        		ArrayList<Path> pathsToThisNodesPrimaries = this.hostnameToChunks.get(this.hostname);
+        		
+        		logger.info("This Storage Nodes chunks that we will be re-replicating to " + newReplicaAssignment + " --->");
+        		
+        		for (Path chunkPath : pathsToThisNodesPrimaries) {
+        			logger.info(chunkPath.getFileName().toString());
+        		}
+        		
+        		// Now send these chunks to the newReplicaAssignment
+        		
+        		
+        		
+        		
         		
 
         		
@@ -276,12 +308,61 @@ public class StorageNode implements DFSNode {
         		 	in the map on that node as belonging to this storage node. 
         		 	Also send a message to the other 
         		 	replica assignment from the down node to merge the down node's mapping with this storage node's mapping
-        		 	
+        		 s	
         		 	(AKA) telling the other replica assignment of the down node that we are now the new primary holder of
         		 	that data and it belongs to this storage node.
         		*/
         		
-        		String downNodeReplicaAssignment2 = replicaRequest.getReplicaAssignment2FromDownNode();
+        		//Change local mapping to that the down node's chunks now belong to this (primary) nodes map listing
+        		
+        		ArrayList<Path> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
+        		
+        		this.hostnameToChunks.get(this.hostname).addAll(pathsToDownNodesData);
+        		this.hostnameToChunks.remove(downNode);
+        		
+        		
+        		// Now we need to message the new replica assignment and provide it with the chunks
+        		// from the pathsToDownNodesData list
+        		
+        		ChannelFuture cf = this.bootstrap.connect(newReplicaAssignment, 13114);
+        		
+        		
+				cf.syncUninterruptibly();
+				Channel chan = cf.channel();
+        		
+        		String ChunkFileName = pathsToDownNodesData.get(0).getFileName().toString();
+        		
+        		ArrayList<ChunkWrapper> chunks = chunkMap.get(ChunkFileName);
+				
+				for (ChunkWrapper chunk : chunks) {
+					chunk.get
+				}
+				
+        		
+        		
+        		
+        		
+        		
+        		
+//        		String pathsToSend = "";
+//        		for (Path path : pathsToDownNodesData) {
+//        			pathsToSend += path.getFileName().toString() + " ";
+//        		}
+//        		String primaryNodeName = this.hostname;
+//        		
+//        		StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildReplicateToNewAssignment(pathsToSend, primaryNodeName);
+//        		
+//        		String downNodeReplicaAssignment2 = replicaRequest.getReplicaAssignment2FromDownNode();
+//        		
+//        		ChannelFuture cf = this.bootstrap.connect(downNodeReplicaAssignment2, 13114);
+//        		
+//        		
+//				cf.syncUninterruptibly();
+//				Channel chan = cf.channel();
+//				chan.writeAndFlush(msgWrapper).syncUninterruptibly();
+//				cf.syncUninterruptibly();
+//				chan.close().syncUninterruptibly();
+        			
         		
         	}
         	

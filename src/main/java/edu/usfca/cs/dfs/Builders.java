@@ -229,4 +229,14 @@ public class Builders {
 		return StorageMessages.StorageMessageWrapper.newBuilder().setPrintRequest(printRequest).build();
 
 	}
+	
+	public static StorageMessages.StorageMessageWrapper buildReplicateToNewAssignment(String paths, String primaryName) {
+		StorageMessages.ReplicateToNewAssignment replicateRequest = StorageMessages.ReplicateToNewAssignment.newBuilder()
+				.setPaths(paths).setPrimaryNodeName(primaryName).build();
+		
+		return StorageMessages.StorageMessageWrapper.newBuilder().setReplicaToNewAssignment(replicateRequest).build();
+		
+	}
+	
+	
 }

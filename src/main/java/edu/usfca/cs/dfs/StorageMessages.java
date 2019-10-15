@@ -10163,6 +10163,698 @@ public final class StorageMessages {
 
   }
 
+  public interface ReplicateToNewAssignmentOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:ReplicateToNewAssignment)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string primaryNodeName = 1;</code>
+     */
+    java.lang.String getPrimaryNodeName();
+    /**
+     * <code>string primaryNodeName = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getPrimaryNodeNameBytes();
+
+    /**
+     * <code>string paths = 2;</code>
+     */
+    java.lang.String getPaths();
+    /**
+     * <code>string paths = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getPathsBytes();
+  }
+  /**
+   * Protobuf type {@code ReplicateToNewAssignment}
+   */
+  public  static final class ReplicateToNewAssignment extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:ReplicateToNewAssignment)
+      ReplicateToNewAssignmentOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ReplicateToNewAssignment.newBuilder() to construct.
+    private ReplicateToNewAssignment(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ReplicateToNewAssignment() {
+      primaryNodeName_ = "";
+      paths_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ReplicateToNewAssignment();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private ReplicateToNewAssignment(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              primaryNodeName_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              paths_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.usfca.cs.dfs.StorageMessages.internal_static_ReplicateToNewAssignment_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.usfca.cs.dfs.StorageMessages.internal_static_ReplicateToNewAssignment_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.class, edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.Builder.class);
+    }
+
+    public static final int PRIMARYNODENAME_FIELD_NUMBER = 1;
+    private volatile java.lang.Object primaryNodeName_;
+    /**
+     * <code>string primaryNodeName = 1;</code>
+     */
+    public java.lang.String getPrimaryNodeName() {
+      java.lang.Object ref = primaryNodeName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        primaryNodeName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string primaryNodeName = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPrimaryNodeNameBytes() {
+      java.lang.Object ref = primaryNodeName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        primaryNodeName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PATHS_FIELD_NUMBER = 2;
+    private volatile java.lang.Object paths_;
+    /**
+     * <code>string paths = 2;</code>
+     */
+    public java.lang.String getPaths() {
+      java.lang.Object ref = paths_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        paths_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string paths = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPathsBytes() {
+      java.lang.Object ref = paths_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        paths_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getPrimaryNodeNameBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, primaryNodeName_);
+      }
+      if (!getPathsBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, paths_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getPrimaryNodeNameBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, primaryNodeName_);
+      }
+      if (!getPathsBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, paths_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment)) {
+        return super.equals(obj);
+      }
+      edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment other = (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) obj;
+
+      if (!getPrimaryNodeName()
+          .equals(other.getPrimaryNodeName())) return false;
+      if (!getPaths()
+          .equals(other.getPaths())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + PRIMARYNODENAME_FIELD_NUMBER;
+      hash = (53 * hash) + getPrimaryNodeName().hashCode();
+      hash = (37 * hash) + PATHS_FIELD_NUMBER;
+      hash = (53 * hash) + getPaths().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code ReplicateToNewAssignment}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:ReplicateToNewAssignment)
+        edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignmentOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_ReplicateToNewAssignment_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_ReplicateToNewAssignment_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.class, edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.Builder.class);
+      }
+
+      // Construct using edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        primaryNodeName_ = "";
+
+        paths_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_ReplicateToNewAssignment_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment getDefaultInstanceForType() {
+        return edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment build() {
+        edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment buildPartial() {
+        edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment result = new edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment(this);
+        result.primaryNodeName_ = primaryNodeName_;
+        result.paths_ = paths_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) {
+          return mergeFrom((edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment other) {
+        if (other == edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance()) return this;
+        if (!other.getPrimaryNodeName().isEmpty()) {
+          primaryNodeName_ = other.primaryNodeName_;
+          onChanged();
+        }
+        if (!other.getPaths().isEmpty()) {
+          paths_ = other.paths_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object primaryNodeName_ = "";
+      /**
+       * <code>string primaryNodeName = 1;</code>
+       */
+      public java.lang.String getPrimaryNodeName() {
+        java.lang.Object ref = primaryNodeName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          primaryNodeName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string primaryNodeName = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPrimaryNodeNameBytes() {
+        java.lang.Object ref = primaryNodeName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          primaryNodeName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string primaryNodeName = 1;</code>
+       */
+      public Builder setPrimaryNodeName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        primaryNodeName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string primaryNodeName = 1;</code>
+       */
+      public Builder clearPrimaryNodeName() {
+        
+        primaryNodeName_ = getDefaultInstance().getPrimaryNodeName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string primaryNodeName = 1;</code>
+       */
+      public Builder setPrimaryNodeNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        primaryNodeName_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object paths_ = "";
+      /**
+       * <code>string paths = 2;</code>
+       */
+      public java.lang.String getPaths() {
+        java.lang.Object ref = paths_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          paths_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string paths = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPathsBytes() {
+        java.lang.Object ref = paths_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          paths_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string paths = 2;</code>
+       */
+      public Builder setPaths(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        paths_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string paths = 2;</code>
+       */
+      public Builder clearPaths() {
+        
+        paths_ = getDefaultInstance().getPaths();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string paths = 2;</code>
+       */
+      public Builder setPathsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        paths_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:ReplicateToNewAssignment)
+    }
+
+    // @@protoc_insertion_point(class_scope:ReplicateToNewAssignment)
+    private static final edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment();
+    }
+
+    public static edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ReplicateToNewAssignment>
+        PARSER = new com.google.protobuf.AbstractParser<ReplicateToNewAssignment>() {
+      @java.lang.Override
+      public ReplicateToNewAssignment parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new ReplicateToNewAssignment(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<ReplicateToNewAssignment> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ReplicateToNewAssignment> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface StorageMessageWrapperOrBuilder extends
       // @@protoc_insertion_point(interface_extends:StorageMessageWrapper)
       com.google.protobuf.MessageOrBuilder {
@@ -10335,6 +11027,19 @@ public final class StorageMessages {
      * <code>.NodeState nodeState = 13;</code>
      */
     edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder getNodeStateOrBuilder();
+
+    /**
+     * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+     */
+    boolean hasReplicaToNewAssignment();
+    /**
+     * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+     */
+    edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment getReplicaToNewAssignment();
+    /**
+     * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+     */
+    edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignmentOrBuilder getReplicaToNewAssignmentOrBuilder();
 
     public edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper.MsgCase getMsgCase();
   }
@@ -10565,6 +11270,20 @@ public final class StorageMessages {
               msgCase_ = 13;
               break;
             }
+            case 114: {
+              edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.Builder subBuilder = null;
+              if (msgCase_ == 14) {
+                subBuilder = ((edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_).toBuilder();
+              }
+              msg_ =
+                  input.readMessage(edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_);
+                msg_ = subBuilder.buildPartial();
+              }
+              msgCase_ = 14;
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -10614,6 +11333,7 @@ public final class StorageMessages {
       REPLICAREQUEST(11),
       PRINTREQUEST(12),
       NODESTATE(13),
+      REPLICATONEWASSIGNMENT(14),
       MSG_NOT_SET(0);
       private final int value;
       private MsgCase(int value) {
@@ -10642,6 +11362,7 @@ public final class StorageMessages {
           case 11: return REPLICAREQUEST;
           case 12: return PRINTREQUEST;
           case 13: return NODESTATE;
+          case 14: return REPLICATONEWASSIGNMENT;
           case 0: return MSG_NOT_SET;
           default: return null;
         }
@@ -10995,6 +11716,32 @@ public final class StorageMessages {
       return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
     }
 
+    public static final int REPLICATONEWASSIGNMENT_FIELD_NUMBER = 14;
+    /**
+     * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+     */
+    public boolean hasReplicaToNewAssignment() {
+      return msgCase_ == 14;
+    }
+    /**
+     * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+     */
+    public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment getReplicaToNewAssignment() {
+      if (msgCase_ == 14) {
+         return (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_;
+      }
+      return edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance();
+    }
+    /**
+     * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+     */
+    public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignmentOrBuilder getReplicaToNewAssignmentOrBuilder() {
+      if (msgCase_ == 14) {
+         return (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_;
+      }
+      return edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -11047,6 +11794,9 @@ public final class StorageMessages {
       }
       if (msgCase_ == 13) {
         output.writeMessage(13, (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_);
+      }
+      if (msgCase_ == 14) {
+        output.writeMessage(14, (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_);
       }
       unknownFields.writeTo(output);
     }
@@ -11108,6 +11858,10 @@ public final class StorageMessages {
       if (msgCase_ == 13) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(13, (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_);
+      }
+      if (msgCase_ == 14) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(14, (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -11178,6 +11932,10 @@ public final class StorageMessages {
           if (!getNodeState()
               .equals(other.getNodeState())) return false;
           break;
+        case 14:
+          if (!getReplicaToNewAssignment()
+              .equals(other.getReplicaToNewAssignment())) return false;
+          break;
         case 0:
         default:
       }
@@ -11244,6 +12002,10 @@ public final class StorageMessages {
         case 13:
           hash = (37 * hash) + NODESTATE_FIELD_NUMBER;
           hash = (53 * hash) + getNodeState().hashCode();
+          break;
+        case 14:
+          hash = (37 * hash) + REPLICATONEWASSIGNMENT_FIELD_NUMBER;
+          hash = (53 * hash) + getReplicaToNewAssignment().hashCode();
           break;
         case 0:
         default:
@@ -11500,6 +12262,13 @@ public final class StorageMessages {
             result.msg_ = nodeStateBuilder_.build();
           }
         }
+        if (msgCase_ == 14) {
+          if (replicaToNewAssignmentBuilder_ == null) {
+            result.msg_ = msg_;
+          } else {
+            result.msg_ = replicaToNewAssignmentBuilder_.build();
+          }
+        }
         result.msgCase_ = msgCase_;
         onBuilt();
         return result;
@@ -11600,6 +12369,10 @@ public final class StorageMessages {
           }
           case NODESTATE: {
             mergeNodeState(other.getNodeState());
+            break;
+          }
+          case REPLICATONEWASSIGNMENT: {
+            mergeReplicaToNewAssignment(other.getReplicaToNewAssignment());
             break;
           }
           case MSG_NOT_SET: {
@@ -13417,6 +14190,142 @@ public final class StorageMessages {
         onChanged();;
         return nodeStateBuilder_;
       }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment, edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.Builder, edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignmentOrBuilder> replicaToNewAssignmentBuilder_;
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      public boolean hasReplicaToNewAssignment() {
+        return msgCase_ == 14;
+      }
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment getReplicaToNewAssignment() {
+        if (replicaToNewAssignmentBuilder_ == null) {
+          if (msgCase_ == 14) {
+            return (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_;
+          }
+          return edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance();
+        } else {
+          if (msgCase_ == 14) {
+            return replicaToNewAssignmentBuilder_.getMessage();
+          }
+          return edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      public Builder setReplicaToNewAssignment(edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment value) {
+        if (replicaToNewAssignmentBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          msg_ = value;
+          onChanged();
+        } else {
+          replicaToNewAssignmentBuilder_.setMessage(value);
+        }
+        msgCase_ = 14;
+        return this;
+      }
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      public Builder setReplicaToNewAssignment(
+          edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.Builder builderForValue) {
+        if (replicaToNewAssignmentBuilder_ == null) {
+          msg_ = builderForValue.build();
+          onChanged();
+        } else {
+          replicaToNewAssignmentBuilder_.setMessage(builderForValue.build());
+        }
+        msgCase_ = 14;
+        return this;
+      }
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      public Builder mergeReplicaToNewAssignment(edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment value) {
+        if (replicaToNewAssignmentBuilder_ == null) {
+          if (msgCase_ == 14 &&
+              msg_ != edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance()) {
+            msg_ = edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.newBuilder((edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            msg_ = value;
+          }
+          onChanged();
+        } else {
+          if (msgCase_ == 14) {
+            replicaToNewAssignmentBuilder_.mergeFrom(value);
+          }
+          replicaToNewAssignmentBuilder_.setMessage(value);
+        }
+        msgCase_ = 14;
+        return this;
+      }
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      public Builder clearReplicaToNewAssignment() {
+        if (replicaToNewAssignmentBuilder_ == null) {
+          if (msgCase_ == 14) {
+            msgCase_ = 0;
+            msg_ = null;
+            onChanged();
+          }
+        } else {
+          if (msgCase_ == 14) {
+            msgCase_ = 0;
+            msg_ = null;
+          }
+          replicaToNewAssignmentBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.Builder getReplicaToNewAssignmentBuilder() {
+        return getReplicaToNewAssignmentFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignmentOrBuilder getReplicaToNewAssignmentOrBuilder() {
+        if ((msgCase_ == 14) && (replicaToNewAssignmentBuilder_ != null)) {
+          return replicaToNewAssignmentBuilder_.getMessageOrBuilder();
+        } else {
+          if (msgCase_ == 14) {
+            return (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_;
+          }
+          return edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.ReplicateToNewAssignment replicaToNewAssignment = 14;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment, edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.Builder, edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignmentOrBuilder> 
+          getReplicaToNewAssignmentFieldBuilder() {
+        if (replicaToNewAssignmentBuilder_ == null) {
+          if (!(msgCase_ == 14)) {
+            msg_ = edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance();
+          }
+          replicaToNewAssignmentBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment, edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.Builder, edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignmentOrBuilder>(
+                  (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_,
+                  getParentForChildren(),
+                  isClean());
+          msg_ = null;
+        }
+        msgCase_ = 14;
+        onChanged();;
+        return replicaToNewAssignmentBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -13536,6 +14445,11 @@ public final class StorageMessages {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_PrintNodesRequest_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_ReplicateToNewAssignment_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_ReplicateToNewAssignment_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_StorageMessageWrapper_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -13575,21 +14489,25 @@ public final class StorageMessages {
       "romDownNode\030\004 \001(\t\"B\n\tNodeState\022\020\n\010nodeNa" +
       "me\030\001 \001(\t\022\020\n\010requests\030\002 \001(\005\022\021\n\tdiskSpace\030" +
       "\003 \001(\003\".\n\021PrintNodesRequest\022\031\n\005nodes\030\001 \003(" +
-      "\0132\n.NodeState\"\254\004\n\025StorageMessageWrapper\022" +
-      "!\n\nstoreChunk\030\001 \001(\0132\013.StoreChunkH\000\022%\n\014re" +
-      "trieveFile\030\002 \001(\0132\r.RetrieveFileH\000\022#\n\013joi" +
-      "nRequest\030\003 \001(\0132\014.JoinRequestH\000\022\037\n\theartb" +
-      "eat\030\004 \001(\0132\n.HeartbeatH\000\022%\n\014storeRequest\030" +
-      "\005 \001(\0132\r.StoreRequestH\000\022\'\n\rstoreResponse\030" +
-      "\006 \001(\0132\016.StoreResponseH\000\0221\n\022replicaAssign" +
-      "ments\030\007 \001(\0132\023.ReplicaAssignmentsH\000\0221\n\016re" +
-      "trievalHosts\030\010 \001(\0132\027.PossibleRetrievalHo" +
-      "stsH\000\022#\n\013healRequest\030\t \001(\0132\014.HealRequest" +
-      "H\000\022%\n\014healResponse\030\n \001(\0132\r.HealResponseH" +
-      "\000\022-\n\016replicaRequest\030\013 \001(\0132\023.ReplicateOnF" +
-      "ailureH\000\022*\n\014printRequest\030\014 \001(\0132\022.PrintNo" +
-      "desRequestH\000\022\037\n\tnodeState\030\r \001(\0132\n.NodeSt" +
-      "ateH\000B\005\n\003msgB\022\n\020edu.usfca.cs.dfsb\006proto3"
+      "\0132\n.NodeState\"B\n\030ReplicateToNewAssignmen" +
+      "t\022\027\n\017primaryNodeName\030\001 \001(\t\022\r\n\005paths\030\002 \001(" +
+      "\t\"\351\004\n\025StorageMessageWrapper\022!\n\nstoreChun" +
+      "k\030\001 \001(\0132\013.StoreChunkH\000\022%\n\014retrieveFile\030\002" +
+      " \001(\0132\r.RetrieveFileH\000\022#\n\013joinRequest\030\003 \001" +
+      "(\0132\014.JoinRequestH\000\022\037\n\theartbeat\030\004 \001(\0132\n." +
+      "HeartbeatH\000\022%\n\014storeRequest\030\005 \001(\0132\r.Stor" +
+      "eRequestH\000\022\'\n\rstoreResponse\030\006 \001(\0132\016.Stor" +
+      "eResponseH\000\0221\n\022replicaAssignments\030\007 \001(\0132" +
+      "\023.ReplicaAssignmentsH\000\0221\n\016retrievalHosts" +
+      "\030\010 \001(\0132\027.PossibleRetrievalHostsH\000\022#\n\013hea" +
+      "lRequest\030\t \001(\0132\014.HealRequestH\000\022%\n\014healRe" +
+      "sponse\030\n \001(\0132\r.HealResponseH\000\022-\n\016replica" +
+      "Request\030\013 \001(\0132\023.ReplicateOnFailureH\000\022*\n\014" +
+      "printRequest\030\014 \001(\0132\022.PrintNodesRequestH\000" +
+      "\022\037\n\tnodeState\030\r \001(\0132\n.NodeStateH\000\022;\n\026rep" +
+      "licaToNewAssignment\030\016 \001(\0132\031.ReplicateToN" +
+      "ewAssignmentH\000B\005\n\003msgB\022\n\020edu.usfca.cs.df" +
+      "sb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -13673,12 +14591,18 @@ public final class StorageMessages {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_PrintNodesRequest_descriptor,
         new java.lang.String[] { "Nodes", });
-    internal_static_StorageMessageWrapper_descriptor =
+    internal_static_ReplicateToNewAssignment_descriptor =
       getDescriptor().getMessageTypes().get(13);
+    internal_static_ReplicateToNewAssignment_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_ReplicateToNewAssignment_descriptor,
+        new java.lang.String[] { "PrimaryNodeName", "Paths", });
+    internal_static_StorageMessageWrapper_descriptor =
+      getDescriptor().getMessageTypes().get(14);
     internal_static_StorageMessageWrapper_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_StorageMessageWrapper_descriptor,
-        new java.lang.String[] { "StoreChunk", "RetrieveFile", "JoinRequest", "Heartbeat", "StoreRequest", "StoreResponse", "ReplicaAssignments", "RetrievalHosts", "HealRequest", "HealResponse", "ReplicaRequest", "PrintRequest", "NodeState", "Msg", });
+        new java.lang.String[] { "StoreChunk", "RetrieveFile", "JoinRequest", "Heartbeat", "StoreRequest", "StoreResponse", "ReplicaAssignments", "RetrievalHosts", "HealRequest", "HealResponse", "ReplicaRequest", "PrintRequest", "NodeState", "ReplicaToNewAssignment", "Msg", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

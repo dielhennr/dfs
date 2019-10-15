@@ -64,6 +64,11 @@ message HealResponse {
     bytes data = 4;
 }
 
+message ReplicateOnFailure {
+	string downNodeHostName = 1;
+	string targetHost = 2;
+	bool reAssign = 3;
+}
 message NodeState {
 	string nodeName = 1;
 	int32 requests = 2;
@@ -85,6 +90,9 @@ message StorageMessageWrapper {
         PossibleRetrievalHosts retrievalHosts = 8;
         HealRequest healRequest = 9;
         HealResponse healResponse = 10;
-        PrintNodesRequest printRequest = 11;
+        ReplicateOnFailure replicaRequest = 11;
+        PrintNodesRequest printRequest = 12;
+        NodeState nodeState = 13;
+
     }
 }

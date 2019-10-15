@@ -1,0 +1,2 @@
+[1 IN] edu.usfca.cs.dfs.StorageNode.main main: Sent join request to orion01 
+[2 IN] edu.usfca.cs.dfs.StorageNode.main main: Started heartbeat thread. 

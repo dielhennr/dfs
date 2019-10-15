@@ -86,6 +86,7 @@ public class StorageNode implements DFSNode {
 			storageNode = new StorageNode(args);
 		} catch (UnknownHostException e) {
 			logger.error("Could not start storage node.");
+			System.out.println("somethings wrong");
 			System.exit(1);
 		}
 
@@ -124,8 +125,8 @@ public class StorageNode implements DFSNode {
 	public void start() throws IOException {
 		/* Pass a reference of the controller to our message router */
 		messageRouter = new ServerMessageRouter(this);
-		messageRouter.listen(13114);
-		System.out.println("Listening for connections on port 13100");
+		messageRouter.listen(13112);
+		System.out.println("Listening for connections on port 13114");
 	}
 
 	/* Storage node inbound duties */
@@ -153,7 +154,7 @@ public class StorageNode implements DFSNode {
 			/* Send to replica assignments */
 			if (replicaHosts.size() == 2 && message.getStoreChunk().getOriginHost().equals(this.hostname)) {
 				/* Connect to first assignment and send chunk */
-				ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13114);
+				ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13112);
 				cf.syncUninterruptibly();
 				Channel chan = cf.channel();
 				chan.writeAndFlush(message).syncUninterruptibly();
@@ -161,7 +162,7 @@ public class StorageNode implements DFSNode {
 				chan.close().syncUninterruptibly();
 
 				/* Connect to second assignment and send chunk */
-				cf = bootstrap.connect(replicaHosts.get(1), 13114);
+				cf = bootstrap.connect(replicaHosts.get(1), 13112);
 				cf.syncUninterruptibly();
 				chan = cf.channel();
 				chan.writeAndFlush(message).syncUninterruptibly();
@@ -188,12 +189,12 @@ public class StorageNode implements DFSNode {
                 /* If our chunk matches its checksum we can send it back to client, otherwise send request to the final replica location */
                 if ( (healResponse = this.getChunkAsHealResponse(message.getHealRequest())) != null ) {
                     logger.info("Found valid chunk here for " + healRequest.getInitialLocation());
-                    ChannelFuture cf = bootstrap.connect(healRequest.getInitialLocation(), 13114).syncUninterruptibly();
+                    ChannelFuture cf = bootstrap.connect(healRequest.getInitialLocation(), 13112).syncUninterruptibly();
                     cf.channel().writeAndFlush(healResponse).syncUninterruptibly();
                 } else {
                     logger.info("Did not find valid chunk here for " + healRequest.getInitialLocation());
                     logger.info("Requesting from " + healRequest.getFinalLocation());
-                    ChannelFuture requestAgain = this.bootstrap.connect(healRequest.getFinalLocation(), 13114).syncUninterruptibly();
+                    ChannelFuture requestAgain = this.bootstrap.connect(healRequest.getFinalLocation(), 13112).syncUninterruptibly();
                     requestAgain.channel().writeAndFlush(message).syncUninterruptibly();
                 }
 
@@ -204,7 +205,7 @@ public class StorageNode implements DFSNode {
                  * Otherwise all of our data is corrupted and we cannot retrieve it
                  */
                 if ( (healResponse = this.getChunkAsHealResponse(message.getHealRequest())) != null) {
-                    ChannelFuture cf = bootstrap.connect(healRequest.getIntermediateLocation(), 13114).syncUninterruptibly();
+                    ChannelFuture cf = bootstrap.connect(healRequest.getIntermediateLocation(), 13112).syncUninterruptibly();
                     cf.channel().writeAndFlush(healResponse).syncUninterruptibly();
                 } else {
                     logger.info("All data corrupted for " + healRequest.getFileName() + " chunk " + healRequest.getChunkId());
@@ -225,12 +226,23 @@ public class StorageNode implements DFSNode {
                 logger.info("Shooting healed chunk to client.");
                 this.clientCtx.pipeline().writeAndFlush(chunk);
             } else {
-                ChannelFuture cf = bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();
+                ChannelFuture cf = bootstrap.connect(message.getHealResponse().getPassTo(), 13112).syncUninterruptibly();
                 cf.channel().writeAndFlush(message).syncUninterruptibly();
             }
 
             /* Intermediate node and primary node write healed chunk to disk */
             this.writeChunk(chunk);
+        }
+		
+        else if (message.hasReplicaRequest()) {
+        	StorageMessages.ReplicateOnFailure replicaRequest = message.getReplicaRequest();
+        	
+        	String downNode = replicaRequest.getDownNodeHostName();
+        	String targetHost = replicaRequest.getTargetHost();
+        	boolean reReplicate = replicaRequest.getReAssign();
+        	
+        	logger.info("Recieved Replication Request: Down Node: " + downNode + " target host for rereplication: " +
+        				targetHost + " reassignment flag: " + reReplicate);
         }
 	}
     
@@ -278,7 +290,7 @@ public class StorageNode implements DFSNode {
 
     }
 
-	/**
+		/**
 	 * Find all chunks // tokenize them check metadata // heal if neccessary // send
 	 * chunks to client
 	 *

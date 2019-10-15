@@ -157,7 +157,7 @@ public class Client implements DFSNode {
 			 * listen on 13111. Meanwhile controller is listening on 13000 for heartbeats
 			 * from SNs HeartBeatRunner.
 			 */
-			ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13114).syncUninterruptibly();
+			ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13112).syncUninterruptibly();
 
 			/*
 			 * Write the request to change the SNs decoder so that it can start receiving
@@ -230,7 +230,7 @@ public class Client implements DFSNode {
 			/* Sending retrieval requests to notes with the file we want */
 			for (String host : possibleHosts) {
 				// Open connections for nodes and check if they have the file
-				ChannelFuture cf = bootstrap.connect(host, 13114);
+				ChannelFuture cf = bootstrap.connect(host, 13112);
 				cf.syncUninterruptibly();
 				Channel chan = cf.channel();
 				ChannelFuture write = chan.writeAndFlush(Builders.buildRetrievalRequest(path.toFile().toString()));

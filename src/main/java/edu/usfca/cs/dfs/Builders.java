@@ -200,7 +200,15 @@ public class Builders {
 		
 		return StorageMessages.StorageMessageWrapper.newBuilder().setRetrievalHosts(hostsResponse).build();
 	}
-	
+
+	public static StorageMessages.StorageMessageWrapper buildReplicaRequest(String targetHost, String downNodeHost, boolean reReplicate) {
+		
+		StorageMessages.ReplicateOnFailure replicaRequest = StorageMessages.ReplicateOnFailure.newBuilder()
+				.setDownNodeHostName(downNodeHost).setTargetHost(targetHost).setReAssign(reReplicate).build();
+		
+		return StorageMessages.StorageMessageWrapper.newBuilder().setReplicaRequest(replicaRequest).build();
+  }
+  
 	public static StorageMessages.StorageMessageWrapper buildPrintRequest(ArrayList<StorageNodeContext> listOfNodes) {
 		StorageMessages.PrintNodesRequest printRequest;
 		if (listOfNodes == null) {
@@ -219,5 +227,6 @@ public class Builders {
 		}
 		
 		return StorageMessages.StorageMessageWrapper.newBuilder().setPrintRequest(printRequest).build();
+
 	}
 }

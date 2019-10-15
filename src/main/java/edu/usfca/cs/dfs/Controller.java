@@ -8,9 +8,16 @@ import java.util.PriorityQueue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import edu.usfca.cs.dfs.net.MessagePipeline;
 import edu.usfca.cs.dfs.net.ServerMessageRouter;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioSocketChannel;
 
 public class Controller implements DFSNode {
 
@@ -32,7 +39,7 @@ public class Controller implements DFSNode {
 		/* Pass a reference of the controller to our message router */
 		messageRouter = new ServerMessageRouter(this);
 		messageRouter.listen(this.port);
-		System.out.println("Listening for connections on port 13100");
+		System.out.println("Listening for connections on port " + this.port);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -42,6 +49,7 @@ public class Controller implements DFSNode {
 		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
+		System.out.println("Uhhh running?");
 	}
 
 	/* Controller inbound duties */
@@ -86,16 +94,30 @@ public class Controller implements DFSNode {
 					 * assign and then put the assignee back in
 					 */
 					if (storageNodePrimary.replicaAssignment1 == null) {
-						replicaAssignment1 = storageNodes.poll();
+						Iterator<StorageNodeContext> iter = storageNodes.iterator();
+						StorageNodeContext snctx = iter.next();
+						while (snctx.equals(storageNodePrimary.replicaAssignment2)) {
+							snctx = iter.next();
+							
+						}
+						replicaAssignment1 = snctx;
+						iter.remove();
 						storageNodePrimary.replicaAssignment1 = replicaAssignment1;
-						storageNodes.add(replicaAssignment1);
+
 					}
 					/* Same here for second assignment */
 					if (storageNodePrimary.replicaAssignment2 == null) {
-						replicaAssignment2 = storageNodes.poll();
+						Iterator<StorageNodeContext> iter = storageNodes.iterator();
+						StorageNodeContext snctx = iter.next();
+						while (snctx.equals(storageNodePrimary.replicaAssignment1)) {
+							snctx = iter.next();
+							
+						}
+						replicaAssignment2 = snctx;
+						iter.remove();
 						storageNodePrimary.replicaAssignment2 = replicaAssignment2;
-						storageNodes.add(replicaAssignment2);
 					}
+					
 					/* Bump requests of all assignments since we are about to send a file */
 					storageNodePrimary.bumpRequests();
 					storageNodePrimary.replicaAssignment1.bumpRequests();
@@ -106,7 +128,12 @@ public class Controller implements DFSNode {
 
 					/* Put primary back in the queue */
 					storageNodes.add(storageNodePrimary);
-
+					if (replicaAssignment1 != null) {
+					storageNodes.add(replicaAssignment1);
+					}
+					if (replicaAssignment2 != null) {
+					storageNodes.add(replicaAssignment2);
+					}
 					/**
 					 * Write back a store response to client with hostname of the primary node to
 					 * send chunks to. This node will handle replication with the ReplicaAssignments
@@ -194,11 +221,12 @@ public class Controller implements DFSNode {
 						long nodeTime = node.getTimestamp();
 
 						if (currentTime - nodeTime > 5500) {
+							iter.remove();
 							handleNodeFailure(node);
 							logger.info("Detected failure on node: " + node.getHostName());
 							/* Also need to rereplicate data here. */
 							/* We have to rereplicate this nodes replicas as well as its primarys */
-							iter.remove();
+							
 						}
 					}
 
@@ -211,8 +239,68 @@ public class Controller implements DFSNode {
 			}
 		}
 
-        public void handleNodeFailure(StorageNodeContext node) {
+        public void handleNodeFailure(StorageNodeContext downNode) {
             
+        	// send message to these nodes to rereplicate the data belonging to the DOWN NODE
+            StorageNodeContext downNodeReplicaAssignment1 = downNode.replicaAssignment1;
+            StorageNodeContext downNodeReplicaAssignment2 = downNode.replicaAssignment2;
+
+            
+            String targetHost = "";
+
+
+            ArrayList<StorageNodeContext> nodesThatNeedNewReplicaAssignments = new ArrayList<>();
+
+            synchronized (storageNodes) {
+
+				Iterator<StorageNodeContext> iter = storageNodes.iterator();
+				while (iter.hasNext()) {
+					StorageNodeContext currNode = iter.next();
+
+					if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
+						nodesThatNeedNewReplicaAssignments.add(currNode);
+					}
+					else if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
+						targetHost = currNode.getHostName();
+					}
+				}
+            }
+            logger.info("Target Host for replication: " + targetHost);
+            // Send message to one of the nodes that handles the down node's replicas
+            String hostname1 = downNodeReplicaAssignment1.getHostName();
+            String downHost = downNode.getHostName();
+            
+            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(targetHost, downHost, false);
+            
+            EventLoopGroup workerGroup = new NioEventLoopGroup();
+            MessagePipeline pipeline = new MessagePipeline();
+    		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+    				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
+
+    		ChannelFuture cf = bootstrap.connect(hostname1, 13112);
+    		cf.syncUninterruptibly();
+    		
+    		Channel chan = cf.channel();
+    		ChannelFuture write = chan.writeAndFlush(replicaRequest);
+    		write.syncUninterruptibly();
+    		
+    		
+    		// Now hit up the nodes that had the down node as its replica assignments
+    		logger.info("Nodes that need new assignments: " + nodesThatNeedNewReplicaAssignments.toString());
+    		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
+    			String nodeName = node.getHostName();
+    			cf = bootstrap.connect(hostname1, 13112);
+    			cf.syncUninterruptibly();
+    			chan = cf.channel();
+    			
+    			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(nodeName, downHost, true);
+    			write = chan.writeAndFlush(replicaAssignmentChange);
+    			
+    		}
+    		
+    		
+    		
+    		
         }
 	}
 }

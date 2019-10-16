@@ -21,9 +21,9 @@ public class StorageNodeContext {
 		replicaAssignment2 = null;
 	}
 
-    public BloomFilter getFilter() {
-        return this.filter;
-    }
+	public BloomFilter getFilter() {
+		return this.filter;
+	}
 
 	public String getHostName() {
 		return this.hostname;
@@ -42,7 +42,7 @@ public class StorageNodeContext {
 	}
 
 	public boolean mightBeThere(byte[] data) {
-        return this.filter.get(data);
+		return this.filter.get(data);
 	}
 
 	public void bumpRequests() {

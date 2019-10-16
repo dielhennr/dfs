@@ -32,24 +32,24 @@ public class BloomFilter {
 	public int getSize() {
 		return this.size;
 	}
+    
+    /**
+     * Returns the {@link BitSet} of this BloomFilter
+     *
+     * @return the bit set of the filter
+     */
+    public BitSet getBitSet() {
+        return this.bitSet;
+    }
 
-	/**
-	 * Returns the {@link BitSet} of this BloomFilter
-	 *
-	 * @return the bit set of the filter
-	 */
-	public BitSet getBitSet() {
-		return this.bitSet;
-	}
-
-	/**
-	 * Merge one filters routing table with another
-	 *
-	 * @param filter
-	 */
-	public void mergeFilter(BloomFilter filter) {
-		this.bitSet.or(filter.getBitSet());
-	}
+    /**
+     * Merge one filters routing table with another
+     *
+     * @param filter
+     */
+    public void mergeFilter(BloomFilter filter) {
+        this.bitSet.or(filter.getBitSet());
+    }
 
 	/**
 	 * Constructs a bloom filter given a size and number of hashes per entry

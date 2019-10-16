@@ -67,8 +67,7 @@ public class Client implements DFSNode {
 		this.arguments = new ArgumentMap(args);
 
 		/* Check that user entered controller to connect to and file to send */
-		if (arguments.hasFlag("-h")
-				&& (((arguments.hasFlag("-r") || arguments.hasFlag("-f")) || arguments.hasFlag("-l")))) {
+		if (arguments.hasFlag("-h") && (((arguments.hasFlag("-r") || arguments.hasFlag("-f")) || arguments.hasFlag("-l")))) {
 			controllerHost = arguments.getString("-h");
 		} else {
 			System.err.println("Usage: java -cp .... -h hostToContact -[fr] fileToSend/Retrieve.\n"
@@ -84,6 +83,8 @@ public class Client implements DFSNode {
 		if (arguments.hasFlag("-f")) {
 			path = arguments.getPath("-f");
 		}
+		
+
 
 		/* Default to port 13100 */
 		port = arguments.getInteger("-p", 13112);
@@ -239,32 +240,31 @@ public class Client implements DFSNode {
 			/* Add chunk to our set sorted by chunkID */
 			retrievalSet.add(message.getStoreChunk());
 			logger.info("Recieved retrieval chunk. So far we retrieved " + retrievalSet.size());
-			logger.info(
-					"This chunks says that there are " + message.getStoreChunk().getTotalChunks() + " total chunks");
+            logger.info("This chunks says that there are " + message.getStoreChunk().getTotalChunks() + " total chunks");
 			if (retrievalSet.size() == message.getStoreChunk().getTotalChunks()) {
 				logger.info("Done with retrieval");
 				this.stitchChunks();
-				ctx.channel().close().syncUninterruptibly();
+                ctx.channel().close().syncUninterruptibly();
 			}
-		} else if (message.hasPrintRequest()) {
+		} else if(message.hasPrintRequest()) {
 			StorageMessages.PrintNodesRequest printRequest = message.getPrintRequest();
-
+			
 			List<NodeState> nodeStateList = printRequest.getNodesList();
-
+			
 			for (StorageMessages.NodeState node : nodeStateList) {
 				long freeSpace = node.getDiskSpace();
 				String nodename = node.getNodeName();
 				int requests = node.getRequests();
-
+				
 				System.out.println("Node Name: " + nodename + " --->");
 				System.out.println("Total requests: " + requests);
 				System.out.println("Free Disk Space: " + freeSpace);
 				System.out.println("------------------------------");
 			}
-
+			
 			ctx.channel().close().syncUninterruptibly();
 			this.workerGroup.shutdownGracefully();
-
+			
 		}
 
 	}

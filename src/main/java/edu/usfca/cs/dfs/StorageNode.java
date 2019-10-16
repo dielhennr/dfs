@@ -236,147 +236,64 @@ public class StorageNode implements DFSNode {
 			/* Intermediate node and primary node write healed chunk to disk */
 			this.writeChunk(chunk);
 		}
+		else if (message.hasReplicateToNewAssignment()) {
+			StorageMessages.ReplicateToNewAssignment replicaRequest = message.getReplicateToNewAssignment();
 
-		else if (message.hasReplicaRequest()) {
-			StorageMessages.ReplicateOnFailure replicaRequest = message.getReplicaRequest();
+			String downNode = replicaRequest.getDownNode();
+			String newReplicaAssignment = replicaRequest.getNewAssignment();
 
-			String downNode = replicaRequest.getDownNodeHostName();
-			String newReplicaAssignment = replicaRequest.getTargetHost();
-			boolean reReplicate = replicaRequest.getReAssign();
+			logger.info("Recieved Replication to new assignment: Down Node: " + downNode + " new replica assignment: "
+					+ newReplicaAssignment );
 
-			logger.info("Recieved Replication Request: Down Node: " + downNode + " new replica assignment: "
-					+ newReplicaAssignment + " reassignment flag: " + reReplicate);
+            /*
+                * was REPLICATING to the DOWN NODE. This means that this storage node needs to
+                * change its assignment that was the down node to the newReplicaAssignment, and
+                * send its chunks to the new node assignment.
+                * 
+                * TODO:
+                * 
+                * CHange this nodes replica assignment that was the down node, to the new
+                * replicaAssignment and send chunks on this node that are this node's primary
+                * chunks to the newReplicaAssignment Also add the chunks to the nodes bloom
+                * filter when it gets it
+                * 
+                */
+            if (this.replicaHosts.get(0) == downNode) {
+                this.replicaHosts.remove(0);
+                this.replicaHosts.add(0, newReplicaAssignment);
+            } else if (replicaHosts.get(1) == downNode) {
+                this.replicaHosts.remove(1);
+                this.replicaHosts.add(1, newReplicaAssignment);
+            }
 
-			if (reReplicate) {
+            // All chunks that belong to this nodes as primaries
 
-				/*
-				 * When this boolean flag is true, it means that we are dealing with a node that
-				 * was REPLICATING to the DOWN NODE. This means that this storage node needs to
-				 * change its assignment that was the down node to the newReplicaAssignment, and
-				 * send its chunks to the new node assignment.
-				 * 
-				 * TODO:
-				 * 
-				 * CHange this nodes replica assignment that was the down node, to the new
-				 * replicaAssignment and send chunks on this node that are this node's primary
-				 * chunks to the newReplicaAssignment Also add the chunks to the nodes bloom
-				 * filter when it gets it
-				 * 
-				 */
+            ArrayList<ChunkWrapper> pathsToThisNodesPrimaries = this.hostnameToChunks.get(this.hostname);
 
-				if (this.replicaHosts.get(0) == downNode) {
-					this.replicaHosts.remove(0);
-					this.replicaHosts.add(0, newReplicaAssignment);
-				} else if (replicaHosts.get(1) == downNode) {
-					this.replicaHosts.remove(1);
-					this.replicaHosts.add(1, newReplicaAssignment);
-				}
+            logger.info("This Storage Nodes chunks that we will be re-replicating to " + newReplicaAssignment
+                    + " --->");
+            
+            ArrayList<ChannelFuture> writes = new ArrayList<>();
 
-				// All chunks that belong to this nodes as primaries
+            // Now send these chunks to the newReplicaAssignment
+            ChannelFuture cf = bootstrap.connect(newReplicaAssignment, 13114).syncUninterruptibly();
 
-				ArrayList<ChunkWrapper> pathsToThisNodesPrimaries = this.hostnameToChunks.get(this.hostname);
+            for (ChunkWrapper chunk : pathsToThisNodesPrimaries) {
+                try {
+                    byte[] data = Files.readAllBytes(chunk.getPath());
 
-				logger.info("This Storage Nodes chunks that we will be re-replicating to " + newReplicaAssignment
-						+ " --->");
-                
-                ArrayList<ChannelFuture> writes = new ArrayList<>();
-
-				// Now send these chunks to the newReplicaAssignment
-                ChannelFuture cf = bootstrap.connect(newReplicaAssignment, 13114).syncUninterruptibly();
-
-				for (ChunkWrapper chunk : pathsToThisNodesPrimaries) {
-                    try {
-                        byte[] data = Files.readAllBytes(chunk.getPath());
-
-                        writes.add(cf.channel().writeAndFlush(Builders.buildStoreChunk(chunk.getFileName(), this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), ByteString.copyFrom(data))));
-                    } catch (IOException ioe) {
-                        logger.info("Could not send " + chunk.getFileName() + " id " + chunk.getChunkID() + " to " + newReplicaAssignment);
-                    }
-				}
-
-                for (ChannelFuture write : writes ) {
-                    write.syncUninterruptibly();
+                    writes.add(cf.channel().writeAndFlush(Builders.buildStoreChunk(chunk.getFileName(), this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), ByteString.copyFrom(data))));
+                } catch (IOException ioe) {
+                    logger.info("Could not send " + chunk.getFileName() + " id " + chunk.getChunkID() + " to " + newReplicaAssignment);
                 }
+            }
+
+            for (ChannelFuture write : writes ) {
+                write.syncUninterruptibly();
+            }
 
 
-			} else {
-
-				/*
-				 * When this boolean flag is false, it means that we are dealing with a storage
-				 * node that was receiving replicas from the down node. In this case, this node
-				 * needs to be designated the new primary for the down nodes data, and it needs
-				 * to replicate it's down nodes data to the new replicaAssignment.
-				 * 
-				 * TODO:
-				 * 
-				 * Send a message to the newReplicaAssignment with the chunks from the down
-				 * node, and put them in the map on that node as belonging to this storage node.
-				 * Also send a message to the other replica assignment from the down node to
-				 * merge the down node's mapping with this storage node's mapping s (AKA)
-				 * telling the other replica assignment of the down node that we are now the new
-				 * primary holder of that data and it belongs to this storage node.
-				 */
-
-				synchronized (hostnameToChunks) {
-					ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
-
-					this.hostnameToChunks.get(this.hostname).addAll(pathsToDownNodesData);
-					this.hostnameToChunks.remove(downNode);
-
-					// Now we need to message the new replica assignment and provide it with the
-					// chunks
-					// from the pathsToDownNodesData list
-					ctx.channel().close().syncUninterruptibly();
-					ChannelFuture cf = this.bootstrap.connect(newReplicaAssignment, 13114);
-
-					cf.syncUninterruptibly();
-					Channel chan = cf.channel();
-
-					String fileName = pathsToDownNodesData.get(0).getFileName().toString();
-
-					ArrayList<ChunkWrapper> chunks = chunkMap.get(fileName);
-
-					ArrayList<ChannelFuture> writes = new ArrayList<>();
-
-					for (ChunkWrapper chunk : chunks) {
-						try {
-							byte[] data = Files.readAllBytes(chunk.getPath());
-
-							StorageMessages.StorageMessageWrapper replicaChunk = Builders.buildStoreChunk(fileName,
-									this.hostname, chunk.getChunkID(), chunk.getTotalChunks(),
-									ByteString.copyFrom(data));
-
-							writes.add(chan.writeAndFlush(replicaChunk));
-
-						} catch (IOException ioe) {
-							logger.info("Could not read chunk to re-replicate");
-						}
-					}
-
-                    for (ChannelFuture write : writes) {
-                        write.syncUninterruptibly();
-                    }
-
-				}
-				
-
-				
-
-			}
-			
-			StorageMessages.DeleteData msg = StorageMessages.DeleteData.newBuilder()
-					.setDownNode(downNode).build();
-			StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-					.setDeleteData(msg).build();
-			
-			
-			ChannelFuture cf = this.bootstrap.connect(newReplicaAssignment, 13114);
-			cf.syncUninterruptibly();
-			Channel chan = cf.channel();
-            chan.writeAndFlush(msgWrapper).syncUninterruptibly();
-
-		}
-		else if (message.hasDeleteData()) {
+		} else if (message.hasDeleteData()) {
 			String nodeToDelete = message.getDeleteData().getDownNode();
 			String fileName = "";
 			ArrayList<ChunkWrapper> wrappers = hostnameToChunks.get(nodeToDelete);
@@ -396,9 +313,71 @@ public class StorageNode implements DFSNode {
 
 			hostnameToChunks.remove(nodeToDelete);
 		
-		}
-		
-		
+		} else if (message.hasMergeReplicasOnFailure()) {
+
+
+            /*
+                * When this boolean flag is false, it means that we are dealing with a storage
+                * node that was receiving replicas from the down node. In this case, this node
+                * needs to be designated the new primary for the down nodes data, and it needs
+                * to replicate it's down nodes data to the new replicaAssignment.
+                * 
+                * TODO:
+                * 
+                * Send a message to the newReplicaAssignment with the chunks from the down
+                * node, and put them in the map on that node as belonging to this storage node.
+                * Also send a message to the other replica assignment from the down node to
+                * merge the down node's mapping with this storage node's mapping s (AKA)
+                * telling the other replica assignment of the down node that we are now the new
+                * primary holder of that data and it belongs to this storage node.
+                */
+            String downNode = message.getMergeReplicasOnFailure().getDownNodeHostName();
+            String toDelete = message.getMergeReplicasOnFailure().getReplicaAssignment2FromDownNode();
+            synchronized (hostnameToChunks) {
+                ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
+
+                this.hostnameToChunks.get(this.hostname).addAll(pathsToDownNodesData);
+                this.hostnameToChunks.remove(downNode);
+
+                // Now we need to message the new replica assignment and provide it with the
+                // chunks
+                // from the pathsToDownNodesData list
+                ctx.channel().close().syncUninterruptibly();
+                for (String host : replicaHosts) {
+                    ChannelFuture cf = this.bootstrap.connect(host, 13114);
+
+                    cf.syncUninterruptibly();
+                    Channel chan = cf.channel();
+
+                    String fileName = pathsToDownNodesData.get(0).getFileName().toString();
+
+                    ArrayList<ChunkWrapper> chunks = chunkMap.get(fileName);
+
+                    ArrayList<ChannelFuture> writes = new ArrayList<>();
+
+                    for (ChunkWrapper chunk : chunks) {
+                        try {
+                            byte[] data = Files.readAllBytes(chunk.getPath());
+
+                            StorageMessages.StorageMessageWrapper replicaChunk = Builders.buildStoreChunk(fileName,
+                                    this.hostname, chunk.getChunkID(), chunk.getTotalChunks(),
+                                    ByteString.copyFrom(data));
+
+                            writes.add(chan.writeAndFlush(replicaChunk));
+
+                        } catch (IOException ioe) {
+                            logger.info("Could not read chunk to re-replicate");
+                        }
+                    }
+
+                    for (ChannelFuture write : writes) {
+                        write.syncUninterruptibly();
+                    }
+                }
+
+            }
+
+        }
 	}
 
 	/**

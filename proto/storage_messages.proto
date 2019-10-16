@@ -64,10 +64,8 @@ message HealResponse {
     bytes data = 4;
 }
 
-message ReplicateOnFailure {
+message MergeReplicasOnFailure {
 	string downNodeHostName = 1;
-	string targetHost = 2;
-	bool reAssign = 3;
 	string replicaAssignment2FromDownNode = 4;
 }
 
@@ -81,10 +79,9 @@ message PrintNodesRequest {
 	repeated NodeState nodes = 1;
 }
 
-
 message ReplicateToNewAssignment {
-	string primaryNodeName = 1;
-	string paths = 2;
+	string downNode = 1;
+    string newAssignment = 2;
 }
 
 message DeleteData {
@@ -103,10 +100,10 @@ message StorageMessageWrapper {
         PossibleRetrievalHosts retrievalHosts = 8;
         HealRequest healRequest = 9;
         HealResponse healResponse = 10;
-        ReplicateOnFailure replicaRequest = 11;
+        MergeReplicasOnFailure mergeReplicasOnFailure = 11;
         PrintNodesRequest printRequest = 12;
         NodeState nodeState = 13;
-        ReplicateToNewAssignment replicaToNewAssignment = 14;
+        ReplicateToNewAssignment replicateToNewAssignment = 14;
 		DeleteData deleteData = 15;
     }
 }

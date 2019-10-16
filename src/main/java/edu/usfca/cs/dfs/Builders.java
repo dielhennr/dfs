@@ -201,13 +201,13 @@ public class Builders {
 		return StorageMessages.StorageMessageWrapper.newBuilder().setRetrievalHosts(hostsResponse).build();
 	}
 
-	public static StorageMessages.StorageMessageWrapper buildReplicaRequest(String targetHost, String downNodeHost, boolean reReplicate, String downNodeReplicaAssignment2) {
+	public static StorageMessages.StorageMessageWrapper buildMergeReplicasOnFailure(String downNodeHost, String downNodeReplicaAssignment2) {
 		
-		StorageMessages.ReplicateOnFailure replicaRequest = StorageMessages.ReplicateOnFailure.newBuilder()
-				.setDownNodeHostName(downNodeHost).setTargetHost(targetHost).setReAssign(reReplicate).build();
+		StorageMessages.MergeReplicasOnFailure replicaRequest = StorageMessages.MergeReplicasOnFailure.newBuilder()
+				.setDownNodeHostName(downNodeHost).setReplicaAssignment2FromDownNode(downNodeReplicaAssignment2).build();
 		
-		return StorageMessages.StorageMessageWrapper.newBuilder().setReplicaRequest(replicaRequest).build();
-  }
+		return StorageMessages.StorageMessageWrapper.newBuilder().setMergeReplicasOnFailure(replicaRequest).build();
+    }
   
 	public static StorageMessages.StorageMessageWrapper buildPrintRequest(ArrayList<StorageNodeContext> listOfNodes) {
 		StorageMessages.PrintNodesRequest printRequest;
@@ -230,13 +230,16 @@ public class Builders {
 
 	}
 	
-	public static StorageMessages.StorageMessageWrapper buildReplicateToNewAssignment(String paths, String primaryName) {
-		StorageMessages.ReplicateToNewAssignment replicateRequest = StorageMessages.ReplicateToNewAssignment.newBuilder()
-				.setPaths(paths).setPrimaryNodeName(primaryName).build();
+    /**
+     * 
+     * @param downNode
+     * @param newAssignment
+     * @return
+     */
+	public static StorageMessages.StorageMessageWrapper buildReplicateToNewAssignment(String downNode, String newAssignment) {
+		StorageMessages.ReplicateToNewAssignment replicateRequest = StorageMessages.ReplicateToNewAssignment.newBuilder().setDownNode(downNode).setNewAssignment(newAssignment).build();
 		
-		return StorageMessages.StorageMessageWrapper.newBuilder().setReplicaToNewAssignment(replicateRequest).build();
-		
+		return StorageMessages.StorageMessageWrapper.newBuilder().setReplicateToNewAssignment(replicateRequest).build();
 	}
-	
 	
 }

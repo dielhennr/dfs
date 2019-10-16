@@ -269,7 +269,6 @@ public class Controller implements DFSNode {
 					/*
 					 	This if statement finds nodes that were replicating to the down node
 					*/
-					
 					if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
 						logger.info("Node that needs new assignment: " + currNode.getHostName());
 						nodesThatNeedNewReplicaAssignments.add(currNode);
@@ -303,7 +302,7 @@ public class Controller implements DFSNode {
              		Send message to the down nodes first replica assignment, telling it which node went down, and
              		which node it can use re-replicate the down nodes chunks to. 
              */
-            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(targetHost, downHost, false, downNodeReplicaAssignment2Hostname);
+            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildMergeReplicasOnFailure(downHost, downNodeReplicaAssignment2Hostname);
             
     		ChannelFuture cf = bootstrap.connect(hostname1, 13114);
     		cf.syncUninterruptibly();
@@ -318,8 +317,6 @@ public class Controller implements DFSNode {
                 but we need to find a new targetNode for their new replica assignment, since 
                 the down node was one of their assignments.
     		 */
-    		
-    		
     		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
     			String nodeName = node.getHostName();
     			
@@ -354,12 +351,9 @@ public class Controller implements DFSNode {
                     cf.syncUninterruptibly();
                     chan = cf.channel();
                     
-                    StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(targetHost, downHost, true, null);
+                    StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicateToNewAssignment(downHost, targetHost);
                     write = chan.writeAndFlush(replicaAssignmentChange).syncUninterruptibly();
                     
-    		
-    		
-    		
     		}
     		
         }

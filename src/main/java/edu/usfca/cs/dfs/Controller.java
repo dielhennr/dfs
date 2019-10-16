@@ -198,9 +198,15 @@ public class Controller implements DFSNode {
 	 */
 	private static class HeartBeatChecker implements Runnable {
 		PriorityQueue<StorageNodeContext> storageNodes;
+        EventLoopGroup workerGroup;
+        Bootstrap bootstrap;
 
 		public HeartBeatChecker(PriorityQueue<StorageNodeContext> storageNodes) {
 			this.storageNodes = storageNodes;
+            workerGroup = new NioEventLoopGroup();
+            MessagePipeline pipeline = new MessagePipeline();
+    		bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
+    				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
 		}
 
 		@Override
@@ -291,11 +297,6 @@ public class Controller implements DFSNode {
             
             StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(targetHost, downHost, false, downNodeReplicaAssignment2Hostname);
             
-            EventLoopGroup workerGroup = new NioEventLoopGroup();
-            MessagePipeline pipeline = new MessagePipeline();
-    		Bootstrap bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
-    				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
-
     		ChannelFuture cf = bootstrap.connect(hostname1, 13114);
     		cf.syncUninterruptibly();
     		
@@ -346,7 +347,7 @@ public class Controller implements DFSNode {
     			chan = cf.channel();
     			
     			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(targetHost, downHost, true, null);
-    			write = chan.writeAndFlush(replicaAssignmentChange);
+    			write = chan.writeAndFlush(replicaAssignmentChange).syncUninterruptibly();
     			
     		
     		

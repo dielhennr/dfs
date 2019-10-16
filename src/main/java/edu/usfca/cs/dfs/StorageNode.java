@@ -160,6 +160,7 @@ public class StorageNode implements DFSNode {
             chunkMap.putIfAbsent(message.getStoreChunk().getFileName(), new ArrayList<ChunkWrapper>());
 			this.writeChunk(message);
 			/* Send to replica assignments */
+            if (!message.getStoreChunk().getIsReplica()) {
 			if (replicaHosts.size() == 2 && message.getStoreChunk().getOriginHost().equals(this.hostname)) {
 				/* Connect to first assignment and send chunk */
 				ChannelFuture cf = bootstrap.connect(replicaHosts.get(0), 13114);
@@ -177,6 +178,7 @@ public class StorageNode implements DFSNode {
 				cf.syncUninterruptibly();
 				chan.close().syncUninterruptibly();
 			}
+            }
 		} else if (message.hasRetrieveFile()) {
             logger.info("Attempting to shoot chunks of " + message.getRetrieveFile().getFileName() + " to client");
 			Path filePath = Paths.get(rootDirectory.toString(), message.getRetrieveFile().getFileName());
@@ -288,12 +290,6 @@ public class StorageNode implements DFSNode {
         		
         		// Now send these chunks to the newReplicaAssignment
         		
-        		
-        		
-        		
-        		
-
-        		
         	} else {
         		
         		/*
@@ -315,52 +311,63 @@ public class StorageNode implements DFSNode {
         		
         		//Change local mapping to that the down node's chunks now belong to this (primary) nodes map listing
         		
-        		ArrayList<Path> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
-        		
-        		this.hostnameToChunks.get(this.hostname).addAll(pathsToDownNodesData);
-        		this.hostnameToChunks.remove(downNode);
-        		
-        		
-        		// Now we need to message the new replica assignment and provide it with the chunks
-        		// from the pathsToDownNodesData list
-        		
-        		ChannelFuture cf = this.bootstrap.connect(newReplicaAssignment, 13114);
+                synchronized (hostnameToChunks) {
+                    ArrayList<Path> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
+                    
+                    this.hostnameToChunks.get(this.hostname).addAll(pathsToDownNodesData);
+                    this.hostnameToChunks.remove(downNode);
         		
         		
-				cf.syncUninterruptibly();
-				Channel chan = cf.channel();
-        		
-        		String ChunkFileName = pathsToDownNodesData.get(0).getFileName().toString();
-        		
-        		ArrayList<ChunkWrapper> chunks = chunkMap.get(ChunkFileName);
-				
-				for (ChunkWrapper chunk : chunks) {
-				}
-				
-        		
-        		
-        		
-        		
-        		
-        		
-//        		String pathsToSend = "";
-//        		for (Path path : pathsToDownNodesData) {
-//        			pathsToSend += path.getFileName().toString() + " ";
-//        		}
-//        		String primaryNodeName = this.hostname;
-//        		
-//        		StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildReplicateToNewAssignment(pathsToSend, primaryNodeName);
-//        		
-//        		String downNodeReplicaAssignment2 = replicaRequest.getReplicaAssignment2FromDownNode();
-//        		
-//        		ChannelFuture cf = this.bootstrap.connect(downNodeReplicaAssignment2, 13114);
-//        		
-//        		
-//				cf.syncUninterruptibly();
-//				Channel chan = cf.channel();
-//				chan.writeAndFlush(msgWrapper).syncUninterruptibly();
-//				cf.syncUninterruptibly();
-//				chan.close().syncUninterruptibly();
+                    // Now we need to message the new replica assignment and provide it with the chunks
+                    // from the pathsToDownNodesData list
+                    ctx.channel().close().syncUninterruptibly();
+                    ChannelFuture cf = this.bootstrap.connect(newReplicaAssignment, 13114);
+                    
+                    
+                    cf.syncUninterruptibly();
+                    Channel chan = cf.channel();
+                    
+                    String fileName = pathsToDownNodesData.get(0).getFileName().toString();
+                    
+                    ArrayList<ChunkWrapper> chunks = chunkMap.get(fileName);
+                    
+
+                    for (ChunkWrapper chunk : chunks) {
+                        try {
+                            byte[] data = Files.readAllBytes(chunk.getPath());
+
+                            StorageMessages.StorageMessageWrapper replicaChunk = Builders.buildStoreChunk(fileName , this.hostname , chunk.getChunkID(), chunk.getTotalChunks(), 
+                                        ByteString.copyFrom(data));
+                                    
+                            } catch (IOException ioe) {
+                                
+                            }
+                        }
+                    
+                    
+                    
+                    }	
+                    
+                    
+                    
+    //        		String pathsToSend = "";
+    //        		for (Path path : pathsToDownNodesData) {
+    //        			pathsToSend += path.getFileName().toString() + " ";
+    //        		}
+    //        		String primaryNodeName = this.hostname;
+    //        		
+    //        		StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildReplicateToNewAssignment(pathsToSend, primaryNodeName);
+    //        		
+    //        		String downNodeReplicaAssignment2 = replicaRequest.getReplicaAssignment2FromDownNode();
+    //        		
+    //        		ChannelFuture cf = this.bootstrap.connect(downNodeReplicaAssignment2, 13114);
+    //        		
+    //        		
+    //				cf.syncUninterruptibly();
+    //				Channel chan = cf.channel();
+    //				chan.writeAndFlush(msgWrapper).syncUninterruptibly();
+    //				cf.syncUninterruptibly();
+    //				chan.close().syncUninterruptibly();
         			
         		
         	}

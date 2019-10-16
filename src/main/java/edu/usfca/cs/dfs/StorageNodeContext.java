@@ -1,7 +1,5 @@
 package edu.usfca.cs.dfs;
 
-import java.util.ArrayList;
-
 public class StorageNodeContext {
 
 	private BloomFilter filter;
@@ -23,6 +21,10 @@ public class StorageNodeContext {
 		replicaAssignment2 = null;
 	}
 
+    public BloomFilter getFilter() {
+        return this.filter;
+    }
+
 	public String getHostName() {
 		return this.hostname;
 	}
@@ -40,11 +42,7 @@ public class StorageNodeContext {
 	}
 
 	public boolean mightBeThere(byte[] data) {
-		if (filter.get(data)) {
-			return true;
-		}
-
-		return false;
+        return this.filter.get(data);
 	}
 
 	public void bumpRequests() {

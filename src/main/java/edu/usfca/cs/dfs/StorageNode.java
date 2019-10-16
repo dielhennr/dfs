@@ -280,10 +280,11 @@ public class StorageNode implements DFSNode {
 						+ " --->");
                 
                 ArrayList<ChannelFuture> writes = new ArrayList<>();
+
+				// Now send these chunks to the newReplicaAssignment
                 ChannelFuture cf = bootstrap.connect(newReplicaAssignment, 13114).syncUninterruptibly();
 
 				for (ChunkWrapper chunk : pathsToThisNodesPrimaries) {
-
                     try {
                         byte[] data = Files.readAllBytes(chunk.getPath());
 
@@ -291,14 +292,12 @@ public class StorageNode implements DFSNode {
                     } catch (IOException ioe) {
                         logger.info("Could not send " + chunk.getFileName() + " id " + chunk.getChunkID() + " to " + newReplicaAssignment);
                     }
-
 				}
 
                 for (ChannelFuture write : writes ) {
                     write.syncUninterruptibly();
                 }
 
-				// Now send these chunks to the newReplicaAssignment
 
 			} else {
 
@@ -317,9 +316,6 @@ public class StorageNode implements DFSNode {
 				 * telling the other replica assignment of the down node that we are now the new
 				 * primary holder of that data and it belongs to this storage node.
 				 */
-
-				// Change local mapping to that the down node's chunks now belong to this
-				// (primary) nodes map listing
 
 				synchronized (hostnameToChunks) {
 					ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);

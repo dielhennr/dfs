@@ -243,8 +243,13 @@ public class Controller implements DFSNode {
 			}
 		}
 
+        /**
+         *
+         *
+         *
+         * @param downNode
+         */
         public void handleNodeFailure(StorageNodeContext downNode) {
-            
         	// send message to these nodes to rereplicate the data belonging to the DOWN NODE
             StorageNodeContext downNodeReplicaAssignment1 = downNode.replicaAssignment1;
             StorageNodeContext downNodeReplicaAssignment2 = downNode.replicaAssignment2;
@@ -269,6 +274,7 @@ public class Controller implements DFSNode {
 						logger.info("Node that needs new assignment: " + currNode.getHostName());
 						nodesThatNeedNewReplicaAssignments.add(currNode);
 					}
+
 					/*
 					 		This else if statement finds a node that the down node was not replicating to
 					 		so we can use it as a target node for when we tell the nodes that the 
@@ -276,16 +282,20 @@ public class Controller implements DFSNode {
 					 		data to. This targetHost is sent in the first message to the first replica
 					 		of the down node that we use as a new primary.
 					 */
-					
-					
 					else if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
 						targetHost = currNode.getHostName();
+                        
 					}
 				}
             }
+
             logger.info("Target Host for replication for nodes that the down node was replicating to: " + targetHost);
             
+            /* We will pick the first replica assingments of the down node to be the new primary holder of the data */
             String hostname1 = downNodeReplicaAssignment1.getHostName();
+            
+            /* Merge the down node's bloom filter into the new primarys for routing purposes */
+            downNodeReplicaAssignment1.getFilter().mergeFilter(downNode.getFilter());
             String downNodeReplicaAssignment2Hostname = downNodeReplicaAssignment2.getHostName();
             String downHost = downNode.getHostName();
             
@@ -293,8 +303,6 @@ public class Controller implements DFSNode {
              		Send message to the down nodes first replica assignment, telling it which node went down, and
              		which node it can use re-replicate the down nodes chunks to. 
              */
-            
-            
             StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildReplicaRequest(targetHost, downHost, false, downNodeReplicaAssignment2Hostname);
             
     		ChannelFuture cf = bootstrap.connect(hostname1, 13114);
@@ -306,9 +314,9 @@ public class Controller implements DFSNode {
     		
     		
     		/*
-    		 		Now we iterate through the list of nodes that were replicating TO the down node,
-    		 		but we need to find a new targetNode for their new replica assignment, since 
-    		 		the down node was one of their assignments.
+                Now we iterate through the list of nodes that were replicating TO the down node,
+                but we need to find a new targetNode for their new replica assignment, since 
+                the down node was one of their assignments.
     		 */
     		
     		
@@ -329,26 +337,26 @@ public class Controller implements DFSNode {
     				 								 	
     				 */
     				
-    				
-    			Iterator<StorageNodeContext> iter = storageNodes.iterator();
-    			while (iter.hasNext()) {
-    				StorageNodeContext currNode = iter.next();
-    				
-    				if (currNode != node.replicaAssignment1 && currNode != node.replicaAssignment2 && currNode != node) {
-    					targetHost = currNode.getHostName();
-    				}
-    				
-    				
-    			}
-    			
-    			}	
-    			cf = bootstrap.connect(nodeName, 13114);
-    			cf.syncUninterruptibly();
-    			chan = cf.channel();
-    			
-    			StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(targetHost, downHost, true, null);
-    			write = chan.writeAndFlush(replicaAssignmentChange).syncUninterruptibly();
-    			
+                        
+                    Iterator<StorageNodeContext> iter = storageNodes.iterator();
+                    while (iter.hasNext()) {
+                        StorageNodeContext currNode = iter.next();
+                        
+                        if (currNode != node.replicaAssignment1 && currNode != node.replicaAssignment2 && currNode != node) {
+                            targetHost = currNode.getHostName();
+                        }
+                        
+                        
+                    }
+                    
+                    }	
+                    cf = bootstrap.connect(nodeName, 13114);
+                    cf.syncUninterruptibly();
+                    chan = cf.channel();
+                    
+                    StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicaRequest(targetHost, downHost, true, null);
+                    write = chan.writeAndFlush(replicaAssignmentChange).syncUninterruptibly();
+                    
     		
     		
     		

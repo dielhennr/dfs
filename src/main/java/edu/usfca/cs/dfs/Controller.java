@@ -49,7 +49,6 @@ public class Controller implements DFSNode {
 		HeartBeatChecker checker = new HeartBeatChecker(controller.storageNodes);
 		Thread heartbeatThread = new Thread(checker);
 		heartbeatThread.run();
-		System.out.println("Uhhh running?");
 	}
 
 	/* Controller inbound duties */
@@ -101,7 +100,6 @@ public class Controller implements DFSNode {
 							
 						}
 						replicaAssignment1 = snctx;
-						iter.remove();
 						storageNodePrimary.replicaAssignment1 = replicaAssignment1;
 
 					}
@@ -114,24 +112,24 @@ public class Controller implements DFSNode {
 							
 						}
 						replicaAssignment2 = snctx;
-						iter.remove();
 						storageNodePrimary.replicaAssignment2 = replicaAssignment2;
 					}
 					
 					/* Bump requests of all assignments since we are about to send a file */
 					storageNodePrimary.bumpRequests();
+					storageNodes.add(storageNodePrimary);
 
-					/* Put that file in this nodes bloom filter */
+                    storageNodes.remove(replicaAssignment1);
+                    replicaAssignment1.bumpRequests();
+                    storageNodes.add(replicaAssignment1);
+
+                    storageNodes.remove(replicaAssignment2);
+                    replicaAssignment2.bumpRequests();
+                    storageNodes.add(replicaAssignment2);
+
+					/* Put that file in primary node's bloom filter */
 					storageNodePrimary.put(message.getStoreRequest().getFileName().getBytes());
 
-					/* Put primary back in the queue */
-					storageNodes.add(storageNodePrimary);
-					if (replicaAssignment1 != null) {
-					storageNodes.add(replicaAssignment1);
-					}
-					if (replicaAssignment2 != null) {
-					storageNodes.add(replicaAssignment2);
-					}
 					/**
 					 * Write back a store response to client with hostname of the primary node to
 					 * send chunks to. This node will handle replication with the ReplicaAssignments
@@ -142,6 +140,7 @@ public class Controller implements DFSNode {
 									storageNodePrimary.getHostName(),
 									storageNodePrimary.replicaAssignment1.getHostName(),
 									storageNodePrimary.replicaAssignment2.getHostName()));
+
 					write.syncUninterruptibly();
 
 					/* Log controllers response */
@@ -244,118 +243,103 @@ public class Controller implements DFSNode {
 		}
 
         /**
+         * Handles the rereplication proccess in the event of a single node failure. Will not work for concurrent failures.
          *
-         *
-         *
-         * @param downNode
+         * @param downNode {@link StorageNodeContext}
          */
         public void handleNodeFailure(StorageNodeContext downNode) {
         	// send message to these nodes to rereplicate the data belonging to the DOWN NODE
+            String downHost = downNode.getHostName();
             StorageNodeContext downNodeReplicaAssignment1 = downNode.replicaAssignment1;
             StorageNodeContext downNodeReplicaAssignment2 = downNode.replicaAssignment2;
 
             
             String targetHost = "";
 
-            // this list contains nodes that were replicating to the down node
+            /* This list will contain nodes that were replicating to the down node */
             ArrayList<StorageNodeContext> nodesThatNeedNewReplicaAssignments = new ArrayList<>();
 
-            synchronized (storageNodes) {
 
-				Iterator<StorageNodeContext> iter = storageNodes.iterator();
-				while (iter.hasNext()) {
-					StorageNodeContext currNode = iter.next();
-
-					/*
-					 	This if statement finds nodes that were replicating to the down node
-					*/
-					if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
-						logger.info("Node that needs new assignment: " + currNode.getHostName());
-						nodesThatNeedNewReplicaAssignments.add(currNode);
-					}
-
-					/*
-					 		This else if statement finds a node that the down node was not replicating to
-					 		so we can use it as a target node for when we tell the nodes that the 
-					 		down node was replicating to which node they can now replicate the down node's
-					 		data to. This targetHost is sent in the first message to the first replica
-					 		of the down node that we use as a new primary.
-					 */
-					else if(currNode != downNodeReplicaAssignment1 && currNode != downNodeReplicaAssignment2) {
-						targetHost = currNode.getHostName();
-                        
-					}
-				}
+            /* Find nodes that were replicating to the down node */
+            Iterator<StorageNodeContext> iter = storageNodes.iterator();
+            while (iter.hasNext()) {
+                StorageNodeContext currNode = iter.next();
+                if (currNode.replicaAssignment1 == downNode || currNode.replicaAssignment2 == downNode) {
+                    logger.info("Node that needs new assignment: " + currNode.getHostName());
+                    nodesThatNeedNewReplicaAssignments.add(currNode);
+                }
             }
+        
 
-            logger.info("Target Host for replication for nodes that the down node was replicating to: " + targetHost);
-            
-            /* We will pick the first replica assingments of the down node to be the new primary holder of the data */
-            String hostname1 = downNodeReplicaAssignment1.getHostName();
+            ChannelFuture cf;
+            Channel chan;
+
+            /**  
+            * Now we iterate through the list of nodes that were replicating TO the down node,
+            * but we need to find a new targetNode for their new replica assignment, since 
+            * the down node was one of their assignments.
+            */
+            for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
+                String nodeName = node.getHostName();
+                
+                /*
+                    Here we iterate through the storagenode queue to find a new node that they can use 
+                    as a new replica assignment. The logic is such:
+                    
+                    Find a node that that is not an assignment of the current
+                    node we are iterating on, and also make sure that the current node
+                    we are looking at is not the same node as the node we are trying to
+                    find a new replica assignment for. Otherwise it is possible that the target
+                    node (new node assignment) can be the same as the node we send the message to
+                */
+                iter = storageNodes.iterator();
+                while (iter.hasNext()) {
+                    StorageNodeContext currNode = iter.next();
+                    
+                    if ( (currNode != node.replicaAssignment1) && (currNode != node.replicaAssignment2) && (currNode != node )) {
+                        targetHost = currNode.getHostName();
+                        break;
+                    }
+                    
+                    
+                }
+                
+                cf = bootstrap.connect(nodeName, 13114);
+                cf.syncUninterruptibly();
+                chan = cf.channel();
+                
+                StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicateToNewAssignment(downHost, targetHost);
+                chan.writeAndFlush(replicaAssignmentChange).syncUninterruptibly();
+                chan.close().syncUninterruptibly();
+            }
+    
+            /* Now we are done getting nodes that were replicating to down node new assignments, but we are not done */
+
+            /* We will pick the first replica assingment of the down node to be the new primary holder of the data */
+            String newPrimaryHolder = downNodeReplicaAssignment1.getHostName();
             
             /* Merge the down node's bloom filter into the new primarys for routing purposes */
             downNodeReplicaAssignment1.getFilter().mergeFilter(downNode.getFilter());
+            
+                
+            /* Send message to the down node's first replica assignment, telling it which node went down and that nodes other assignment 
+             * This node will merge the down nodes data with it's primary data. Then it will check if the down nodes second replica assignment
+             * is one of its own as well. If it is, it will ask downNodeReplicaAssignment2 to merge downNodes data with it's data and delete its
+             * key for downnode, and then send down nodes data to its other replica assignment under the new primary key. If they don't have the same assignments,
+             * the new primary holder sends the data of down node to both of it's assignments and then tells downNodeReplicaAssignment2 to delete it's data 
+             * for down node
+             * */
             String downNodeReplicaAssignment2Hostname = downNodeReplicaAssignment2.getHostName();
-            String downHost = downNode.getHostName();
+            StorageMessages.StorageMessageWrapper replicaMergeRequest = Builders.buildMergeReplicasOnFailure(downHost, downNodeReplicaAssignment2Hostname);
             
-            /*
-             		Send message to the down nodes first replica assignment, telling it which node went down, and
-             		which node it can use re-replicate the down nodes chunks to. 
-             */
-            StorageMessages.StorageMessageWrapper replicaRequest = Builders.buildMergeReplicasOnFailure(downHost, downNodeReplicaAssignment2Hostname);
-            
-    		ChannelFuture cf = bootstrap.connect(hostname1, 13114);
+    		cf = bootstrap.connect(newPrimaryHolder, 13114);
     		cf.syncUninterruptibly();
     		
-    		Channel chan = cf.channel();
-    		ChannelFuture write = chan.writeAndFlush(replicaRequest);
+    		chan = cf.channel();
+    		ChannelFuture write = chan.writeAndFlush(replicaMergeRequest);
     		write.syncUninterruptibly();
-    		
-    		
-    		/*
-                Now we iterate through the list of nodes that were replicating TO the down node,
-                but we need to find a new targetNode for their new replica assignment, since 
-                the down node was one of their assignments.
-    		 */
-    		for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
-    			String nodeName = node.getHostName();
-    			
-    			synchronized (storageNodes) {
-    				
-    				/*
-    				 	Here we iterate through the storagenode queue to find a new node that they can use 
-    				 	as a new replica assignment. The logic is such:
-    				 	
-    				 	Find a node that that is not an assignment of the current
-    				 	node we are iterating on, and also make sure that the current node
-    				 	we are looking at is not the same node as the node we are trying to
-    				 	find a new replica for. Otherwise it is possible that the target
-    				 	node (new node assignment) can be the same as the node itself
-    				 								 	
-    				 */
-    				
-                        
-                    Iterator<StorageNodeContext> iter = storageNodes.iterator();
-                    while (iter.hasNext()) {
-                        StorageNodeContext currNode = iter.next();
-                        
-                        if (currNode != node.replicaAssignment1 && currNode != node.replicaAssignment2 && currNode != node) {
-                            targetHost = currNode.getHostName();
-                        }
-                        
-                        
-                    }
-                    
-                    }	
-                    cf = bootstrap.connect(nodeName, 13114);
-                    cf.syncUninterruptibly();
-                    chan = cf.channel();
-                    
-                    StorageMessages.StorageMessageWrapper replicaAssignmentChange = Builders.buildReplicateToNewAssignment(downHost, targetHost);
-                    write = chan.writeAndFlush(replicaAssignmentChange).syncUninterruptibly();
-                    
-    		}
-    		
+
+            chan.close().syncUninterruptibly();
         }
 	}
 }

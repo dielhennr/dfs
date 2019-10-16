@@ -238,7 +238,6 @@ public class StorageNode implements DFSNode {
 		}
 		else if (message.hasReplicateToNewAssignment()) {
 			StorageMessages.ReplicateToNewAssignment replicaRequest = message.getReplicateToNewAssignment();
-            ctx.channel().close().syncUninterruptibly();
 			String downNode = replicaRequest.getDownNode();
 			String newReplicaAssignment = replicaRequest.getNewAssignment();
 
@@ -279,7 +278,11 @@ public class StorageNode implements DFSNode {
                     try {
                         byte[] data = Files.readAllBytes(chunk.getPath());
 
-                        writes.add(cf.channel().writeAndFlush(Builders.buildStoreChunk(chunk.getFileName(), this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), ByteString.copyFrom(data))));
+                        writes.add(cf.channel().writeAndFlush(Builders.buildStoreChunk(chunk.getFileName(), 
+                                                                                        this.hostname, 
+                                                                                        chunk.getChunkID(), 
+                                                                                        chunk.getTotalChunks(), 
+                                                                                        ByteString.copyFrom(data))));
                     } catch (IOException ioe) {
                         logger.info("Could not send " + chunk.getFileName() + " id " + chunk.getChunkID() + " to " + newReplicaAssignment);
                     }
@@ -290,6 +293,7 @@ public class StorageNode implements DFSNode {
                 }
                 cf.channel().close().syncUninterruptibly();
             }
+
 		} else if (message.hasMergeReplicasOnFailure()) {
 
 
@@ -332,7 +336,6 @@ public class StorageNode implements DFSNode {
             String downNode = message.getMergeReplicasOnFailure().getDownNodeHostName();
             String location2 = message.getMergeReplicasOnFailure().getReplicaAssignment2FromDownNode();
 
-            ctx.channel().close().syncUninterruptibly();
 
             synchronized (hostnameToChunks) {
                 ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);

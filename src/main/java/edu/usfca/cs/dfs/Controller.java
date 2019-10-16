@@ -85,47 +85,42 @@ public class Controller implements DFSNode {
 				synchronized (storageNodes) {
 					/* StorageNode with least requests processed should be at the top */
 					StorageNodeContext storageNodePrimary = storageNodes.poll();
-					StorageNodeContext replicaAssignment1 = null;
-					StorageNodeContext replicaAssignment2 = null;
 
 					/*
-					 * If the first node in the queue doesn't have assignments pull from queue,
-					 * assign and then put the assignee back in
+					 * If the first node in the queue doesn't have assignments we need to make them
 					 */
 					if (storageNodePrimary.replicaAssignment1 == null) {
+                        /* find first assignment */
 						Iterator<StorageNodeContext> iter = storageNodes.iterator();
 						StorageNodeContext snctx = iter.next();
-						while (snctx.equals(storageNodePrimary.replicaAssignment2)) {
+						if (snctx == storageNodePrimary.replicaAssignment2) {
 							snctx = iter.next();
 							
 						}
-						replicaAssignment1 = snctx;
-						storageNodePrimary.replicaAssignment1 = replicaAssignment1;
+						storageNodePrimary.replicaAssignment1 = snctx;
 
 					}
-					/* Same here for second assignment */
 					if (storageNodePrimary.replicaAssignment2 == null) {
+					    /* Find second assignment */
 						Iterator<StorageNodeContext> iter = storageNodes.iterator();
 						StorageNodeContext snctx = iter.next();
-						while (snctx.equals(storageNodePrimary.replicaAssignment1)) {
+						if (snctx == storageNodePrimary.replicaAssignment1) {
 							snctx = iter.next();
-							
 						}
-						replicaAssignment2 = snctx;
-						storageNodePrimary.replicaAssignment2 = replicaAssignment2;
+						storageNodePrimary.replicaAssignment2 = snctx;
 					}
 					
 					/* Bump requests of all assignments since we are about to send a file */
 					storageNodePrimary.bumpRequests();
 					storageNodes.add(storageNodePrimary);
 
-                    storageNodes.remove(replicaAssignment1);
-                    replicaAssignment1.bumpRequests();
-                    storageNodes.add(replicaAssignment1);
+                    storageNodes.remove(storageNodePrimary.replicaAssignment1);
+                    storageNodePrimary.replicaAssignment1.bumpRequests();
+                    storageNodes.add(storageNodePrimary.replicaAssignment1);
 
-                    storageNodes.remove(replicaAssignment2);
-                    replicaAssignment2.bumpRequests();
-                    storageNodes.add(replicaAssignment2);
+                    storageNodes.remove(storageNodePrimary.replicaAssignment2);
+                    storageNodePrimary.replicaAssignment2.bumpRequests();
+                    storageNodes.add(storageNodePrimary.replicaAssignment2);
 
 					/* Put that file in primary node's bloom filter */
 					storageNodePrimary.put(message.getStoreRequest().getFileName().getBytes());

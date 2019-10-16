@@ -209,6 +209,7 @@ public class Builders {
 		return StorageMessages.StorageMessageWrapper.newBuilder().setMergeReplicasOnFailure(replicaRequest).build();
     }
   
+
 	public static StorageMessages.StorageMessageWrapper buildPrintRequest(ArrayList<StorageNodeContext> listOfNodes) {
 		StorageMessages.PrintNodesRequest printRequest;
 		if (listOfNodes == null) {
@@ -234,12 +235,28 @@ public class Builders {
      * 
      * @param downNode
      * @param newAssignment
-     * @return
+     * @return rereplicate to new node request
      */
 	public static StorageMessages.StorageMessageWrapper buildReplicateToNewAssignment(String downNode, String newAssignment) {
 		StorageMessages.ReplicateToNewAssignment replicateRequest = StorageMessages.ReplicateToNewAssignment.newBuilder().setDownNode(downNode).setNewAssignment(newAssignment).build();
 		
 		return StorageMessages.StorageMessageWrapper.newBuilder().setReplicateToNewAssignment(replicateRequest).build();
 	}
-	
+    
+    /**
+     * 
+     * @param downNode
+     * @return deleteRequest
+     */
+	public static StorageMessages.StorageMessageWrapper buildDeleteData(String downNode) {
+		StorageMessages.DeleteData deleteRequest = StorageMessages.DeleteData.newBuilder().setDownNode(downNode).build();
+		
+		return StorageMessages.StorageMessageWrapper.newBuilder().setDeleteData(deleteRequest).build();
+	}
+
+	public static StorageMessages.StorageMessageWrapper buildSimplyMerge(String owner, String passedFrom) {
+        StorageMessages.SimplyMerge simplyMerge = StorageMessages.SimplyMerge.newBuilder().setOwner(owner).setOwnershipPassedFrom(passedFrom).build();
+		
+		return StorageMessages.StorageMessageWrapper.newBuilder().setSimplyMerge(simplyMerge).build();
+	}
 }

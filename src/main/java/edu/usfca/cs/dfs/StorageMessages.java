@@ -11210,6 +11210,698 @@ public final class StorageMessages {
 
   }
 
+  public interface SimplyMergeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:SimplyMerge)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>string owner = 1;</code>
+     */
+    java.lang.String getOwner();
+    /**
+     * <code>string owner = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getOwnerBytes();
+
+    /**
+     * <code>string ownershipPassedFrom = 2;</code>
+     */
+    java.lang.String getOwnershipPassedFrom();
+    /**
+     * <code>string ownershipPassedFrom = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getOwnershipPassedFromBytes();
+  }
+  /**
+   * Protobuf type {@code SimplyMerge}
+   */
+  public  static final class SimplyMerge extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:SimplyMerge)
+      SimplyMergeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SimplyMerge.newBuilder() to construct.
+    private SimplyMerge(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SimplyMerge() {
+      owner_ = "";
+      ownershipPassedFrom_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SimplyMerge();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SimplyMerge(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              owner_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              ownershipPassedFrom_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return edu.usfca.cs.dfs.StorageMessages.internal_static_SimplyMerge_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return edu.usfca.cs.dfs.StorageMessages.internal_static_SimplyMerge_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              edu.usfca.cs.dfs.StorageMessages.SimplyMerge.class, edu.usfca.cs.dfs.StorageMessages.SimplyMerge.Builder.class);
+    }
+
+    public static final int OWNER_FIELD_NUMBER = 1;
+    private volatile java.lang.Object owner_;
+    /**
+     * <code>string owner = 1;</code>
+     */
+    public java.lang.String getOwner() {
+      java.lang.Object ref = owner_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        owner_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string owner = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getOwnerBytes() {
+      java.lang.Object ref = owner_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        owner_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int OWNERSHIPPASSEDFROM_FIELD_NUMBER = 2;
+    private volatile java.lang.Object ownershipPassedFrom_;
+    /**
+     * <code>string ownershipPassedFrom = 2;</code>
+     */
+    public java.lang.String getOwnershipPassedFrom() {
+      java.lang.Object ref = ownershipPassedFrom_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        ownershipPassedFrom_ = s;
+        return s;
+      }
+    }
+    /**
+     * <code>string ownershipPassedFrom = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getOwnershipPassedFromBytes() {
+      java.lang.Object ref = ownershipPassedFrom_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        ownershipPassedFrom_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getOwnerBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, owner_);
+      }
+      if (!getOwnershipPassedFromBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, ownershipPassedFrom_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getOwnerBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, owner_);
+      }
+      if (!getOwnershipPassedFromBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, ownershipPassedFrom_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof edu.usfca.cs.dfs.StorageMessages.SimplyMerge)) {
+        return super.equals(obj);
+      }
+      edu.usfca.cs.dfs.StorageMessages.SimplyMerge other = (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) obj;
+
+      if (!getOwner()
+          .equals(other.getOwner())) return false;
+      if (!getOwnershipPassedFrom()
+          .equals(other.getOwnershipPassedFrom())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + OWNER_FIELD_NUMBER;
+      hash = (53 * hash) + getOwner().hashCode();
+      hash = (37 * hash) + OWNERSHIPPASSEDFROM_FIELD_NUMBER;
+      hash = (53 * hash) + getOwnershipPassedFrom().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(edu.usfca.cs.dfs.StorageMessages.SimplyMerge prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code SimplyMerge}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:SimplyMerge)
+        edu.usfca.cs.dfs.StorageMessages.SimplyMergeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_SimplyMerge_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_SimplyMerge_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                edu.usfca.cs.dfs.StorageMessages.SimplyMerge.class, edu.usfca.cs.dfs.StorageMessages.SimplyMerge.Builder.class);
+      }
+
+      // Construct using edu.usfca.cs.dfs.StorageMessages.SimplyMerge.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        owner_ = "";
+
+        ownershipPassedFrom_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return edu.usfca.cs.dfs.StorageMessages.internal_static_SimplyMerge_descriptor;
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.SimplyMerge getDefaultInstanceForType() {
+        return edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.SimplyMerge build() {
+        edu.usfca.cs.dfs.StorageMessages.SimplyMerge result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public edu.usfca.cs.dfs.StorageMessages.SimplyMerge buildPartial() {
+        edu.usfca.cs.dfs.StorageMessages.SimplyMerge result = new edu.usfca.cs.dfs.StorageMessages.SimplyMerge(this);
+        result.owner_ = owner_;
+        result.ownershipPassedFrom_ = ownershipPassedFrom_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof edu.usfca.cs.dfs.StorageMessages.SimplyMerge) {
+          return mergeFrom((edu.usfca.cs.dfs.StorageMessages.SimplyMerge)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(edu.usfca.cs.dfs.StorageMessages.SimplyMerge other) {
+        if (other == edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance()) return this;
+        if (!other.getOwner().isEmpty()) {
+          owner_ = other.owner_;
+          onChanged();
+        }
+        if (!other.getOwnershipPassedFrom().isEmpty()) {
+          ownershipPassedFrom_ = other.ownershipPassedFrom_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        edu.usfca.cs.dfs.StorageMessages.SimplyMerge parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object owner_ = "";
+      /**
+       * <code>string owner = 1;</code>
+       */
+      public java.lang.String getOwner() {
+        java.lang.Object ref = owner_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          owner_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string owner = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getOwnerBytes() {
+        java.lang.Object ref = owner_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          owner_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string owner = 1;</code>
+       */
+      public Builder setOwner(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        owner_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string owner = 1;</code>
+       */
+      public Builder clearOwner() {
+        
+        owner_ = getDefaultInstance().getOwner();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string owner = 1;</code>
+       */
+      public Builder setOwnerBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        owner_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object ownershipPassedFrom_ = "";
+      /**
+       * <code>string ownershipPassedFrom = 2;</code>
+       */
+      public java.lang.String getOwnershipPassedFrom() {
+        java.lang.Object ref = ownershipPassedFrom_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          ownershipPassedFrom_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <code>string ownershipPassedFrom = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getOwnershipPassedFromBytes() {
+        java.lang.Object ref = ownershipPassedFrom_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          ownershipPassedFrom_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <code>string ownershipPassedFrom = 2;</code>
+       */
+      public Builder setOwnershipPassedFrom(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        ownershipPassedFrom_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string ownershipPassedFrom = 2;</code>
+       */
+      public Builder clearOwnershipPassedFrom() {
+        
+        ownershipPassedFrom_ = getDefaultInstance().getOwnershipPassedFrom();
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>string ownershipPassedFrom = 2;</code>
+       */
+      public Builder setOwnershipPassedFromBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        ownershipPassedFrom_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:SimplyMerge)
+    }
+
+    // @@protoc_insertion_point(class_scope:SimplyMerge)
+    private static final edu.usfca.cs.dfs.StorageMessages.SimplyMerge DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new edu.usfca.cs.dfs.StorageMessages.SimplyMerge();
+    }
+
+    public static edu.usfca.cs.dfs.StorageMessages.SimplyMerge getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SimplyMerge>
+        PARSER = new com.google.protobuf.AbstractParser<SimplyMerge>() {
+      @java.lang.Override
+      public SimplyMerge parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SimplyMerge(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SimplyMerge> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SimplyMerge> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public edu.usfca.cs.dfs.StorageMessages.SimplyMerge getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface StorageMessageWrapperOrBuilder extends
       // @@protoc_insertion_point(interface_extends:StorageMessageWrapper)
       com.google.protobuf.MessageOrBuilder {
@@ -11345,43 +12037,43 @@ public final class StorageMessages {
     edu.usfca.cs.dfs.StorageMessages.HealResponseOrBuilder getHealResponseOrBuilder();
 
     /**
-     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-     */
-    boolean hasMergeReplicasOnFailure();
-    /**
-     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-     */
-    edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure getMergeReplicasOnFailure();
-    /**
-     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-     */
-    edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder getMergeReplicasOnFailureOrBuilder();
-
-    /**
-     * <code>.PrintNodesRequest printRequest = 12;</code>
+     * <code>.PrintNodesRequest printRequest = 11;</code>
      */
     boolean hasPrintRequest();
     /**
-     * <code>.PrintNodesRequest printRequest = 12;</code>
+     * <code>.PrintNodesRequest printRequest = 11;</code>
      */
     edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest getPrintRequest();
     /**
-     * <code>.PrintNodesRequest printRequest = 12;</code>
+     * <code>.PrintNodesRequest printRequest = 11;</code>
      */
     edu.usfca.cs.dfs.StorageMessages.PrintNodesRequestOrBuilder getPrintRequestOrBuilder();
 
     /**
-     * <code>.NodeState nodeState = 13;</code>
+     * <code>.NodeState nodeState = 12;</code>
      */
     boolean hasNodeState();
     /**
-     * <code>.NodeState nodeState = 13;</code>
+     * <code>.NodeState nodeState = 12;</code>
      */
     edu.usfca.cs.dfs.StorageMessages.NodeState getNodeState();
     /**
-     * <code>.NodeState nodeState = 13;</code>
+     * <code>.NodeState nodeState = 12;</code>
      */
     edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder getNodeStateOrBuilder();
+
+    /**
+     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
+     */
+    boolean hasMergeReplicasOnFailure();
+    /**
+     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
+     */
+    edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure getMergeReplicasOnFailure();
+    /**
+     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
+     */
+    edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder getMergeReplicasOnFailureOrBuilder();
 
     /**
      * <code>.ReplicateToNewAssignment replicateToNewAssignment = 14;</code>
@@ -11408,6 +12100,19 @@ public final class StorageMessages {
      * <code>.DeleteData deleteData = 15;</code>
      */
     edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder getDeleteDataOrBuilder();
+
+    /**
+     * <code>.SimplyMerge simplyMerge = 16;</code>
+     */
+    boolean hasSimplyMerge();
+    /**
+     * <code>.SimplyMerge simplyMerge = 16;</code>
+     */
+    edu.usfca.cs.dfs.StorageMessages.SimplyMerge getSimplyMerge();
+    /**
+     * <code>.SimplyMerge simplyMerge = 16;</code>
+     */
+    edu.usfca.cs.dfs.StorageMessages.SimplyMergeOrBuilder getSimplyMergeOrBuilder();
 
     public edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper.MsgCase getMsgCase();
   }
@@ -11597,22 +12302,8 @@ public final class StorageMessages {
               break;
             }
             case 90: {
-              edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder subBuilder = null;
-              if (msgCase_ == 11) {
-                subBuilder = ((edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_).toBuilder();
-              }
-              msg_ =
-                  input.readMessage(edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.parser(), extensionRegistry);
-              if (subBuilder != null) {
-                subBuilder.mergeFrom((edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_);
-                msg_ = subBuilder.buildPartial();
-              }
-              msgCase_ = 11;
-              break;
-            }
-            case 98: {
               edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.Builder subBuilder = null;
-              if (msgCase_ == 12) {
+              if (msgCase_ == 11) {
                 subBuilder = ((edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_).toBuilder();
               }
               msg_ =
@@ -11621,18 +12312,32 @@ public final class StorageMessages {
                 subBuilder.mergeFrom((edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_);
                 msg_ = subBuilder.buildPartial();
               }
-              msgCase_ = 12;
+              msgCase_ = 11;
               break;
             }
-            case 106: {
+            case 98: {
               edu.usfca.cs.dfs.StorageMessages.NodeState.Builder subBuilder = null;
-              if (msgCase_ == 13) {
+              if (msgCase_ == 12) {
                 subBuilder = ((edu.usfca.cs.dfs.StorageMessages.NodeState) msg_).toBuilder();
               }
               msg_ =
                   input.readMessage(edu.usfca.cs.dfs.StorageMessages.NodeState.parser(), extensionRegistry);
               if (subBuilder != null) {
                 subBuilder.mergeFrom((edu.usfca.cs.dfs.StorageMessages.NodeState) msg_);
+                msg_ = subBuilder.buildPartial();
+              }
+              msgCase_ = 12;
+              break;
+            }
+            case 106: {
+              edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder subBuilder = null;
+              if (msgCase_ == 13) {
+                subBuilder = ((edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_).toBuilder();
+              }
+              msg_ =
+                  input.readMessage(edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_);
                 msg_ = subBuilder.buildPartial();
               }
               msgCase_ = 13;
@@ -11664,6 +12369,20 @@ public final class StorageMessages {
                 msg_ = subBuilder.buildPartial();
               }
               msgCase_ = 15;
+              break;
+            }
+            case 130: {
+              edu.usfca.cs.dfs.StorageMessages.SimplyMerge.Builder subBuilder = null;
+              if (msgCase_ == 16) {
+                subBuilder = ((edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_).toBuilder();
+              }
+              msg_ =
+                  input.readMessage(edu.usfca.cs.dfs.StorageMessages.SimplyMerge.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_);
+                msg_ = subBuilder.buildPartial();
+              }
+              msgCase_ = 16;
               break;
             }
             default: {
@@ -11712,11 +12431,12 @@ public final class StorageMessages {
       RETRIEVALHOSTS(8),
       HEALREQUEST(9),
       HEALRESPONSE(10),
-      MERGEREPLICASONFAILURE(11),
-      PRINTREQUEST(12),
-      NODESTATE(13),
+      PRINTREQUEST(11),
+      NODESTATE(12),
+      MERGEREPLICASONFAILURE(13),
       REPLICATETONEWASSIGNMENT(14),
       DELETEDATA(15),
+      SIMPLYMERGE(16),
       MSG_NOT_SET(0);
       private final int value;
       private MsgCase(int value) {
@@ -11742,11 +12462,12 @@ public final class StorageMessages {
           case 8: return RETRIEVALHOSTS;
           case 9: return HEALREQUEST;
           case 10: return HEALRESPONSE;
-          case 11: return MERGEREPLICASONFAILURE;
-          case 12: return PRINTREQUEST;
-          case 13: return NODESTATE;
+          case 11: return PRINTREQUEST;
+          case 12: return NODESTATE;
+          case 13: return MERGEREPLICASONFAILURE;
           case 14: return REPLICATETONEWASSIGNMENT;
           case 15: return DELETEDATA;
+          case 16: return SIMPLYMERGE;
           case 0: return MSG_NOT_SET;
           default: return null;
         }
@@ -12022,82 +12743,82 @@ public final class StorageMessages {
       return edu.usfca.cs.dfs.StorageMessages.HealResponse.getDefaultInstance();
     }
 
-    public static final int MERGEREPLICASONFAILURE_FIELD_NUMBER = 11;
+    public static final int PRINTREQUEST_FIELD_NUMBER = 11;
     /**
-     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
+     * <code>.PrintNodesRequest printRequest = 11;</code>
      */
-    public boolean hasMergeReplicasOnFailure() {
+    public boolean hasPrintRequest() {
       return msgCase_ == 11;
     }
     /**
-     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
+     * <code>.PrintNodesRequest printRequest = 11;</code>
      */
-    public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure getMergeReplicasOnFailure() {
+    public edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest getPrintRequest() {
       if (msgCase_ == 11) {
-         return (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_;
+         return (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_;
       }
-      return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
+      return edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance();
     }
     /**
-     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
+     * <code>.PrintNodesRequest printRequest = 11;</code>
      */
-    public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder getMergeReplicasOnFailureOrBuilder() {
+    public edu.usfca.cs.dfs.StorageMessages.PrintNodesRequestOrBuilder getPrintRequestOrBuilder() {
       if (msgCase_ == 11) {
-         return (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_;
+         return (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_;
       }
-      return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
+      return edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance();
     }
 
-    public static final int PRINTREQUEST_FIELD_NUMBER = 12;
+    public static final int NODESTATE_FIELD_NUMBER = 12;
     /**
-     * <code>.PrintNodesRequest printRequest = 12;</code>
+     * <code>.NodeState nodeState = 12;</code>
      */
-    public boolean hasPrintRequest() {
+    public boolean hasNodeState() {
       return msgCase_ == 12;
     }
     /**
-     * <code>.PrintNodesRequest printRequest = 12;</code>
+     * <code>.NodeState nodeState = 12;</code>
      */
-    public edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest getPrintRequest() {
+    public edu.usfca.cs.dfs.StorageMessages.NodeState getNodeState() {
       if (msgCase_ == 12) {
-         return (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_;
+         return (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_;
       }
-      return edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance();
+      return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
     }
     /**
-     * <code>.PrintNodesRequest printRequest = 12;</code>
+     * <code>.NodeState nodeState = 12;</code>
      */
-    public edu.usfca.cs.dfs.StorageMessages.PrintNodesRequestOrBuilder getPrintRequestOrBuilder() {
+    public edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder getNodeStateOrBuilder() {
       if (msgCase_ == 12) {
-         return (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_;
+         return (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_;
       }
-      return edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance();
+      return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
     }
 
-    public static final int NODESTATE_FIELD_NUMBER = 13;
+    public static final int MERGEREPLICASONFAILURE_FIELD_NUMBER = 13;
     /**
-     * <code>.NodeState nodeState = 13;</code>
+     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
      */
-    public boolean hasNodeState() {
+    public boolean hasMergeReplicasOnFailure() {
       return msgCase_ == 13;
     }
     /**
-     * <code>.NodeState nodeState = 13;</code>
+     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
      */
-    public edu.usfca.cs.dfs.StorageMessages.NodeState getNodeState() {
+    public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure getMergeReplicasOnFailure() {
       if (msgCase_ == 13) {
-         return (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_;
+         return (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_;
       }
-      return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
+      return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
     }
     /**
-     * <code>.NodeState nodeState = 13;</code>
+     * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
      */
-    public edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder getNodeStateOrBuilder() {
+    public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder getMergeReplicasOnFailureOrBuilder() {
       if (msgCase_ == 13) {
-         return (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_;
+         return (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_;
       }
-      return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
+      return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
     }
 
     public static final int REPLICATETONEWASSIGNMENT_FIELD_NUMBER = 14;
@@ -12152,6 +12873,32 @@ public final class StorageMessages {
       return edu.usfca.cs.dfs.StorageMessages.DeleteData.getDefaultInstance();
     }
 
+    public static final int SIMPLYMERGE_FIELD_NUMBER = 16;
+    /**
+     * <code>.SimplyMerge simplyMerge = 16;</code>
+     */
+    public boolean hasSimplyMerge() {
+      return msgCase_ == 16;
+    }
+    /**
+     * <code>.SimplyMerge simplyMerge = 16;</code>
+     */
+    public edu.usfca.cs.dfs.StorageMessages.SimplyMerge getSimplyMerge() {
+      if (msgCase_ == 16) {
+         return (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_;
+      }
+      return edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance();
+    }
+    /**
+     * <code>.SimplyMerge simplyMerge = 16;</code>
+     */
+    public edu.usfca.cs.dfs.StorageMessages.SimplyMergeOrBuilder getSimplyMergeOrBuilder() {
+      if (msgCase_ == 16) {
+         return (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_;
+      }
+      return edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -12197,19 +12944,22 @@ public final class StorageMessages {
         output.writeMessage(10, (edu.usfca.cs.dfs.StorageMessages.HealResponse) msg_);
       }
       if (msgCase_ == 11) {
-        output.writeMessage(11, (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_);
+        output.writeMessage(11, (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_);
       }
       if (msgCase_ == 12) {
-        output.writeMessage(12, (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_);
+        output.writeMessage(12, (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_);
       }
       if (msgCase_ == 13) {
-        output.writeMessage(13, (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_);
+        output.writeMessage(13, (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_);
       }
       if (msgCase_ == 14) {
         output.writeMessage(14, (edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment) msg_);
       }
       if (msgCase_ == 15) {
         output.writeMessage(15, (edu.usfca.cs.dfs.StorageMessages.DeleteData) msg_);
+      }
+      if (msgCase_ == 16) {
+        output.writeMessage(16, (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_);
       }
       unknownFields.writeTo(output);
     }
@@ -12262,15 +13012,15 @@ public final class StorageMessages {
       }
       if (msgCase_ == 11) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(11, (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_);
+          .computeMessageSize(11, (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_);
       }
       if (msgCase_ == 12) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(12, (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_);
+          .computeMessageSize(12, (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_);
       }
       if (msgCase_ == 13) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(13, (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_);
+          .computeMessageSize(13, (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_);
       }
       if (msgCase_ == 14) {
         size += com.google.protobuf.CodedOutputStream
@@ -12279,6 +13029,10 @@ public final class StorageMessages {
       if (msgCase_ == 15) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(15, (edu.usfca.cs.dfs.StorageMessages.DeleteData) msg_);
+      }
+      if (msgCase_ == 16) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(16, (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -12338,16 +13092,16 @@ public final class StorageMessages {
               .equals(other.getHealResponse())) return false;
           break;
         case 11:
-          if (!getMergeReplicasOnFailure()
-              .equals(other.getMergeReplicasOnFailure())) return false;
-          break;
-        case 12:
           if (!getPrintRequest()
               .equals(other.getPrintRequest())) return false;
           break;
-        case 13:
+        case 12:
           if (!getNodeState()
               .equals(other.getNodeState())) return false;
+          break;
+        case 13:
+          if (!getMergeReplicasOnFailure()
+              .equals(other.getMergeReplicasOnFailure())) return false;
           break;
         case 14:
           if (!getReplicateToNewAssignment()
@@ -12356,6 +13110,10 @@ public final class StorageMessages {
         case 15:
           if (!getDeleteData()
               .equals(other.getDeleteData())) return false;
+          break;
+        case 16:
+          if (!getSimplyMerge()
+              .equals(other.getSimplyMerge())) return false;
           break;
         case 0:
         default:
@@ -12413,16 +13171,16 @@ public final class StorageMessages {
           hash = (53 * hash) + getHealResponse().hashCode();
           break;
         case 11:
-          hash = (37 * hash) + MERGEREPLICASONFAILURE_FIELD_NUMBER;
-          hash = (53 * hash) + getMergeReplicasOnFailure().hashCode();
-          break;
-        case 12:
           hash = (37 * hash) + PRINTREQUEST_FIELD_NUMBER;
           hash = (53 * hash) + getPrintRequest().hashCode();
           break;
-        case 13:
+        case 12:
           hash = (37 * hash) + NODESTATE_FIELD_NUMBER;
           hash = (53 * hash) + getNodeState().hashCode();
+          break;
+        case 13:
+          hash = (37 * hash) + MERGEREPLICASONFAILURE_FIELD_NUMBER;
+          hash = (53 * hash) + getMergeReplicasOnFailure().hashCode();
           break;
         case 14:
           hash = (37 * hash) + REPLICATETONEWASSIGNMENT_FIELD_NUMBER;
@@ -12431,6 +13189,10 @@ public final class StorageMessages {
         case 15:
           hash = (37 * hash) + DELETEDATA_FIELD_NUMBER;
           hash = (53 * hash) + getDeleteData().hashCode();
+          break;
+        case 16:
+          hash = (37 * hash) + SIMPLYMERGE_FIELD_NUMBER;
+          hash = (53 * hash) + getSimplyMerge().hashCode();
           break;
         case 0:
         default:
@@ -12667,24 +13429,24 @@ public final class StorageMessages {
           }
         }
         if (msgCase_ == 11) {
-          if (mergeReplicasOnFailureBuilder_ == null) {
-            result.msg_ = msg_;
-          } else {
-            result.msg_ = mergeReplicasOnFailureBuilder_.build();
-          }
-        }
-        if (msgCase_ == 12) {
           if (printRequestBuilder_ == null) {
             result.msg_ = msg_;
           } else {
             result.msg_ = printRequestBuilder_.build();
           }
         }
-        if (msgCase_ == 13) {
+        if (msgCase_ == 12) {
           if (nodeStateBuilder_ == null) {
             result.msg_ = msg_;
           } else {
             result.msg_ = nodeStateBuilder_.build();
+          }
+        }
+        if (msgCase_ == 13) {
+          if (mergeReplicasOnFailureBuilder_ == null) {
+            result.msg_ = msg_;
+          } else {
+            result.msg_ = mergeReplicasOnFailureBuilder_.build();
           }
         }
         if (msgCase_ == 14) {
@@ -12699,6 +13461,13 @@ public final class StorageMessages {
             result.msg_ = msg_;
           } else {
             result.msg_ = deleteDataBuilder_.build();
+          }
+        }
+        if (msgCase_ == 16) {
+          if (simplyMergeBuilder_ == null) {
+            result.msg_ = msg_;
+          } else {
+            result.msg_ = simplyMergeBuilder_.build();
           }
         }
         result.msgCase_ = msgCase_;
@@ -12791,10 +13560,6 @@ public final class StorageMessages {
             mergeHealResponse(other.getHealResponse());
             break;
           }
-          case MERGEREPLICASONFAILURE: {
-            mergeMergeReplicasOnFailure(other.getMergeReplicasOnFailure());
-            break;
-          }
           case PRINTREQUEST: {
             mergePrintRequest(other.getPrintRequest());
             break;
@@ -12803,12 +13568,20 @@ public final class StorageMessages {
             mergeNodeState(other.getNodeState());
             break;
           }
+          case MERGEREPLICASONFAILURE: {
+            mergeMergeReplicasOnFailure(other.getMergeReplicasOnFailure());
+            break;
+          }
           case REPLICATETONEWASSIGNMENT: {
             mergeReplicateToNewAssignment(other.getReplicateToNewAssignment());
             break;
           }
           case DELETEDATA: {
             mergeDeleteData(other.getDeleteData());
+            break;
+          }
+          case SIMPLYMERGE: {
+            mergeSimplyMerge(other.getSimplyMerge());
             break;
           }
           case MSG_NOT_SET: {
@@ -14220,167 +14993,31 @@ public final class StorageMessages {
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
-          edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder> mergeReplicasOnFailureBuilder_;
+          edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest, edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.Builder, edu.usfca.cs.dfs.StorageMessages.PrintNodesRequestOrBuilder> printRequestBuilder_;
       /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
-      public boolean hasMergeReplicasOnFailure() {
+      public boolean hasPrintRequest() {
         return msgCase_ == 11;
       }
       /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-       */
-      public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure getMergeReplicasOnFailure() {
-        if (mergeReplicasOnFailureBuilder_ == null) {
-          if (msgCase_ == 11) {
-            return (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_;
-          }
-          return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
-        } else {
-          if (msgCase_ == 11) {
-            return mergeReplicasOnFailureBuilder_.getMessage();
-          }
-          return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
-        }
-      }
-      /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-       */
-      public Builder setMergeReplicasOnFailure(edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure value) {
-        if (mergeReplicasOnFailureBuilder_ == null) {
-          if (value == null) {
-            throw new NullPointerException();
-          }
-          msg_ = value;
-          onChanged();
-        } else {
-          mergeReplicasOnFailureBuilder_.setMessage(value);
-        }
-        msgCase_ = 11;
-        return this;
-      }
-      /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-       */
-      public Builder setMergeReplicasOnFailure(
-          edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder builderForValue) {
-        if (mergeReplicasOnFailureBuilder_ == null) {
-          msg_ = builderForValue.build();
-          onChanged();
-        } else {
-          mergeReplicasOnFailureBuilder_.setMessage(builderForValue.build());
-        }
-        msgCase_ = 11;
-        return this;
-      }
-      /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-       */
-      public Builder mergeMergeReplicasOnFailure(edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure value) {
-        if (mergeReplicasOnFailureBuilder_ == null) {
-          if (msgCase_ == 11 &&
-              msg_ != edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance()) {
-            msg_ = edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.newBuilder((edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_)
-                .mergeFrom(value).buildPartial();
-          } else {
-            msg_ = value;
-          }
-          onChanged();
-        } else {
-          if (msgCase_ == 11) {
-            mergeReplicasOnFailureBuilder_.mergeFrom(value);
-          }
-          mergeReplicasOnFailureBuilder_.setMessage(value);
-        }
-        msgCase_ = 11;
-        return this;
-      }
-      /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-       */
-      public Builder clearMergeReplicasOnFailure() {
-        if (mergeReplicasOnFailureBuilder_ == null) {
-          if (msgCase_ == 11) {
-            msgCase_ = 0;
-            msg_ = null;
-            onChanged();
-          }
-        } else {
-          if (msgCase_ == 11) {
-            msgCase_ = 0;
-            msg_ = null;
-          }
-          mergeReplicasOnFailureBuilder_.clear();
-        }
-        return this;
-      }
-      /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-       */
-      public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder getMergeReplicasOnFailureBuilder() {
-        return getMergeReplicasOnFailureFieldBuilder().getBuilder();
-      }
-      /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-       */
-      public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder getMergeReplicasOnFailureOrBuilder() {
-        if ((msgCase_ == 11) && (mergeReplicasOnFailureBuilder_ != null)) {
-          return mergeReplicasOnFailureBuilder_.getMessageOrBuilder();
-        } else {
-          if (msgCase_ == 11) {
-            return (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_;
-          }
-          return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
-        }
-      }
-      /**
-       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 11;</code>
-       */
-      private com.google.protobuf.SingleFieldBuilderV3<
-          edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder> 
-          getMergeReplicasOnFailureFieldBuilder() {
-        if (mergeReplicasOnFailureBuilder_ == null) {
-          if (!(msgCase_ == 11)) {
-            msg_ = edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
-          }
-          mergeReplicasOnFailureBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder>(
-                  (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_,
-                  getParentForChildren(),
-                  isClean());
-          msg_ = null;
-        }
-        msgCase_ = 11;
-        onChanged();;
-        return mergeReplicasOnFailureBuilder_;
-      }
-
-      private com.google.protobuf.SingleFieldBuilderV3<
-          edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest, edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.Builder, edu.usfca.cs.dfs.StorageMessages.PrintNodesRequestOrBuilder> printRequestBuilder_;
-      /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
-       */
-      public boolean hasPrintRequest() {
-        return msgCase_ == 12;
-      }
-      /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
       public edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest getPrintRequest() {
         if (printRequestBuilder_ == null) {
-          if (msgCase_ == 12) {
+          if (msgCase_ == 11) {
             return (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_;
           }
           return edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance();
         } else {
-          if (msgCase_ == 12) {
+          if (msgCase_ == 11) {
             return printRequestBuilder_.getMessage();
           }
           return edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance();
         }
       }
       /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
       public Builder setPrintRequest(edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest value) {
         if (printRequestBuilder_ == null) {
@@ -14392,11 +15029,11 @@ public final class StorageMessages {
         } else {
           printRequestBuilder_.setMessage(value);
         }
-        msgCase_ = 12;
+        msgCase_ = 11;
         return this;
       }
       /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
       public Builder setPrintRequest(
           edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.Builder builderForValue) {
@@ -14406,15 +15043,15 @@ public final class StorageMessages {
         } else {
           printRequestBuilder_.setMessage(builderForValue.build());
         }
-        msgCase_ = 12;
+        msgCase_ = 11;
         return this;
       }
       /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
       public Builder mergePrintRequest(edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest value) {
         if (printRequestBuilder_ == null) {
-          if (msgCase_ == 12 &&
+          if (msgCase_ == 11 &&
               msg_ != edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance()) {
             msg_ = edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.newBuilder((edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_)
                 .mergeFrom(value).buildPartial();
@@ -14423,26 +15060,26 @@ public final class StorageMessages {
           }
           onChanged();
         } else {
-          if (msgCase_ == 12) {
+          if (msgCase_ == 11) {
             printRequestBuilder_.mergeFrom(value);
           }
           printRequestBuilder_.setMessage(value);
         }
-        msgCase_ = 12;
+        msgCase_ = 11;
         return this;
       }
       /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
       public Builder clearPrintRequest() {
         if (printRequestBuilder_ == null) {
-          if (msgCase_ == 12) {
+          if (msgCase_ == 11) {
             msgCase_ = 0;
             msg_ = null;
             onChanged();
           }
         } else {
-          if (msgCase_ == 12) {
+          if (msgCase_ == 11) {
             msgCase_ = 0;
             msg_ = null;
           }
@@ -14451,32 +15088,32 @@ public final class StorageMessages {
         return this;
       }
       /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
       public edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.Builder getPrintRequestBuilder() {
         return getPrintRequestFieldBuilder().getBuilder();
       }
       /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
       public edu.usfca.cs.dfs.StorageMessages.PrintNodesRequestOrBuilder getPrintRequestOrBuilder() {
-        if ((msgCase_ == 12) && (printRequestBuilder_ != null)) {
+        if ((msgCase_ == 11) && (printRequestBuilder_ != null)) {
           return printRequestBuilder_.getMessageOrBuilder();
         } else {
-          if (msgCase_ == 12) {
+          if (msgCase_ == 11) {
             return (edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest) msg_;
           }
           return edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance();
         }
       }
       /**
-       * <code>.PrintNodesRequest printRequest = 12;</code>
+       * <code>.PrintNodesRequest printRequest = 11;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest, edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.Builder, edu.usfca.cs.dfs.StorageMessages.PrintNodesRequestOrBuilder> 
           getPrintRequestFieldBuilder() {
         if (printRequestBuilder_ == null) {
-          if (!(msgCase_ == 12)) {
+          if (!(msgCase_ == 11)) {
             msg_ = edu.usfca.cs.dfs.StorageMessages.PrintNodesRequest.getDefaultInstance();
           }
           printRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
@@ -14486,7 +15123,7 @@ public final class StorageMessages {
                   isClean());
           msg_ = null;
         }
-        msgCase_ = 12;
+        msgCase_ = 11;
         onChanged();;
         return printRequestBuilder_;
       }
@@ -14494,29 +15131,29 @@ public final class StorageMessages {
       private com.google.protobuf.SingleFieldBuilderV3<
           edu.usfca.cs.dfs.StorageMessages.NodeState, edu.usfca.cs.dfs.StorageMessages.NodeState.Builder, edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder> nodeStateBuilder_;
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.NodeState nodeState = 12;</code>
        */
       public boolean hasNodeState() {
-        return msgCase_ == 13;
+        return msgCase_ == 12;
       }
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.NodeState nodeState = 12;</code>
        */
       public edu.usfca.cs.dfs.StorageMessages.NodeState getNodeState() {
         if (nodeStateBuilder_ == null) {
-          if (msgCase_ == 13) {
+          if (msgCase_ == 12) {
             return (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_;
           }
           return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
         } else {
-          if (msgCase_ == 13) {
+          if (msgCase_ == 12) {
             return nodeStateBuilder_.getMessage();
           }
           return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
         }
       }
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.NodeState nodeState = 12;</code>
        */
       public Builder setNodeState(edu.usfca.cs.dfs.StorageMessages.NodeState value) {
         if (nodeStateBuilder_ == null) {
@@ -14528,11 +15165,11 @@ public final class StorageMessages {
         } else {
           nodeStateBuilder_.setMessage(value);
         }
-        msgCase_ = 13;
+        msgCase_ = 12;
         return this;
       }
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.NodeState nodeState = 12;</code>
        */
       public Builder setNodeState(
           edu.usfca.cs.dfs.StorageMessages.NodeState.Builder builderForValue) {
@@ -14542,15 +15179,15 @@ public final class StorageMessages {
         } else {
           nodeStateBuilder_.setMessage(builderForValue.build());
         }
-        msgCase_ = 13;
+        msgCase_ = 12;
         return this;
       }
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.NodeState nodeState = 12;</code>
        */
       public Builder mergeNodeState(edu.usfca.cs.dfs.StorageMessages.NodeState value) {
         if (nodeStateBuilder_ == null) {
-          if (msgCase_ == 13 &&
+          if (msgCase_ == 12 &&
               msg_ != edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance()) {
             msg_ = edu.usfca.cs.dfs.StorageMessages.NodeState.newBuilder((edu.usfca.cs.dfs.StorageMessages.NodeState) msg_)
                 .mergeFrom(value).buildPartial();
@@ -14559,19 +15196,155 @@ public final class StorageMessages {
           }
           onChanged();
         } else {
-          if (msgCase_ == 13) {
+          if (msgCase_ == 12) {
             nodeStateBuilder_.mergeFrom(value);
           }
           nodeStateBuilder_.setMessage(value);
+        }
+        msgCase_ = 12;
+        return this;
+      }
+      /**
+       * <code>.NodeState nodeState = 12;</code>
+       */
+      public Builder clearNodeState() {
+        if (nodeStateBuilder_ == null) {
+          if (msgCase_ == 12) {
+            msgCase_ = 0;
+            msg_ = null;
+            onChanged();
+          }
+        } else {
+          if (msgCase_ == 12) {
+            msgCase_ = 0;
+            msg_ = null;
+          }
+          nodeStateBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.NodeState nodeState = 12;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.NodeState.Builder getNodeStateBuilder() {
+        return getNodeStateFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.NodeState nodeState = 12;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder getNodeStateOrBuilder() {
+        if ((msgCase_ == 12) && (nodeStateBuilder_ != null)) {
+          return nodeStateBuilder_.getMessageOrBuilder();
+        } else {
+          if (msgCase_ == 12) {
+            return (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_;
+          }
+          return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.NodeState nodeState = 12;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.usfca.cs.dfs.StorageMessages.NodeState, edu.usfca.cs.dfs.StorageMessages.NodeState.Builder, edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder> 
+          getNodeStateFieldBuilder() {
+        if (nodeStateBuilder_ == null) {
+          if (!(msgCase_ == 12)) {
+            msg_ = edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
+          }
+          nodeStateBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.usfca.cs.dfs.StorageMessages.NodeState, edu.usfca.cs.dfs.StorageMessages.NodeState.Builder, edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder>(
+                  (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_,
+                  getParentForChildren(),
+                  isClean());
+          msg_ = null;
+        }
+        msgCase_ = 12;
+        onChanged();;
+        return nodeStateBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder> mergeReplicasOnFailureBuilder_;
+      /**
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
+       */
+      public boolean hasMergeReplicasOnFailure() {
+        return msgCase_ == 13;
+      }
+      /**
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure getMergeReplicasOnFailure() {
+        if (mergeReplicasOnFailureBuilder_ == null) {
+          if (msgCase_ == 13) {
+            return (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_;
+          }
+          return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
+        } else {
+          if (msgCase_ == 13) {
+            return mergeReplicasOnFailureBuilder_.getMessage();
+          }
+          return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
+       */
+      public Builder setMergeReplicasOnFailure(edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure value) {
+        if (mergeReplicasOnFailureBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          msg_ = value;
+          onChanged();
+        } else {
+          mergeReplicasOnFailureBuilder_.setMessage(value);
         }
         msgCase_ = 13;
         return this;
       }
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
        */
-      public Builder clearNodeState() {
-        if (nodeStateBuilder_ == null) {
+      public Builder setMergeReplicasOnFailure(
+          edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder builderForValue) {
+        if (mergeReplicasOnFailureBuilder_ == null) {
+          msg_ = builderForValue.build();
+          onChanged();
+        } else {
+          mergeReplicasOnFailureBuilder_.setMessage(builderForValue.build());
+        }
+        msgCase_ = 13;
+        return this;
+      }
+      /**
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
+       */
+      public Builder mergeMergeReplicasOnFailure(edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure value) {
+        if (mergeReplicasOnFailureBuilder_ == null) {
+          if (msgCase_ == 13 &&
+              msg_ != edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance()) {
+            msg_ = edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.newBuilder((edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            msg_ = value;
+          }
+          onChanged();
+        } else {
+          if (msgCase_ == 13) {
+            mergeReplicasOnFailureBuilder_.mergeFrom(value);
+          }
+          mergeReplicasOnFailureBuilder_.setMessage(value);
+        }
+        msgCase_ = 13;
+        return this;
+      }
+      /**
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
+       */
+      public Builder clearMergeReplicasOnFailure() {
+        if (mergeReplicasOnFailureBuilder_ == null) {
           if (msgCase_ == 13) {
             msgCase_ = 0;
             msg_ = null;
@@ -14582,49 +15355,49 @@ public final class StorageMessages {
             msgCase_ = 0;
             msg_ = null;
           }
-          nodeStateBuilder_.clear();
+          mergeReplicasOnFailureBuilder_.clear();
         }
         return this;
       }
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
        */
-      public edu.usfca.cs.dfs.StorageMessages.NodeState.Builder getNodeStateBuilder() {
-        return getNodeStateFieldBuilder().getBuilder();
+      public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder getMergeReplicasOnFailureBuilder() {
+        return getMergeReplicasOnFailureFieldBuilder().getBuilder();
       }
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
        */
-      public edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder getNodeStateOrBuilder() {
-        if ((msgCase_ == 13) && (nodeStateBuilder_ != null)) {
-          return nodeStateBuilder_.getMessageOrBuilder();
+      public edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder getMergeReplicasOnFailureOrBuilder() {
+        if ((msgCase_ == 13) && (mergeReplicasOnFailureBuilder_ != null)) {
+          return mergeReplicasOnFailureBuilder_.getMessageOrBuilder();
         } else {
           if (msgCase_ == 13) {
-            return (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_;
+            return (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_;
           }
-          return edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
+          return edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
         }
       }
       /**
-       * <code>.NodeState nodeState = 13;</code>
+       * <code>.MergeReplicasOnFailure mergeReplicasOnFailure = 13;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
-          edu.usfca.cs.dfs.StorageMessages.NodeState, edu.usfca.cs.dfs.StorageMessages.NodeState.Builder, edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder> 
-          getNodeStateFieldBuilder() {
-        if (nodeStateBuilder_ == null) {
+          edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder> 
+          getMergeReplicasOnFailureFieldBuilder() {
+        if (mergeReplicasOnFailureBuilder_ == null) {
           if (!(msgCase_ == 13)) {
-            msg_ = edu.usfca.cs.dfs.StorageMessages.NodeState.getDefaultInstance();
+            msg_ = edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.getDefaultInstance();
           }
-          nodeStateBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-              edu.usfca.cs.dfs.StorageMessages.NodeState, edu.usfca.cs.dfs.StorageMessages.NodeState.Builder, edu.usfca.cs.dfs.StorageMessages.NodeStateOrBuilder>(
-                  (edu.usfca.cs.dfs.StorageMessages.NodeState) msg_,
+          mergeReplicasOnFailureBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure.Builder, edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailureOrBuilder>(
+                  (edu.usfca.cs.dfs.StorageMessages.MergeReplicasOnFailure) msg_,
                   getParentForChildren(),
                   isClean());
           msg_ = null;
         }
         msgCase_ = 13;
         onChanged();;
-        return nodeStateBuilder_;
+        return mergeReplicasOnFailureBuilder_;
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -14898,6 +15671,142 @@ public final class StorageMessages {
         onChanged();;
         return deleteDataBuilder_;
       }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.usfca.cs.dfs.StorageMessages.SimplyMerge, edu.usfca.cs.dfs.StorageMessages.SimplyMerge.Builder, edu.usfca.cs.dfs.StorageMessages.SimplyMergeOrBuilder> simplyMergeBuilder_;
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      public boolean hasSimplyMerge() {
+        return msgCase_ == 16;
+      }
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.SimplyMerge getSimplyMerge() {
+        if (simplyMergeBuilder_ == null) {
+          if (msgCase_ == 16) {
+            return (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_;
+          }
+          return edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance();
+        } else {
+          if (msgCase_ == 16) {
+            return simplyMergeBuilder_.getMessage();
+          }
+          return edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      public Builder setSimplyMerge(edu.usfca.cs.dfs.StorageMessages.SimplyMerge value) {
+        if (simplyMergeBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          msg_ = value;
+          onChanged();
+        } else {
+          simplyMergeBuilder_.setMessage(value);
+        }
+        msgCase_ = 16;
+        return this;
+      }
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      public Builder setSimplyMerge(
+          edu.usfca.cs.dfs.StorageMessages.SimplyMerge.Builder builderForValue) {
+        if (simplyMergeBuilder_ == null) {
+          msg_ = builderForValue.build();
+          onChanged();
+        } else {
+          simplyMergeBuilder_.setMessage(builderForValue.build());
+        }
+        msgCase_ = 16;
+        return this;
+      }
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      public Builder mergeSimplyMerge(edu.usfca.cs.dfs.StorageMessages.SimplyMerge value) {
+        if (simplyMergeBuilder_ == null) {
+          if (msgCase_ == 16 &&
+              msg_ != edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance()) {
+            msg_ = edu.usfca.cs.dfs.StorageMessages.SimplyMerge.newBuilder((edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            msg_ = value;
+          }
+          onChanged();
+        } else {
+          if (msgCase_ == 16) {
+            simplyMergeBuilder_.mergeFrom(value);
+          }
+          simplyMergeBuilder_.setMessage(value);
+        }
+        msgCase_ = 16;
+        return this;
+      }
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      public Builder clearSimplyMerge() {
+        if (simplyMergeBuilder_ == null) {
+          if (msgCase_ == 16) {
+            msgCase_ = 0;
+            msg_ = null;
+            onChanged();
+          }
+        } else {
+          if (msgCase_ == 16) {
+            msgCase_ = 0;
+            msg_ = null;
+          }
+          simplyMergeBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.SimplyMerge.Builder getSimplyMergeBuilder() {
+        return getSimplyMergeFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      public edu.usfca.cs.dfs.StorageMessages.SimplyMergeOrBuilder getSimplyMergeOrBuilder() {
+        if ((msgCase_ == 16) && (simplyMergeBuilder_ != null)) {
+          return simplyMergeBuilder_.getMessageOrBuilder();
+        } else {
+          if (msgCase_ == 16) {
+            return (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_;
+          }
+          return edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.SimplyMerge simplyMerge = 16;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          edu.usfca.cs.dfs.StorageMessages.SimplyMerge, edu.usfca.cs.dfs.StorageMessages.SimplyMerge.Builder, edu.usfca.cs.dfs.StorageMessages.SimplyMergeOrBuilder> 
+          getSimplyMergeFieldBuilder() {
+        if (simplyMergeBuilder_ == null) {
+          if (!(msgCase_ == 16)) {
+            msg_ = edu.usfca.cs.dfs.StorageMessages.SimplyMerge.getDefaultInstance();
+          }
+          simplyMergeBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              edu.usfca.cs.dfs.StorageMessages.SimplyMerge, edu.usfca.cs.dfs.StorageMessages.SimplyMerge.Builder, edu.usfca.cs.dfs.StorageMessages.SimplyMergeOrBuilder>(
+                  (edu.usfca.cs.dfs.StorageMessages.SimplyMerge) msg_,
+                  getParentForChildren(),
+                  isClean());
+          msg_ = null;
+        }
+        msgCase_ = 16;
+        onChanged();;
+        return simplyMergeBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -15027,6 +15936,11 @@ public final class StorageMessages {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_DeleteData_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_SimplyMerge_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_SimplyMerge_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_StorageMessageWrapper_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -15068,24 +15982,26 @@ public final class StorageMessages {
       "s\030\001 \003(\0132\n.NodeState\"C\n\030ReplicateToNewAss" +
       "ignment\022\020\n\010downNode\030\001 \001(\t\022\025\n\rnewAssignme" +
       "nt\030\002 \001(\t\"\036\n\nDeleteData\022\020\n\010downNode\030\001 \001(\t" +
-      "\"\232\005\n\025StorageMessageWrapper\022!\n\nstoreChunk" +
-      "\030\001 \001(\0132\013.StoreChunkH\000\022%\n\014retrieveFile\030\002 " +
-      "\001(\0132\r.RetrieveFileH\000\022#\n\013joinRequest\030\003 \001(" +
-      "\0132\014.JoinRequestH\000\022\037\n\theartbeat\030\004 \001(\0132\n.H" +
-      "eartbeatH\000\022%\n\014storeRequest\030\005 \001(\0132\r.Store" +
-      "RequestH\000\022\'\n\rstoreResponse\030\006 \001(\0132\016.Store" +
-      "ResponseH\000\0221\n\022replicaAssignments\030\007 \001(\0132\023" +
-      ".ReplicaAssignmentsH\000\0221\n\016retrievalHosts\030" +
-      "\010 \001(\0132\027.PossibleRetrievalHostsH\000\022#\n\013heal" +
-      "Request\030\t \001(\0132\014.HealRequestH\000\022%\n\014healRes" +
-      "ponse\030\n \001(\0132\r.HealResponseH\000\0229\n\026mergeRep" +
-      "licasOnFailure\030\013 \001(\0132\027.MergeReplicasOnFa" +
-      "ilureH\000\022*\n\014printRequest\030\014 \001(\0132\022.PrintNod" +
-      "esRequestH\000\022\037\n\tnodeState\030\r \001(\0132\n.NodeSta" +
-      "teH\000\022=\n\030replicateToNewAssignment\030\016 \001(\0132\031" +
-      ".ReplicateToNewAssignmentH\000\022!\n\ndeleteDat" +
-      "a\030\017 \001(\0132\013.DeleteDataH\000B\005\n\003msgB\022\n\020edu.usf" +
-      "ca.cs.dfsb\006proto3"
+      "\"9\n\013SimplyMerge\022\r\n\005owner\030\001 \001(\t\022\033\n\023owners" +
+      "hipPassedFrom\030\002 \001(\t\"\277\005\n\025StorageMessageWr" +
+      "apper\022!\n\nstoreChunk\030\001 \001(\0132\013.StoreChunkH\000" +
+      "\022%\n\014retrieveFile\030\002 \001(\0132\r.RetrieveFileH\000\022" +
+      "#\n\013joinRequest\030\003 \001(\0132\014.JoinRequestH\000\022\037\n\t" +
+      "heartbeat\030\004 \001(\0132\n.HeartbeatH\000\022%\n\014storeRe" +
+      "quest\030\005 \001(\0132\r.StoreRequestH\000\022\'\n\rstoreRes" +
+      "ponse\030\006 \001(\0132\016.StoreResponseH\000\0221\n\022replica" +
+      "Assignments\030\007 \001(\0132\023.ReplicaAssignmentsH\000" +
+      "\0221\n\016retrievalHosts\030\010 \001(\0132\027.PossibleRetri" +
+      "evalHostsH\000\022#\n\013healRequest\030\t \001(\0132\014.HealR" +
+      "equestH\000\022%\n\014healResponse\030\n \001(\0132\r.HealRes" +
+      "ponseH\000\022*\n\014printRequest\030\013 \001(\0132\022.PrintNod" +
+      "esRequestH\000\022\037\n\tnodeState\030\014 \001(\0132\n.NodeSta" +
+      "teH\000\0229\n\026mergeReplicasOnFailure\030\r \001(\0132\027.M" +
+      "ergeReplicasOnFailureH\000\022=\n\030replicateToNe" +
+      "wAssignment\030\016 \001(\0132\031.ReplicateToNewAssign" +
+      "mentH\000\022!\n\ndeleteData\030\017 \001(\0132\013.DeleteDataH" +
+      "\000\022#\n\013simplyMerge\030\020 \001(\0132\014.SimplyMergeH\000B\005" +
+      "\n\003msgB\022\n\020edu.usfca.cs.dfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -15181,12 +16097,18 @@ public final class StorageMessages {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_DeleteData_descriptor,
         new java.lang.String[] { "DownNode", });
-    internal_static_StorageMessageWrapper_descriptor =
+    internal_static_SimplyMerge_descriptor =
       getDescriptor().getMessageTypes().get(15);
+    internal_static_SimplyMerge_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_SimplyMerge_descriptor,
+        new java.lang.String[] { "Owner", "OwnershipPassedFrom", });
+    internal_static_StorageMessageWrapper_descriptor =
+      getDescriptor().getMessageTypes().get(16);
     internal_static_StorageMessageWrapper_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_StorageMessageWrapper_descriptor,
-        new java.lang.String[] { "StoreChunk", "RetrieveFile", "JoinRequest", "Heartbeat", "StoreRequest", "StoreResponse", "ReplicaAssignments", "RetrievalHosts", "HealRequest", "HealResponse", "MergeReplicasOnFailure", "PrintRequest", "NodeState", "ReplicateToNewAssignment", "DeleteData", "Msg", });
+        new java.lang.String[] { "StoreChunk", "RetrieveFile", "JoinRequest", "Heartbeat", "StoreRequest", "StoreResponse", "ReplicaAssignments", "RetrievalHosts", "HealRequest", "HealResponse", "PrintRequest", "NodeState", "MergeReplicasOnFailure", "ReplicateToNewAssignment", "DeleteData", "SimplyMerge", "Msg", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

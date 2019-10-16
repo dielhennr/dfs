@@ -88,6 +88,11 @@ message DeleteData {
 	string downNode = 1;
 }
 
+message SimplyMerge {
+    string owner = 1;
+    string ownershipPassedFrom = 2;
+}
+
 message StorageMessageWrapper {
     oneof msg {
         StoreChunk storeChunk = 1;
@@ -100,10 +105,11 @@ message StorageMessageWrapper {
         PossibleRetrievalHosts retrievalHosts = 8;
         HealRequest healRequest = 9;
         HealResponse healResponse = 10;
-        MergeReplicasOnFailure mergeReplicasOnFailure = 11;
-        PrintNodesRequest printRequest = 12;
-        NodeState nodeState = 13;
+        PrintNodesRequest printRequest = 11;
+        NodeState nodeState = 12;
+        MergeReplicasOnFailure mergeReplicasOnFailure = 13;
         ReplicateToNewAssignment replicateToNewAssignment = 14;
 		DeleteData deleteData = 15;
+        SimplyMerge simplyMerge = 16;
     }
 }

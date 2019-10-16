@@ -7,7 +7,6 @@ message StoreChunk {
     int64 totalChunks = 3;
     bytes data = 4;
     string originHost = 5;
-    bool isReplica = 6;
 }
 
 message RetrieveFile {

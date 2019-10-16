@@ -349,17 +349,13 @@ public class StorageNode implements DFSNode {
                     cf.syncUninterruptibly();
                     Channel chan = cf.channel();
 
-                    String fileName = pathsToDownNodesData.get(0).getFileName().toString();
-
-                    ArrayList<ChunkWrapper> chunks = chunkMap.get(fileName);
-
                     ArrayList<ChannelFuture> writes = new ArrayList<>();
 
-                    for (ChunkWrapper chunk : chunks) {
+                    for (ChunkWrapper chunk : pathsToDownNodesData) {
                         try {
                             byte[] data = Files.readAllBytes(chunk.getPath());
 
-                            StorageMessages.StorageMessageWrapper replicaChunk = Builders.buildStoreChunk(fileName,
+                            StorageMessages.StorageMessageWrapper replicaChunk = Builders.buildStoreChunk(chunk.getFileName(),
                                     this.hostname, chunk.getChunkID(), chunk.getTotalChunks(),
                                     ByteString.copyFrom(data));
 

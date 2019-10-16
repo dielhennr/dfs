@@ -11597,17 +11597,17 @@ public final class StorageMessages {
     edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignmentOrBuilder getReplicaToNewAssignmentOrBuilder();
 
     /**
-     * <code>.DeleteData data = 15;</code>
+     * <code>.DeleteData deleteData = 15;</code>
      */
-    boolean hasData();
+    boolean hasDeleteData();
     /**
-     * <code>.DeleteData data = 15;</code>
+     * <code>.DeleteData deleteData = 15;</code>
      */
-    edu.usfca.cs.dfs.StorageMessages.DeleteData getData();
+    edu.usfca.cs.dfs.StorageMessages.DeleteData getDeleteData();
     /**
-     * <code>.DeleteData data = 15;</code>
+     * <code>.DeleteData deleteData = 15;</code>
      */
-    edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder getDataOrBuilder();
+    edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder getDeleteDataOrBuilder();
 
     public edu.usfca.cs.dfs.StorageMessages.StorageMessageWrapper.MsgCase getMsgCase();
   }
@@ -11916,7 +11916,7 @@ public final class StorageMessages {
       PRINTREQUEST(12),
       NODESTATE(13),
       REPLICATONEWASSIGNMENT(14),
-      DATA(15),
+      DELETEDATA(15),
       MSG_NOT_SET(0);
       private final int value;
       private MsgCase(int value) {
@@ -11946,7 +11946,7 @@ public final class StorageMessages {
           case 12: return PRINTREQUEST;
           case 13: return NODESTATE;
           case 14: return REPLICATONEWASSIGNMENT;
-          case 15: return DATA;
+          case 15: return DELETEDATA;
           case 0: return MSG_NOT_SET;
           default: return null;
         }
@@ -12326,26 +12326,26 @@ public final class StorageMessages {
       return edu.usfca.cs.dfs.StorageMessages.ReplicateToNewAssignment.getDefaultInstance();
     }
 
-    public static final int DATA_FIELD_NUMBER = 15;
+    public static final int DELETEDATA_FIELD_NUMBER = 15;
     /**
-     * <code>.DeleteData data = 15;</code>
+     * <code>.DeleteData deleteData = 15;</code>
      */
-    public boolean hasData() {
+    public boolean hasDeleteData() {
       return msgCase_ == 15;
     }
     /**
-     * <code>.DeleteData data = 15;</code>
+     * <code>.DeleteData deleteData = 15;</code>
      */
-    public edu.usfca.cs.dfs.StorageMessages.DeleteData getData() {
+    public edu.usfca.cs.dfs.StorageMessages.DeleteData getDeleteData() {
       if (msgCase_ == 15) {
          return (edu.usfca.cs.dfs.StorageMessages.DeleteData) msg_;
       }
       return edu.usfca.cs.dfs.StorageMessages.DeleteData.getDefaultInstance();
     }
     /**
-     * <code>.DeleteData data = 15;</code>
+     * <code>.DeleteData deleteData = 15;</code>
      */
-    public edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder getDataOrBuilder() {
+    public edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder getDeleteDataOrBuilder() {
       if (msgCase_ == 15) {
          return (edu.usfca.cs.dfs.StorageMessages.DeleteData) msg_;
       }
@@ -12554,8 +12554,8 @@ public final class StorageMessages {
               .equals(other.getReplicaToNewAssignment())) return false;
           break;
         case 15:
-          if (!getData()
-              .equals(other.getData())) return false;
+          if (!getDeleteData()
+              .equals(other.getDeleteData())) return false;
           break;
         case 0:
         default:
@@ -12629,8 +12629,8 @@ public final class StorageMessages {
           hash = (53 * hash) + getReplicaToNewAssignment().hashCode();
           break;
         case 15:
-          hash = (37 * hash) + DATA_FIELD_NUMBER;
-          hash = (53 * hash) + getData().hashCode();
+          hash = (37 * hash) + DELETEDATA_FIELD_NUMBER;
+          hash = (53 * hash) + getDeleteData().hashCode();
           break;
         case 0:
         default:
@@ -12895,10 +12895,10 @@ public final class StorageMessages {
           }
         }
         if (msgCase_ == 15) {
-          if (dataBuilder_ == null) {
+          if (deleteDataBuilder_ == null) {
             result.msg_ = msg_;
           } else {
-            result.msg_ = dataBuilder_.build();
+            result.msg_ = deleteDataBuilder_.build();
           }
         }
         result.msgCase_ = msgCase_;
@@ -13007,8 +13007,8 @@ public final class StorageMessages {
             mergeReplicaToNewAssignment(other.getReplicaToNewAssignment());
             break;
           }
-          case DATA: {
-            mergeData(other.getData());
+          case DELETEDATA: {
+            mergeDeleteData(other.getDeleteData());
             break;
           }
           case MSG_NOT_SET: {
@@ -14964,64 +14964,64 @@ public final class StorageMessages {
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
-          edu.usfca.cs.dfs.StorageMessages.DeleteData, edu.usfca.cs.dfs.StorageMessages.DeleteData.Builder, edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder> dataBuilder_;
+          edu.usfca.cs.dfs.StorageMessages.DeleteData, edu.usfca.cs.dfs.StorageMessages.DeleteData.Builder, edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder> deleteDataBuilder_;
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
-      public boolean hasData() {
+      public boolean hasDeleteData() {
         return msgCase_ == 15;
       }
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
-      public edu.usfca.cs.dfs.StorageMessages.DeleteData getData() {
-        if (dataBuilder_ == null) {
+      public edu.usfca.cs.dfs.StorageMessages.DeleteData getDeleteData() {
+        if (deleteDataBuilder_ == null) {
           if (msgCase_ == 15) {
             return (edu.usfca.cs.dfs.StorageMessages.DeleteData) msg_;
           }
           return edu.usfca.cs.dfs.StorageMessages.DeleteData.getDefaultInstance();
         } else {
           if (msgCase_ == 15) {
-            return dataBuilder_.getMessage();
+            return deleteDataBuilder_.getMessage();
           }
           return edu.usfca.cs.dfs.StorageMessages.DeleteData.getDefaultInstance();
         }
       }
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
-      public Builder setData(edu.usfca.cs.dfs.StorageMessages.DeleteData value) {
-        if (dataBuilder_ == null) {
+      public Builder setDeleteData(edu.usfca.cs.dfs.StorageMessages.DeleteData value) {
+        if (deleteDataBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
           msg_ = value;
           onChanged();
         } else {
-          dataBuilder_.setMessage(value);
+          deleteDataBuilder_.setMessage(value);
         }
         msgCase_ = 15;
         return this;
       }
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
-      public Builder setData(
+      public Builder setDeleteData(
           edu.usfca.cs.dfs.StorageMessages.DeleteData.Builder builderForValue) {
-        if (dataBuilder_ == null) {
+        if (deleteDataBuilder_ == null) {
           msg_ = builderForValue.build();
           onChanged();
         } else {
-          dataBuilder_.setMessage(builderForValue.build());
+          deleteDataBuilder_.setMessage(builderForValue.build());
         }
         msgCase_ = 15;
         return this;
       }
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
-      public Builder mergeData(edu.usfca.cs.dfs.StorageMessages.DeleteData value) {
-        if (dataBuilder_ == null) {
+      public Builder mergeDeleteData(edu.usfca.cs.dfs.StorageMessages.DeleteData value) {
+        if (deleteDataBuilder_ == null) {
           if (msgCase_ == 15 &&
               msg_ != edu.usfca.cs.dfs.StorageMessages.DeleteData.getDefaultInstance()) {
             msg_ = edu.usfca.cs.dfs.StorageMessages.DeleteData.newBuilder((edu.usfca.cs.dfs.StorageMessages.DeleteData) msg_)
@@ -15032,18 +15032,18 @@ public final class StorageMessages {
           onChanged();
         } else {
           if (msgCase_ == 15) {
-            dataBuilder_.mergeFrom(value);
+            deleteDataBuilder_.mergeFrom(value);
           }
-          dataBuilder_.setMessage(value);
+          deleteDataBuilder_.setMessage(value);
         }
         msgCase_ = 15;
         return this;
       }
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
-      public Builder clearData() {
-        if (dataBuilder_ == null) {
+      public Builder clearDeleteData() {
+        if (deleteDataBuilder_ == null) {
           if (msgCase_ == 15) {
             msgCase_ = 0;
             msg_ = null;
@@ -15054,22 +15054,22 @@ public final class StorageMessages {
             msgCase_ = 0;
             msg_ = null;
           }
-          dataBuilder_.clear();
+          deleteDataBuilder_.clear();
         }
         return this;
       }
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
-      public edu.usfca.cs.dfs.StorageMessages.DeleteData.Builder getDataBuilder() {
-        return getDataFieldBuilder().getBuilder();
+      public edu.usfca.cs.dfs.StorageMessages.DeleteData.Builder getDeleteDataBuilder() {
+        return getDeleteDataFieldBuilder().getBuilder();
       }
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
-      public edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder getDataOrBuilder() {
-        if ((msgCase_ == 15) && (dataBuilder_ != null)) {
-          return dataBuilder_.getMessageOrBuilder();
+      public edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder getDeleteDataOrBuilder() {
+        if ((msgCase_ == 15) && (deleteDataBuilder_ != null)) {
+          return deleteDataBuilder_.getMessageOrBuilder();
         } else {
           if (msgCase_ == 15) {
             return (edu.usfca.cs.dfs.StorageMessages.DeleteData) msg_;
@@ -15078,16 +15078,16 @@ public final class StorageMessages {
         }
       }
       /**
-       * <code>.DeleteData data = 15;</code>
+       * <code>.DeleteData deleteData = 15;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           edu.usfca.cs.dfs.StorageMessages.DeleteData, edu.usfca.cs.dfs.StorageMessages.DeleteData.Builder, edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder> 
-          getDataFieldBuilder() {
-        if (dataBuilder_ == null) {
+          getDeleteDataFieldBuilder() {
+        if (deleteDataBuilder_ == null) {
           if (!(msgCase_ == 15)) {
             msg_ = edu.usfca.cs.dfs.StorageMessages.DeleteData.getDefaultInstance();
           }
-          dataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+          deleteDataBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
               edu.usfca.cs.dfs.StorageMessages.DeleteData, edu.usfca.cs.dfs.StorageMessages.DeleteData.Builder, edu.usfca.cs.dfs.StorageMessages.DeleteDataOrBuilder>(
                   (edu.usfca.cs.dfs.StorageMessages.DeleteData) msg_,
                   getParentForChildren(),
@@ -15096,7 +15096,7 @@ public final class StorageMessages {
         }
         msgCase_ = 15;
         onChanged();;
-        return dataBuilder_;
+        return deleteDataBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -15268,7 +15268,7 @@ public final class StorageMessages {
       "\003 \001(\003\".\n\021PrintNodesRequest\022\031\n\005nodes\030\001 \003(" +
       "\0132\n.NodeState\"B\n\030ReplicateToNewAssignmen" +
       "t\022\027\n\017primaryNodeName\030\001 \001(\t\022\r\n\005paths\030\002 \001(" +
-      "\t\"\036\n\nDeleteData\022\020\n\010downNode\030\001 \001(\t\"\206\005\n\025St" +
+      "\t\"\036\n\nDeleteData\022\020\n\010downNode\030\001 \001(\t\"\214\005\n\025St" +
       "orageMessageWrapper\022!\n\nstoreChunk\030\001 \001(\0132" +
       "\013.StoreChunkH\000\022%\n\014retrieveFile\030\002 \001(\0132\r.R" +
       "etrieveFileH\000\022#\n\013joinRequest\030\003 \001(\0132\014.Joi" +
@@ -15284,8 +15284,8 @@ public final class StorageMessages {
       "uest\030\014 \001(\0132\022.PrintNodesRequestH\000\022\037\n\tnode" +
       "State\030\r \001(\0132\n.NodeStateH\000\022;\n\026replicaToNe" +
       "wAssignment\030\016 \001(\0132\031.ReplicateToNewAssign" +
-      "mentH\000\022\033\n\004data\030\017 \001(\0132\013.DeleteDataH\000B\005\n\003m" +
-      "sgB\022\n\020edu.usfca.cs.dfsb\006proto3"
+      "mentH\000\022!\n\ndeleteData\030\017 \001(\0132\013.DeleteDataH" +
+      "\000B\005\n\003msgB\022\n\020edu.usfca.cs.dfsb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -15386,7 +15386,7 @@ public final class StorageMessages {
     internal_static_StorageMessageWrapper_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_StorageMessageWrapper_descriptor,
-        new java.lang.String[] { "StoreChunk", "RetrieveFile", "JoinRequest", "Heartbeat", "StoreRequest", "StoreResponse", "ReplicaAssignments", "RetrievalHosts", "HealRequest", "HealResponse", "ReplicaRequest", "PrintRequest", "NodeState", "ReplicaToNewAssignment", "Data", "Msg", });
+        new java.lang.String[] { "StoreChunk", "RetrieveFile", "JoinRequest", "Heartbeat", "StoreRequest", "StoreResponse", "ReplicaAssignments", "RetrievalHosts", "HealRequest", "HealResponse", "ReplicaRequest", "PrintRequest", "NodeState", "ReplicaToNewAssignment", "DeleteData", "Msg", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

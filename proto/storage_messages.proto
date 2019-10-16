@@ -107,6 +107,6 @@ message StorageMessageWrapper {
         PrintNodesRequest printRequest = 12;
         NodeState nodeState = 13;
         ReplicateToNewAssignment replicaToNewAssignment = 14;
-		DeleteData data = 15;
+		DeleteData deleteData = 15;
     }
 }

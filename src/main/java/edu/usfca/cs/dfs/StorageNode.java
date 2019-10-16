@@ -371,24 +371,21 @@ public class StorageNode implements DFSNode {
 			StorageMessages.DeleteData msg = StorageMessages.DeleteData.newBuilder()
 					.setDownNode(downNode).build();
 			StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
-					.setData(msg).build();
+					.setDeleteData(msg).build();
 			
 			
 			ChannelFuture cf = this.bootstrap.connect(newReplicaAssignment, 13114);
-			cf .syncUninterruptibly();
+			cf.syncUninterruptibly();
 			Channel chan = cf.channel();
-			ArrayList<ChannelFuture> writes = new ArrayList<>();
-			writes.add(chan.writeAndFlush(msgWrapper));
+            chan.writeAndFlush(msgWrapper).syncUninterruptibly();
 
 		}
-		
-		else if (message.hasData()) {
-			String nodeToDelete = message.getData().getDownNode();
+		else if (message.hasDeleteData()) {
+			String nodeToDelete = message.getDeleteData().getDownNode();
 			String fileName = "";
 			ArrayList<ChunkWrapper> wrappers = hostnameToChunks.get(nodeToDelete);
 			
 			for (ChunkWrapper wrapper : wrappers) {
-				
 				try {
 					fileName = wrapper.getFileName();
 					
@@ -402,10 +399,6 @@ public class StorageNode implements DFSNode {
 			}
 
 			hostnameToChunks.remove(nodeToDelete);
-			
-		
-		
-		
 		
 		}
 		

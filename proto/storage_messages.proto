@@ -87,6 +87,10 @@ message ReplicateToNewAssignment {
 	string paths = 2;
 }
 
+message DeleteData {
+	string downNode = 1;
+}
+
 message StorageMessageWrapper {
     oneof msg {
         StoreChunk storeChunk = 1;
@@ -103,6 +107,6 @@ message StorageMessageWrapper {
         PrintNodesRequest printRequest = 12;
         NodeState nodeState = 13;
         ReplicateToNewAssignment replicaToNewAssignment = 14;
-
+		DeleteData data = 15;
     }
 }

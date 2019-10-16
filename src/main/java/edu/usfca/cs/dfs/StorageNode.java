@@ -362,10 +362,54 @@ public class StorageNode implements DFSNode {
                     }
 
 				}
+				
+
+				
 
 			}
+			
+			StorageMessages.DeleteData msg = StorageMessages.DeleteData.newBuilder()
+					.setDownNode(downNode).build();
+			StorageMessages.StorageMessageWrapper msgWrapper = StorageMessages.StorageMessageWrapper.newBuilder()
+					.setData(msg).build();
+			
+			
+			ChannelFuture cf = this.bootstrap.connect(newReplicaAssignment, 13114);
+			cf .syncUninterruptibly();
+			Channel chan = cf.channel();
+			ArrayList<ChannelFuture> writes = new ArrayList<>();
+			writes.add(chan.writeAndFlush(msgWrapper));
 
 		}
+		
+		else if (message.hasData()) {
+			String nodeToDelete = message.getData().getDownNode();
+			String fileName = "";
+			ArrayList<ChunkWrapper> wrappers = hostnameToChunks.get(nodeToDelete);
+			
+			for (ChunkWrapper wrapper : wrappers) {
+				
+				try {
+					fileName = wrapper.getFileName();
+					
+					chunkMap.remove(fileName);
+					Path path = Paths.get(rootDirectory + fileName);
+					Files.deleteIfExists(path);
+					chunkMap.remove(fileName);
+				} catch (Exception e) {
+					
+				}
+			}
+
+			hostnameToChunks.remove(nodeToDelete);
+			
+		
+		
+		
+		
+		}
+		
+		
 	}
 
 	/**

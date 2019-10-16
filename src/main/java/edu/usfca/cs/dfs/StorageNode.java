@@ -52,7 +52,7 @@ public class StorageNode implements DFSNode {
 	long totalChunks;
 
 	HashMap<String, ArrayList<ChunkWrapper>> chunkMap; // Mapping filenames to the chunks
-	HashMap<String, ArrayList<Path>> hostnameToChunks; // Mapping hostnames to Paths of chunks
+	HashMap<String, ArrayList<ChunkWrapper>> hostnameToChunks; // Mapping hostnames chunks
 
 	public StorageNode(String[] args) throws UnknownHostException {
 		replicaHosts = new ArrayList<>();
@@ -78,10 +78,6 @@ public class StorageNode implements DFSNode {
 
 		bootstrap = new Bootstrap().group(workerGroup).channel(NioSocketChannel.class)
 				.option(ChannelOption.SO_KEEPALIVE, true).handler(pipeline);
-	}
-
-	public HashMap<String, ArrayList<Path>> getHostNameToChunksMap() {
-		return this.hostnameToChunks;
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -151,7 +147,7 @@ public class StorageNode implements DFSNode {
 			logger.info("Request to store " + storeRequest.getFileName() + " size: " + storeRequest.getFileSize());
 		} else if (message.hasStoreChunk()) {
 			/* Write that shit to disk */
-			hostnameToChunks.putIfAbsent(message.getStoreChunk().getOriginHost(), new ArrayList<Path>());
+			hostnameToChunks.putIfAbsent(message.getStoreChunk().getOriginHost(), new ArrayList<ChunkWrapper>());
 			chunkMap.putIfAbsent(message.getStoreChunk().getFileName(), new ArrayList<ChunkWrapper>());
 			this.writeChunk(message);
 			/* Send to replica assignments */
@@ -278,14 +274,29 @@ public class StorageNode implements DFSNode {
 
 				// All chunks that belong to this nodes as primaries
 
-				ArrayList<Path> pathsToThisNodesPrimaries = this.hostnameToChunks.get(this.hostname);
+				ArrayList<ChunkWrapper> pathsToThisNodesPrimaries = this.hostnameToChunks.get(this.hostname);
 
 				logger.info("This Storage Nodes chunks that we will be re-replicating to " + newReplicaAssignment
 						+ " --->");
+                
+                ArrayList<ChannelFuture> writes = new ArrayList<>();
+                ChannelFuture cf = bootstrap.connect(newReplicaAssignment, 13114).syncUninterruptibly();
 
-				for (Path chunkPath : pathsToThisNodesPrimaries) {
-					logger.info(chunkPath.getFileName().toString());
+				for (ChunkWrapper chunk : pathsToThisNodesPrimaries) {
+
+                    try {
+                        byte[] data = Files.readAllBytes(chunk.getPath());
+
+                        writes.add(cf.channel().writeAndFlush(Builders.buildStoreChunk(chunk.getFileName(), this.hostname, chunk.getChunkID(), chunk.getTotalChunks(), ByteString.copyFrom(data))));
+                    } catch (IOException ioe) {
+                        logger.info("Could not send " + chunk.getFileName() + " id " + chunk.getChunkID() + " to " + newReplicaAssignment);
+                    }
+
 				}
+
+                for (ChannelFuture write : writes ) {
+                    write.syncUninterruptibly();
+                }
 
 				// Now send these chunks to the newReplicaAssignment
 
@@ -311,7 +322,7 @@ public class StorageNode implements DFSNode {
 				// (primary) nodes map listing
 
 				synchronized (hostnameToChunks) {
-					ArrayList<Path> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
+					ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
 
 					this.hostnameToChunks.get(this.hostname).addAll(pathsToDownNodesData);
 					this.hostnameToChunks.remove(downNode);
@@ -345,6 +356,10 @@ public class StorageNode implements DFSNode {
 							logger.info("Could not read chunk to re-replicate");
 						}
 					}
+
+                    for (ChannelFuture write : writes) {
+                        write.syncUninterruptibly();
+                    }
 
 				}
 
@@ -560,8 +575,9 @@ public class StorageNode implements DFSNode {
 			 * Add this path to the mapping of hosts to thier paths, we will use this to
 			 * handle node failures and re-replication
 			 */
+            ChunkWrapper chunk = new ChunkWrapper(path, fileName, message.getStoreChunk().getChunkId(), message.getStoreChunk().getTotalChunks(), checksum);
 			synchronized (hostnameToChunks) {
-				hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(path);
+				hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(chunk);
 			}
 
 			/* Add this chunk to it's files set */

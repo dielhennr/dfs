@@ -341,6 +341,7 @@ public class StorageNode implements DFSNode {
                 ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
                 
                 /* We are now the primary owner of the data so merge down node's with ours */
+                this.hostnameToChunks.putIfAbsent(this.hostname, new ArrayList<>());
                 this.hostnameToChunks.get(this.hostname).addAll(pathsToDownNodesData);
                 /* Remove down node's key */
                 this.hostnameToChunks.remove(downNode);

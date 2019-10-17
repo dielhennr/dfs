@@ -181,8 +181,6 @@ public class Controller implements DFSNode {
 			StorageMessages.StorageMessageWrapper msgWrapper = Builders.buildPrintRequest(nodeList);
 			ChannelFuture write = ctx.pipeline().writeAndFlush(msgWrapper);
 			write.syncUninterruptibly();
-			
-			
 		}
 	}
 
@@ -290,13 +288,10 @@ public class Controller implements DFSNode {
                 iter = storageNodes.iterator();
                 while (iter.hasNext()) {
                     StorageNodeContext currNode = iter.next();
-                    
                     if ( (currNode != node.replicaAssignment1) && (currNode != node.replicaAssignment2) && (currNode != node )) {
                         targetHost = currNode.getHostName();
                         break;
                     }
-                    
-                    
                 }
                 
                 cf = bootstrap.connect(nodeName, 13114);
@@ -308,7 +303,7 @@ public class Controller implements DFSNode {
                 chan.close().syncUninterruptibly();
             }
     
-            /* Now we are done getting nodes that were replicating to down node new assignments, but we are not done */
+            /* Now we are done getting nodes that were replicating to down node's new assignments, but we are not done */
 
             /* We will pick the first replica assingment of the down node to be the new primary holder of the data */
             String newPrimaryHolder = downNodeReplicaAssignment1.getHostName();

@@ -304,32 +304,35 @@ public class Controller implements DFSNode {
             }
     
             /* Now we are done getting nodes that were replicating to down node's new assignments, but we are not done */
-
-            /* We will pick the first replica assingment of the down node to be the new primary holder of the data */
-            String newPrimaryHolder = downNodeReplicaAssignment1.getHostName();
             
-            /* Merge the down node's bloom filter into the new primarys for routing purposes */
-            downNodeReplicaAssignment1.getFilter().mergeFilter(downNode.getFilter());
-            
+            /* If this node had no assignments it means we do not need to merge anything because no primaries were stored here done*/
+            if (downNodeReplicaAssignment1 != null && downNodeReplicaAssignment2 != null) {
+                /* We will pick the first replica assingment of the down node to be the new primary holder of the data */
+                String newPrimaryHolder = downNodeReplicaAssignment1.getHostName();
                 
-            /* Send message to the down node's first replica assignment, telling it which node went down and that nodes other assignment 
-             * This node will merge the down nodes data with it's primary data. Then it will check if the down nodes second replica assignment
-             * is one of its own as well. If it is, it will ask downNodeReplicaAssignment2 to merge downNodes data with it's data and delete its
-             * key for downnode, and then send down nodes data to its other replica assignment under the new primary key. If they don't have the same assignments,
-             * the new primary holder sends the data of down node to both of it's assignments and then tells downNodeReplicaAssignment2 to delete it's data 
-             * for down node
-             * */
-            String downNodeReplicaAssignment2Hostname = downNodeReplicaAssignment2.getHostName();
-            StorageMessages.StorageMessageWrapper replicaMergeRequest = Builders.buildMergeReplicasOnFailure(downHost, downNodeReplicaAssignment2Hostname);
-            
-    		cf = bootstrap.connect(newPrimaryHolder, 13114);
-    		cf.syncUninterruptibly();
-    		
-    		chan = cf.channel();
-    		ChannelFuture write = chan.writeAndFlush(replicaMergeRequest);
-    		write.syncUninterruptibly();
+                /* Merge the down node's bloom filter into the new primarys for routing purposes */
+                downNodeReplicaAssignment1.getFilter().mergeFilter(downNode.getFilter());
+                
+                    
+                /* Send message to the down node's first replica assignment, telling it which node went down and that nodes other assignment 
+                * This node will merge the down nodes data with it's primary data. Then it will check if the down nodes second replica assignment
+                * is one of its own as well. If it is, it will ask downNodeReplicaAssignment2 to merge downNodes data with it's data and delete its
+                * key for downnode, and then send down nodes data to its other replica assignment under the new primary key. If they don't have the same assignments,
+                * the new primary holder sends the data of down node to both of it's assignments and then tells downNodeReplicaAssignment2 to delete it's data 
+                * for down node
+                * */
+                String downNodeReplicaAssignment2Hostname = downNodeReplicaAssignment2.getHostName();
+                StorageMessages.StorageMessageWrapper replicaMergeRequest = Builders.buildMergeReplicasOnFailure(downHost, downNodeReplicaAssignment2Hostname);
+                
+                cf = bootstrap.connect(newPrimaryHolder, 13114);
+                cf.syncUninterruptibly();
+                
+                chan = cf.channel();
+                ChannelFuture write = chan.writeAndFlush(replicaMergeRequest);
+                write.syncUninterruptibly();
 
-            chan.close().syncUninterruptibly();
+                chan.close().syncUninterruptibly();
+            }
         }
 	}
 }

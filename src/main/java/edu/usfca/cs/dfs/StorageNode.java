@@ -416,7 +416,6 @@ public class StorageNode implements DFSNode {
                 hostnameToChunks.get(newOwner).addAll(hostnameToChunks.get(passedFrom));
                 hostnameToChunks.remove(passedFrom);
             }
-
         } else if (message.hasDeleteData()) {
 
             /**

@@ -26,17 +26,11 @@ message Heartbeat {
 message StoreRequest {
 	string fileName = 1;
     int64 fileSize = 2;
-    oneof msg {
-        ReplicaAssignments replicaAssignments = 3;
-    }
 }
 
 message StoreResponse {
     string fileName = 1;
     string hostname = 2;
-    oneof msg {
-        ReplicaAssignments replicaAssignments = 3;
-    }
 }
 
 message ReplicaAssignments {

@@ -154,19 +154,13 @@ public class Builders {
 	 * @param hostname
 	 * @return store response
 	 */
-	public static StorageMessages.StorageMessageWrapper buildStoreResponse(String fileName, String hostname, String replicaHost1, String replicaHost2) {
+	public static StorageMessages.StorageMessageWrapper buildStoreResponse(String fileName, String hostname) {
     
-        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments
-                                                .newBuilder()
-                                                .setReplica1(replicaHost1)
-                                                .setReplica2(replicaHost2)
-                                                .build();
         
 		StorageMessages.StoreResponse storeRequest = StorageMessages.StoreResponse
                                             .newBuilder()
                                             .setHostname(hostname)
 				                            .setFileName(fileName)
-                                            .setReplicaAssignments(replicaAssignments)
                                             .build();
 
 		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreResponse(storeRequest).build();

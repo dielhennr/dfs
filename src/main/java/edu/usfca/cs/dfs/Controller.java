@@ -90,6 +90,17 @@ public class Controller implements DFSNode {
 
                     storageNodes.add(first);
                     storageNodes.add(second);
+                } else if (storageNodes.size() > 2) {
+                    Iterator<StorageNodeContext> iter = storageNodes.iterator();
+                    thisRequest.replicaAssignment1 = iter.next();
+                    thisRequest.replicaAssignment2 = iter.next();
+
+                    /* Send thisRequest its assignments */
+                    thisRequest.ctx.pipeline().writeAndFlush(
+                            Builders.buildReplicaAssignments(thisRequest.replicaAssignment1.getHostName(), thisRequest.replicaAssignment2.getHostName()));
+                    logger.info("writing assignments " + thisRequest.getHostName() + " assigned to " + thisRequest.replicaAssignment1.getHostName() + " and " + thisRequest.replicaAssignment2.getHostName());
+                } else {
+                    logger.info("Need more nodes in the network to make replica assignments");
                 }
 				storageNodes.add(thisRequest);
 			}
@@ -115,30 +126,6 @@ public class Controller implements DFSNode {
 				synchronized (storageNodes) {
 					/* StorageNode with least requests processed should be at the top */
 					StorageNodeContext storageNodePrimary = storageNodes.poll();
-
-					/*
-					 * If the first node in the queue doesn't have assignments we need to make them
-					 */
-					if (storageNodePrimary.replicaAssignment1 == null) {
-                        /* find first assignment */
-						Iterator<StorageNodeContext> iter = storageNodes.iterator();
-						StorageNodeContext snctx = iter.next();
-						if (snctx == storageNodePrimary.replicaAssignment2) {
-							snctx = iter.next();
-							
-						}
-						storageNodePrimary.replicaAssignment1 = snctx;
-
-					}
-					if (storageNodePrimary.replicaAssignment2 == null) {
-					    /* Find second assignment */
-						Iterator<StorageNodeContext> iter = storageNodes.iterator();
-						StorageNodeContext snctx = iter.next();
-						if (snctx == storageNodePrimary.replicaAssignment1) {
-							snctx = iter.next();
-						}
-						storageNodePrimary.replicaAssignment2 = snctx;
-					}
 					
 					/* Bump requests of all assignments since we are about to send a file */
 					storageNodePrimary.bumpRequests();
@@ -157,14 +144,11 @@ public class Controller implements DFSNode {
 
 					/**
 					 * Write back a store response to client with hostname of the primary node to
-					 * send chunks to. This node will handle replication with the ReplicaAssignments
-					 * protobuf nested in this store response
+					 * send chunks to. This node will handle replication to its replica assignments
 					 */
 					ChannelFuture write = ctx.pipeline()
 							.writeAndFlush(Builders.buildStoreResponse(message.getStoreRequest().getFileName(),
-									storageNodePrimary.getHostName(),
-									storageNodePrimary.replicaAssignment1.getHostName(),
-									storageNodePrimary.replicaAssignment2.getHostName()));
+									storageNodePrimary.getHostName()));
 
 					write.syncUninterruptibly();
 
@@ -183,7 +167,6 @@ public class Controller implements DFSNode {
 			 * Here we could check each nodes bloom filter and then send the client the list
 			 * of nodes that could have it.
 			 */
-
 			String fileName = message.getRetrieveFile().getFileName();
 
 			ArrayList<String> possibleNodes = new ArrayList<>();

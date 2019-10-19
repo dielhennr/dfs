@@ -267,14 +267,16 @@ public class StorageNode implements DFSNode {
             * replicaAssignment and send chunks on this node that are this node's primary
             * chunks to the newReplicaAssignment 
             */
-            if (this.replicaHosts.get(0) == downNode) {
-                logger.info("Took new assignment " + newReplicaAssignment  + " because old assignment " + this.replicaHosts.get(0) + " went down.");
-                this.replicaHosts.remove(0);
-                this.replicaHosts.add(0, newReplicaAssignment);
-            } else if (replicaHosts.get(1) == downNode) {
-                logger.info("Took new assignment " + newReplicaAssignment  + " because old assignment " + this.replicaHosts.get(1) + " went down.");
-                this.replicaHosts.remove(1);
-                this.replicaHosts.add(1, newReplicaAssignment);
+            synchronized(replicaHosts) {
+                if (this.replicaHosts.get(0) == downNode) {
+                    logger.info("Took new assignment " + newReplicaAssignment  + " because old assignment " + this.replicaHosts.get(0) + " went down.");
+                    this.replicaHosts.remove(0);
+                    this.replicaHosts.add(0, newReplicaAssignment);
+                } else if (replicaHosts.get(1) == downNode) {
+                    logger.info("Took new assignment " + newReplicaAssignment  + " because old assignment " + this.replicaHosts.get(1) + " went down.");
+                    this.replicaHosts.remove(1);
+                    this.replicaHosts.add(1, newReplicaAssignment);
+                }
             }
 
             // All chunks that belong to this nodes as primaries
@@ -372,54 +374,54 @@ public class StorageNode implements DFSNode {
                  * on that node or use it to verify the correctess of our data
                  * */
                 boolean delete = true;
-                for (String host : replicaHosts) {
-                    /* Connect to one of our assignments */
-                    ChannelFuture cf = this.bootstrap.connect(host, 13114);
-                    cf.syncUninterruptibly();
-                    Channel chan = cf.channel();
+                synchronized (replicaHosts) {
+                    for (String host : replicaHosts) {
+                        /* Connect to one of our assignments */
+                        ChannelFuture cf = this.bootstrap.connect(host, 13114);
+                        cf.syncUninterruptibly();
+                        Channel chan = cf.channel();
 
-                    /** 
-                     * If we have one of down node's assignment's then we don't want to delete
-                     * data, we will simply merge location2's replicas of downNode and location2's 
-                     * replica's of this under the key this.hostname
-                     */
-                    if (host.equals(location2)) {
-                        delete = false;
-                        /* This protobuf means merge downNode's chunks into this.hostnames and delete the key downNode */
-                        ChannelFuture write = chan.writeAndFlush(Builders.buildSimplyMerge(this.hostname, downNode));
-                        write.syncUninterruptibly();
-                    } else {
-                        /* Otherwise we need to rereplicate the data to our assignments and tell them that 
-                         * we are the primary holder as always
-                         * */
-                        ArrayList<ChannelFuture> writes = new ArrayList<>();
+                        /** 
+                        * If we have one of down node's assignment's then we don't want to delete
+                        * data, we will simply merge location2's replicas of downNode and location2's 
+                        * replica's of this under the key this.hostname
+                        */
+                        if (host.equals(location2)) {
+                            delete = false;
+                            /* This protobuf means merge downNode's chunks into this.hostnames and delete the key downNode */
+                            ChannelFuture write = chan.writeAndFlush(Builders.buildSimplyMerge(this.hostname, downNode));
+                            write.syncUninterruptibly();
+                        } else {
+                            /* Otherwise we need to rereplicate the data to our assignments and tell them that 
+                            * we are the primary holder as always
+                            * */
+                            ArrayList<ChannelFuture> writes = new ArrayList<>();
 
-                        for (ChunkWrapper chunk : pathsToDownNodesData) {
-                            try {
-                                byte[] data = Files.readAllBytes(chunk.getPath());
+                            for (ChunkWrapper chunk : pathsToDownNodesData) {
+                                try {
+                                    byte[] data = Files.readAllBytes(chunk.getPath());
+                                    StorageMessages.StorageMessageWrapper replicaChunk = Builders
+                                                                            .buildStoreChunk(
+                                                                            chunk.getFileName(),
+                                                                            this.hostname, 
+                                                                            chunk.getChunkID(), 
+                                                                            chunk.getTotalChunks(),
+                                                                            ByteString.copyFrom(data));
 
-                                StorageMessages.StorageMessageWrapper replicaChunk = Builders
-                                                                        .buildStoreChunk(
-                                                                        chunk.getFileName(),
-                                                                        this.hostname, 
-                                                                        chunk.getChunkID(), 
-                                                                        chunk.getTotalChunks(),
-                                                                        ByteString.copyFrom(data));
+                                    writes.add(chan.writeAndFlush(replicaChunk));
 
-                                writes.add(chan.writeAndFlush(replicaChunk));
+                                } catch (IOException ioe) {
+                                    logger.info("Could not read chunk to re-replicate");
+                                }
+                            }
 
-                            } catch (IOException ioe) {
-                                logger.info("Could not read chunk to re-replicate");
+                            for (ChannelFuture write : writes) {
+                                write.syncUninterruptibly();
                             }
                         }
-
-                        for (ChannelFuture write : writes) {
-                            write.syncUninterruptibly();
-                        }
+                        chan.close().syncUninterruptibly();
                     }
-                    chan.close().syncUninterruptibly();
                 }
-                
                 /* If none of our assignments were the down nodes other assignment, send a request to the down
                  * node's other assignment to delete its key for the down node
                  * */

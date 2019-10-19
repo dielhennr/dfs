@@ -258,13 +258,11 @@ public class Controller implements DFSNode {
             String downHost = downNode.getHostName();
             StorageNodeContext downNodeReplicaAssignment1 = downNode.replicaAssignment1;
             StorageNodeContext downNodeReplicaAssignment2 = downNode.replicaAssignment2;
-
             
             String targetHost = "";
 
             /* This list will contain nodes that were replicating to the down node */
             ArrayList<StorageNodeContext> nodesThatNeedNewReplicaAssignments = new ArrayList<>();
-
 
             /* Find nodes that were replicating to the down node */
             Iterator<StorageNodeContext> iter = storageNodes.iterator();
@@ -276,7 +274,6 @@ public class Controller implements DFSNode {
                 }
             }
         
-
             ChannelFuture cf;
             Channel chan;
 
@@ -287,11 +284,9 @@ public class Controller implements DFSNode {
             */
             for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
                 String nodeName = node.getHostName();
-                
                 /*
                     Here we iterate through the storagenode queue to find a new node that they can use 
                     as a new replica assignment. The logic is such:
-                    
                     Find a node that that is not an assignment of the current
                     node we are iterating on, and also make sure that the current node
                     we are looking at is not the same node as the node we are trying to
@@ -317,8 +312,12 @@ public class Controller implements DFSNode {
             }
     
             /* Now we are done getting nodes that were replicating to down node's new assignments, but we are not done */
+
+            /* We will sleep here for a second to ensure that all nodes recieve their new assignments, and then we will request a merge
+             * of the down node's primary metadata into the new primary node
+             * */
             
-            /* If this node had no assignments it means we do not need to merge anything because no primaries were stored here done*/
+            /* If this node had no assignments it means we do not need to merge anything because no primaries were stored here done (should never be false regardless)*/
             if (downNodeReplicaAssignment1 != null && downNodeReplicaAssignment2 != null) {
                 /* We will pick the first replica assingment of the down node to be the new primary holder of the data */
                 String newPrimaryHolder = downNodeReplicaAssignment1.getHostName();

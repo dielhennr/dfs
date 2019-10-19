@@ -230,7 +230,18 @@ public class Builders {
 		return StorageMessages.StorageMessageWrapper.newBuilder().setPrintRequest(printRequest).build();
 
 	}
-	
+
+	/**
+     * Replica Assignments
+     * @param first
+     * @param second
+     * @return assignments for replication
+     */
+    public static StorageMessages.StorageMessageWrapper buildReplicaAssignments(String first, String second) {
+        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments.newBuilder().setReplica1(first).setReplica2(second).build();
+        return StorageMessages.StorageMessageWrapper.newBuilder().setReplicaAssignments(replicaAssignments).build();
+    }
+
     /**
      * 
      * @param downNode

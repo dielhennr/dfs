@@ -113,7 +113,7 @@ public class Client implements DFSNode {
 
 		StorageMessages.StorageMessageWrapper msgWrapper = null;
 		if (client.arguments.hasFlag("-f")) {
-			msgWrapper = Builders.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize, "", "");
+			msgWrapper = Builders.buildStoreRequest(client.path.getFileName().toString(), client.chunkSize);
 		} else if (client.arguments.hasFlag("-r")) {
 			msgWrapper = Builders.buildRetrievalRequest(client.path.getFileName().toString());
 		} else if (client.arguments.hasFlag("-l")) {
@@ -137,16 +137,13 @@ public class Client implements DFSNode {
 		 */
 		if (message.hasStoreResponse()) {
 			logger.info("Recieved permission to put file on " + message.getStoreResponse().getHostname());
-			String replica1 = message.getStoreResponse().getReplicaAssignments().getReplica1();
-			String replica2 = message.getStoreResponse().getReplicaAssignments().getReplica2();
-			logger.info("Replicating to " + replica1 + " and " + replica2);
 
 			/*
 			 * Build a store request to send to the storagenode so that it can change it's
 			 * decoder
 			 */
 			StorageMessages.StorageMessageWrapper storeRequest = Builders
-					.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize, replica1, replica2);
+					.buildStoreRequest(message.getStoreResponse().getFileName(), this.chunkSize);
 
 			logger.info("Sending chunks in size " + this.chunkSize + " to " + message.getStoreResponse().getHostname());
 

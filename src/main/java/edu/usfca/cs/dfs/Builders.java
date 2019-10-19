@@ -104,18 +104,11 @@ public class Builders {
      *
 	 * @return store request
 	 */
-	public static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize, String replicaHost1, String replicaHost2) {
-        StorageMessages.ReplicaAssignments replicaAssignments = StorageMessages.ReplicaAssignments
-                                                .newBuilder()
-                                                .setReplica1(replicaHost1)
-                                                .setReplica2(replicaHost2)
-                                                .build();
-
+	public static StorageMessages.StorageMessageWrapper buildStoreRequest(String filename, long fileSize) {
 		StorageMessages.StoreRequest storeRequest = StorageMessages.StoreRequest
                                             .newBuilder()
                                             .setFileName(filename)
 				                            .setFileSize(fileSize)
-                                            .setReplicaAssignments(replicaAssignments)
                                             .build();
 
 		return StorageMessages.StorageMessageWrapper.newBuilder().setStoreRequest(storeRequest).build();

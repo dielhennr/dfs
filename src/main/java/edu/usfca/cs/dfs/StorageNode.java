@@ -234,7 +234,7 @@ public class StorageNode implements DFSNode {
 
             /* Client should know how many chunk we are receiving from first chunk */
 			StorageMessages.StorageMessageWrapper chunk = Builders.buildStoreChunk(healResponse.getFileName(),
-					healResponse.getPassTo(), healResponse.getChunkId(), 0, healResponse.getData());
+					healResponse.getPassTo(), healResponse.getChunkId(), healResponse.getTotalChunks(), healResponse.getData());
 			/* Shoot the healed chunk back to client if we are done healing */
 			if (message.getHealResponse().getPassTo().equals(this.hostname)) {
 				logger.info("Shooting healed chunk to client.");
@@ -479,7 +479,7 @@ public class StorageNode implements DFSNode {
 							String passTo = healRequest.getInitialLocation();
 
 							StorageMessages.HealResponse validChunk = StorageMessages.HealResponse.newBuilder()
-									.setFileName(filename).setChunkId(chunkID).setPassTo(passTo)
+									.setFileName(filename).setChunkId(chunkID).setTotalChunks(chunk.totalChunks).setPassTo(passTo)
 									.setData(ByteString.copyFrom(data)).build();
 
 							healedChunk = StorageMessages.StorageMessageWrapper.newBuilder().setHealResponse(validChunk)

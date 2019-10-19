@@ -71,8 +71,7 @@ public class Controller implements DFSNode {
                     first.replicaAssignment2 = thisRequest;
 
                     first.ctx.pipeline().writeAndFlush(
-                            Builders.buildReplicaAssignments(first.replicaAssignment1.getHostName(), first.replicaAssignment2.getHostName()))
-                        .syncUninterruptibly();
+                            Builders.buildReplicaAssignments(first.replicaAssignment1.getHostName(), first.replicaAssignment2.getHostName()));
                     logger.info("writing assignments " + first.getHostName() + " assigned to " + first.replicaAssignment1.getHostName() + " and " + first.replicaAssignment2.getHostName());
                     
                     second.replicaAssignment1 = thisRequest;
@@ -80,16 +79,14 @@ public class Controller implements DFSNode {
                     
                     /* And second */
                     second.ctx.pipeline().writeAndFlush(
-                            Builders.buildReplicaAssignments(second.replicaAssignment1.getHostName(), second.replicaAssignment2.getHostName()))
-                        .syncUninterruptibly();
+                            Builders.buildReplicaAssignments(second.replicaAssignment1.getHostName(), second.replicaAssignment2.getHostName()));
 
                     thisRequest.replicaAssignment1 = first;
                     thisRequest.replicaAssignment2 = second;
 
                     /* Send thisRequest its assignments */
                     thisRequest.ctx.pipeline().writeAndFlush(
-                            Builders.buildReplicaAssignments(thisRequest.replicaAssignment1.getHostName(), thisRequest.replicaAssignment2.getHostName()))
-                        .syncUninterruptibly();
+                            Builders.buildReplicaAssignments(thisRequest.replicaAssignment1.getHostName(), thisRequest.replicaAssignment2.getHostName()));
 
                     storageNodes.add(first);
                     storageNodes.add(second);

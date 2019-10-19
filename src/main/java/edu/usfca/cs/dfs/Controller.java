@@ -336,7 +336,7 @@ public class Controller implements DFSNode {
                 * */
                 String downNodeReplicaAssignment2Hostname = downNodeReplicaAssignment2.getHostName();
                 StorageMessages.StorageMessageWrapper replicaMergeRequest = Builders.buildMergeReplicasOnFailure(downHost, downNodeReplicaAssignment2Hostname);
-                
+                logger.info("New primary holder for merge of " + downNode + " -> " + newPrimaryHolder);
                 cf = bootstrap.connect(newPrimaryHolder, 13114);
                 cf.syncUninterruptibly();
                 

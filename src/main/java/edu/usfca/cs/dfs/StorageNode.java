@@ -360,6 +360,7 @@ public class StorageNode implements DFSNode {
             synchronized (hostnameToChunks) {
                 ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
                 logger.info("Request to merge " + downNode + " into " + location2); 
+                logger.info("My replica assignments " + replicaHosts.toString());
                 
                 /* We are now the primary owner of the data so merge down node's with ours */
                 this.hostnameToChunks.putIfAbsent(this.hostname, new ArrayList<>());
@@ -434,6 +435,7 @@ public class StorageNode implements DFSNode {
         } else if (message.hasSimplyMerge()) {
             String newOwner = message.getSimplyMerge().getOwner();
             String passedFrom = message.getSimplyMerge().getOwnershipPassedFrom();
+            logger.info("Request recieved to simply merge " + passedFrom + " into " + newOwner);
             synchronized(hostnameToChunks) {
                 hostnameToChunks.putIfAbsent(newOwner, new ArrayList<ChunkWrapper>());
                 hostnameToChunks.get(newOwner).addAll(hostnameToChunks.get(passedFrom));
@@ -446,6 +448,7 @@ public class StorageNode implements DFSNode {
              * rereplication of this data and we can delete the key.
              */
 			String nodeToDelete = message.getDeleteData().getDownNode();
+            logger.info("Request recieved to simply delete data of " + nodeToDelete);
             synchronized (hostnameToChunks) {
 			    hostnameToChunks.remove(nodeToDelete);
             }

@@ -262,17 +262,16 @@ public class StorageNode implements DFSNode {
             * change its assignment that was the down node to the newReplicaAssignment, and
             * send its chunks to the new node assignment.
             * 
-            * 
             * CHange this nodes replica assignment that was the down node, to the new
             * replicaAssignment and send chunks on this node that are this node's primary
             * chunks to the newReplicaAssignment 
             */
             synchronized(replicaHosts) {
-                if (this.replicaHosts.get(0) == downNode) {
+                if (this.replicaHosts.get(0).equals(downNode)) {
                     logger.info("Took new assignment " + newReplicaAssignment  + " because old assignment " + this.replicaHosts.get(0) + " went down.");
                     this.replicaHosts.remove(0);
                     this.replicaHosts.add(0, newReplicaAssignment);
-                } else if (replicaHosts.get(1) == downNode) {
+                } else if (replicaHosts.get(1).equals(downNode)) {
                     logger.info("Took new assignment " + newReplicaAssignment  + " because old assignment " + this.replicaHosts.get(1) + " went down.");
                     this.replicaHosts.remove(1);
                     this.replicaHosts.add(1, newReplicaAssignment);
@@ -422,6 +421,7 @@ public class StorageNode implements DFSNode {
                         chan.close().syncUninterruptibly();
                     }
                 }
+
                 /* If none of our assignments were the down nodes other assignment, send a request to the down
                  * node's other assignment to delete its key for the down node
                  * */

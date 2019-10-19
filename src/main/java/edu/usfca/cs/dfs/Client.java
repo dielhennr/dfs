@@ -50,6 +50,8 @@ public class Client implements DFSNode {
 	/* Chunk Size */
 	Integer chunkSize;
 
+    Integer totalRetrievalChunks;
+
 	/* Clients bootstrap for connecting to controller and storeagenodes */
 	Bootstrap bootstrap;
 
@@ -91,6 +93,8 @@ public class Client implements DFSNode {
 
 		/* Default Chunk size to 50mb */
 		this.chunkSize = arguments.getInteger("-c", 50000000);
+
+        this.totalRetrievalChunks = 0;
 
 		workerGroup = new NioEventLoopGroup();
 		MessagePipeline pipeline = new MessagePipeline(this);
@@ -160,8 +164,7 @@ public class Client implements DFSNode {
 			ChannelFuture cf = bootstrap.connect(message.getStoreResponse().getHostname(), 13114).syncUninterruptibly();
 
 			/*
-			 * Write the request to change the SNs decoder so that it can start receiving
-			 * chunks
+			 * Write the request to overwrite previous data under this filename
 			 */
 			ChannelFuture write = cf.channel().writeAndFlush(storeRequest).syncUninterruptibly();
 
@@ -238,10 +241,14 @@ public class Client implements DFSNode {
 			}
 		} else if (message.hasStoreChunk()) {
 			/* Add chunk to our set sorted by chunkID */
+            if (message.getStoreChunk().getChunkId() == 0){
+                this.totalRetrievalChunks = (int) message.getStoreChunk().getTotalChunks();
+            }
+
 			retrievalSet.add(message.getStoreChunk());
 			logger.info("Recieved retrieval chunk. So far we retrieved " + retrievalSet.size());
             logger.info("This chunks says that there are " + message.getStoreChunk().getTotalChunks() + " total chunks");
-			if (retrievalSet.size() == message.getStoreChunk().getTotalChunks()) {
+			if (retrievalSet.size() == this.totalRetrievalChunks) {
 				logger.info("Done with retrieval");
 				this.stitchChunks();
                 ctx.channel().close().syncUninterruptibly();
@@ -264,9 +271,7 @@ public class Client implements DFSNode {
 			
 			ctx.channel().close().syncUninterruptibly();
 			this.workerGroup.shutdownGracefully();
-			
 		}
-
 	}
 
 	/**

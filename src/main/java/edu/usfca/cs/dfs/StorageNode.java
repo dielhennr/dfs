@@ -49,7 +49,6 @@ public class StorageNode implements DFSNode {
 
 	ChannelHandlerContext clientCtx;
 
-	long totalChunks;
 
 	HashMap<String, ArrayList<ChunkWrapper>> chunkMap; // Mapping filenames to the chunks
 	HashMap<String, ArrayList<ChunkWrapper>> hostnameToChunks; // Mapping hostnames chunks
@@ -60,7 +59,6 @@ public class StorageNode implements DFSNode {
 		hostnameToChunks = new HashMap<>();
 		ip = InetAddress.getLocalHost();
 		clientCtx = null;
-		totalChunks = 0;
 		hostname = ip.getHostName();
 		arguments = new ArgumentMap(args);
 		if (arguments.hasFlag("-h") && arguments.hasFlag("-r")) {
@@ -234,8 +232,9 @@ public class StorageNode implements DFSNode {
 			StorageMessages.HealResponse healResponse = message.getHealResponse();
 			ctx.channel().close().syncUninterruptibly();
 
+            /* Client should know how many chunk we are receiving from first chunk */
 			StorageMessages.StorageMessageWrapper chunk = Builders.buildStoreChunk(healResponse.getFileName(),
-					healResponse.getPassTo(), healResponse.getChunkId(), this.totalChunks, healResponse.getData());
+					healResponse.getPassTo(), healResponse.getChunkId(), 0, healResponse.getData());
 			/* Shoot the healed chunk back to client if we are done healing */
 			if (message.getHealResponse().getPassTo().equals(this.hostname)) {
 				logger.info("Shooting healed chunk to client.");
@@ -595,7 +594,6 @@ public class StorageNode implements DFSNode {
 
 						}
 					}
-					totalChunks = chunks.get(0).getTotalChunks();
 					for (ChunkWrapper chunk : chunksToRemove) {
 						chunks.remove(chunk);
 					}

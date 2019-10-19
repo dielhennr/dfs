@@ -145,7 +145,10 @@ public class StorageNode implements DFSNode {
 			}
 
 			logger.info("Request to store " + storeRequest.getFileName() + " size: " + storeRequest.getFileSize());
-		} else if (message.hasStoreChunk()) {
+		} else if (message.hasReplicaAssignments()) {
+            logger.info("FUCK");
+
+        } else if (message.hasStoreChunk()) {
 			/* Write that shit to disk */
 			hostnameToChunks.putIfAbsent(message.getStoreChunk().getOriginHost(), new ArrayList<ChunkWrapper>());
 			chunkMap.putIfAbsent(message.getStoreChunk().getFileName(), new ArrayList<ChunkWrapper>());

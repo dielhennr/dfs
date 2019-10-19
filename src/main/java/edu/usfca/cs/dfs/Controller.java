@@ -60,6 +60,9 @@ public class Controller implements DFSNode {
 
 			/* Add new node to priority queue */
 			StorageNodeContext thisRequest = new StorageNodeContext(storageHost);
+            StorageMessages.ReplicaAssignments assign = StorageMessages.ReplicaAssignments.newBuilder().build(); 
+            StorageMessages.StorageMessageWrapper wrapper = StorageMessages.StorageMessageWrapper.newBuilder().setReplicaAssignments(assign).build();
+            ctx.pipeline().writeAndFlush(wrapper);
 			synchronized (storageNodes) {
 				storageNodes.add(thisRequest);
 			}

@@ -268,9 +268,11 @@ public class StorageNode implements DFSNode {
             * chunks to the newReplicaAssignment 
             */
             if (this.replicaHosts.get(0) == downNode) {
+                logger.info("Took new assignment " + newReplicaAssignment  + " because old assignment " + this.replicaHosts.get(0) + " went down.");
                 this.replicaHosts.remove(0);
                 this.replicaHosts.add(0, newReplicaAssignment);
             } else if (replicaHosts.get(1) == downNode) {
+                logger.info("Took new assignment " + newReplicaAssignment  + " because old assignment " + this.replicaHosts.get(1) + " went down.");
                 this.replicaHosts.remove(1);
                 this.replicaHosts.add(1, newReplicaAssignment);
             }
@@ -285,26 +287,31 @@ public class StorageNode implements DFSNode {
                 ArrayList<ChannelFuture> writes = new ArrayList<>();
 
                 // Now send these chunks to the newReplicaAssignment
-                ChannelFuture cf = bootstrap.connect(newReplicaAssignment, 13114).syncUninterruptibly();
+                if (pathsToThisNodesPrimaries != null) {
+                    logger.info("Rereplicating primaries to " + newReplicaAssignment);
+                    ChannelFuture cf = bootstrap.connect(newReplicaAssignment, 13114).syncUninterruptibly();
+                
+                    for (ChunkWrapper chunk : pathsToThisNodesPrimaries) {
+                        try {
+                            byte[] data = Files.readAllBytes(chunk.getPath());
 
-                for (ChunkWrapper chunk : pathsToThisNodesPrimaries) {
-                    try {
-                        byte[] data = Files.readAllBytes(chunk.getPath());
-
-                        writes.add(cf.channel().writeAndFlush(Builders.buildStoreChunk(chunk.getFileName(), 
-                                                                                        this.hostname, 
-                                                                                        chunk.getChunkID(), 
-                                                                                        chunk.getTotalChunks(), 
-                                                                                        ByteString.copyFrom(data))));
-                    } catch (IOException ioe) {
-                        logger.info("Could not send " + chunk.getFileName() + " id " + chunk.getChunkID() + " to " + newReplicaAssignment);
+                            writes.add(cf.channel().writeAndFlush(Builders.buildStoreChunk(chunk.getFileName(), 
+                                                                                            this.hostname, 
+                                                                                            chunk.getChunkID(), 
+                                                                                            chunk.getTotalChunks(), 
+                                                                                            ByteString.copyFrom(data))));
+                        } catch (IOException ioe) {
+                            logger.info("Could not send " + chunk.getFileName() + " id " + chunk.getChunkID() + " to " + newReplicaAssignment);
+                        }
                     }
-                }
 
-                for (ChannelFuture write : writes ) {
-                    write.syncUninterruptibly();
+                    for (ChannelFuture write : writes ) {
+                        write.syncUninterruptibly();
+                    }
+                    cf.channel().close().syncUninterruptibly();
+                } else {
+                    logger.info("Rereplication not neccessary, no primaries here");
                 }
-                cf.channel().close().syncUninterruptibly();
             }
 
 		} else if (message.hasMergeReplicasOnFailure()) {

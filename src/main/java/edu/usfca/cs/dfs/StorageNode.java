@@ -359,6 +359,7 @@ public class StorageNode implements DFSNode {
 
             synchronized (hostnameToChunks) {
                 ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
+                logger.info("Request to merge " + downNode + " into " + location2); 
                 
                 /* We are now the primary owner of the data so merge down node's with ours */
                 this.hostnameToChunks.putIfAbsent(this.hostname, new ArrayList<>());
@@ -434,6 +435,7 @@ public class StorageNode implements DFSNode {
             String newOwner = message.getSimplyMerge().getOwner();
             String passedFrom = message.getSimplyMerge().getOwnershipPassedFrom();
             synchronized(hostnameToChunks) {
+                hostnameToChunks.putIfAbsent(newOwner, new ArrayList<ChunkWrapper>());
                 hostnameToChunks.get(newOwner).addAll(hostnameToChunks.get(passedFrom));
                 hostnameToChunks.remove(passedFrom);
             }

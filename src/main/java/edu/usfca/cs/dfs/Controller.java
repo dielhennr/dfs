@@ -61,14 +61,14 @@ public class Controller implements DFSNode {
 			/* Add new node to priority queue */
 			StorageNodeContext thisRequest = new StorageNodeContext(storageHost, ctx);
 			synchronized (storageNodes) {
-				storageNodes.add(thisRequest);
-                if (storageNodes.size() == 3) {
-                    for (StorageNodeContext sn : storageNodes) {
-                        StorageMessages.ReplicaAssignments assign = StorageMessages.ReplicaAssignments.newBuilder().build(); 
-                        StorageMessages.StorageMessageWrapper wrapper = StorageMessages.StorageMessageWrapper.newBuilder().setReplicaAssignments(assign).build();
-                        sn.ctx.pipeline().writeAndFlush(wrapper);
-                    }
+                if (storageNodes.size() == 2) {
+                    StorageNodeContext sn2 = storageNodes.poll();
+                    StorageNodeContext sn3 = storageNodes.poll();
+                    StorageMessages.ReplicaAssignments assign = StorageMessages.ReplicaAssignments.newBuilder().setReplica1(sn2.getHostName()).setReplica2(sn3.getHostName()).build(); 
+                    StorageMessages.StorageMessageWrapper wrapper = StorageMessages.StorageMessageWrapper.newBuilder().setReplicaAssignments(assign).build();
+                    thisRequest.ctx.pipeline().writeAndFlush(wrapper);
                 }
+				storageNodes.add(thisRequest);
 			}
 
 		} else if (message.hasHeartbeat()) {

@@ -146,7 +146,7 @@ public class StorageNode implements DFSNode {
 
 			logger.info("Request to store " + storeRequest.getFileName() + " size: " + storeRequest.getFileSize());
 		} else if (message.hasReplicaAssignments()) {
-            logger.info("FUCK");
+            logger.info("FUCK " + message.getReplicaAssignments().getReplica1() + " " + message.getReplicaAssignments().getReplica2());
 
         } else if (message.hasStoreChunk()) {
 			/* Write that shit to disk */

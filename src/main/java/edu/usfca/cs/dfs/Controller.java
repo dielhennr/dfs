@@ -112,7 +112,9 @@ public class Controller implements DFSNode {
         } else if (storageNodes.size() > 2) {
           Iterator<StorageNodeContext> iter = storageNodes.iterator();
           thisRequest.replicaAssignment1 = iter.next();
+          iter.remove();
           thisRequest.replicaAssignment2 = iter.next();
+          iter.remove();
 
           /* Send thisRequest its assignments */
           thisRequest
@@ -129,6 +131,8 @@ public class Controller implements DFSNode {
                   + thisRequest.replicaAssignment1.getHostName()
                   + " and "
                   + thisRequest.replicaAssignment2.getHostName());
+          storageNodes.add(thisRequest.replicaAssignment1);
+          storageNodes.add(thisRequest.replicaAssignment2);
         } else {
           logger.info("Need more nodes in the network to make replica assignments");
         }

@@ -134,20 +134,30 @@ public class StorageNode implements DFSNode {
 	public void onMessage(ChannelHandlerContext ctx, StorageMessageWrapper message) {
 		if (message.hasStoreRequest()) {
 			StorageMessages.StoreRequest storeRequest = message.getStoreRequest();
+
+			logger.info("Request to store " + storeRequest.getFileName() + " size: " + storeRequest.getFileSize());
+
+			Path storeRequestOverwrite = Paths.get(rootDirectory.toString(), storeRequest.getFileName());
+            try {
+                Files.deleteIfExists(storeRequestOverwrite);
+            } catch (IOException ioe) {
+                logger.info("Could not overwrite " + storeRequest.getFileName());
+            }
+
+		} else if (message.hasReplicaAssignments()) {
+            logger.info("FUCK " + message.getReplicaAssignments().getReplica1() + " " + message.getReplicaAssignments().getReplica2());
+
 			/* Only accept first replica assignments for now */
 			if (replicaHosts.isEmpty()) {
-				replicaHosts.add(storeRequest.getReplicaAssignments().getReplica1());
-				replicaHosts.add(storeRequest.getReplicaAssignments().getReplica2());
-				logger.info("Replica Assignment 1: " + storeRequest.getReplicaAssignments().getReplica1());
-				logger.info("Replica Assignment 2: " + storeRequest.getReplicaAssignments().getReplica2());
+				replicaHosts.add(message.getReplicaAssignments().getReplica1());
+				replicaHosts.add(message.getReplicaAssignments().getReplica2());
+				logger.info("Replica Assignment 1: " + message.getReplicaAssignments().getReplica1());
+				logger.info("Replica Assignment 2: " + message.getReplicaAssignments().getReplica2());
 			} else {
 				logger.info("Rejecting Assignment");
 			}
 
-			logger.info("Request to store " + storeRequest.getFileName() + " size: " + storeRequest.getFileSize());
-		} else if (message.hasReplicaAssignments()) {
-            logger.info("FUCK " + message.getReplicaAssignments().getReplica1() + " " + message.getReplicaAssignments().getReplica2());
-
+            ctx.channel().close().syncUninterruptibly();
         } else if (message.hasStoreChunk()) {
 			/* Write that shit to disk */
 			hostnameToChunks.putIfAbsent(message.getStoreChunk().getOriginHost(), new ArrayList<ChunkWrapper>());

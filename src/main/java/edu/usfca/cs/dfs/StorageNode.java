@@ -434,6 +434,10 @@ public class StorageNode implements DFSNode {
 
       synchronized (hostnameToChunks) {
         ArrayList<ChunkWrapper> pathsToDownNodesData = this.hostnameToChunks.get(downNode);
+        if (pathsToDownNodesData == null) {
+          logger.info("Refusing request to merge, none of down node's data here");
+          return;
+        }
         logger.info("Request to merge " + downNode + " into " + location2);
         logger.info("My replica assignments " + replicaHosts.toString());
 

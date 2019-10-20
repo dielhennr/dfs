@@ -12,7 +12,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -22,8 +21,6 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -297,7 +294,6 @@ public class StorageNode implements DFSNode {
             bootstrap.connect(message.getHealResponse().getPassTo(), 13114).syncUninterruptibly();
         cf.channel().writeAndFlush(message).syncUninterruptibly();
       }
-
       /* Intermediate node and primary node write healed chunk to disk */
       this.writeChunk(chunk);
     } else if (message.hasReplicateToNewAssignment()) {
@@ -363,6 +359,8 @@ public class StorageNode implements DFSNode {
           for (ChunkWrapper chunk : pathsToThisNodesPrimaries) {
             try {
               byte[] data = Files.readAllBytes(chunk.getPath());
+
+              data = chunk.isCompressed ? Compressor.decompress(data) : data;
 
               writes.add(
                   cf.channel()
@@ -476,6 +474,9 @@ public class StorageNode implements DFSNode {
               for (ChunkWrapper chunk : pathsToDownNodesData) {
                 try {
                   byte[] data = Files.readAllBytes(chunk.getPath());
+                  if (chunk.isCompressed) {
+                    data = Compressor.decompress(data);
+                  }
                   StorageMessages.StorageMessageWrapper replicaChunk =
                       Builders.buildStoreChunk(
                           chunk.getFileName(),
@@ -554,14 +555,11 @@ public class StorageNode implements DFSNode {
         if (chunk.chunkID == chunkID) {
           try {
             byte[] data = Files.readAllBytes(chunk.getPath());
+
             if (chunk.isCompressed) {
-              ByteArrayOutputStream out = new ByteArrayOutputStream();
-              InflaterOutputStream infl = new InflaterOutputStream(out);
-              infl.write(data);
-              infl.flush();
-              infl.close();
-              data = out.toByteArray();
+              data = Compressor.decompress(data);
             }
+
             if (chunk.checksum.equals(Checksum.SHAsum(data))) {
               String passTo = healRequest.getInitialLocation();
 
@@ -606,7 +604,7 @@ public class StorageNode implements DFSNode {
         synchronized (chunks) {
           for (ChunkWrapper chunk : chunks) {
             Path chunkPath = chunk.getPath();
-            ByteString data = null;
+            byte[] data = null;
             String checksumCheck = null;
 
             /*
@@ -616,17 +614,12 @@ public class StorageNode implements DFSNode {
             if (Files.exists(chunkPath)) {
               /* Read the chunk and compute it's checksum */
               try {
-                data = ByteString.copyFrom(Files.readAllBytes(chunkPath));
+                data = Files.readAllBytes(chunkPath);
                 if (chunk.isCompressed) {
-                  ByteArrayOutputStream out = new ByteArrayOutputStream();
-                  InflaterOutputStream infl = new InflaterOutputStream(out);
-                  infl.write(data.toByteArray());
-                  infl.flush();
-                  infl.close();
-                  data = ByteString.copyFrom(out.toByteArray());
+                  data = Compressor.decompress(data);
                   logger.info("Decompressing chunk");
                 }
-                checksumCheck = Checksum.SHAsum(data.toByteArray());
+                checksumCheck = Checksum.SHAsum(data);
               } catch (IOException | NoSuchAlgorithmException ioe) {
                 logger.info("Could not read chunk to send to client");
               }
@@ -684,7 +677,7 @@ public class StorageNode implements DFSNode {
                         this.hostname,
                         chunk.getChunkID(),
                         chunk.getTotalChunks(),
-                        data);
+                        ByteString.copyFrom(data));
                 this.clientCtx.pipeline().writeAndFlush(chunkToSend);
               }
             } else {
@@ -789,13 +782,6 @@ public class StorageNode implements DFSNode {
       if ((1 - (Entropy.entropy(data) / 8)) > 0.6) {
         isCompressed = true;
         logger.info("Compressing chunk and writing to disk");
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        DeflaterOutputStream deflater = new DeflaterOutputStream(outputStream);
-        deflater.write(data);
-        deflater.flush();
-        deflater.close();
-        Files.write(path, outputStream.toByteArray());
-        outputStream.close();
       }
 
       /*
@@ -810,6 +796,7 @@ public class StorageNode implements DFSNode {
               message.getStoreChunk().getTotalChunks(),
               checksum,
               isCompressed);
+
       synchronized (hostnameToChunks) {
         hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(chunk);
       }
@@ -827,10 +814,9 @@ public class StorageNode implements DFSNode {
                     checksum,
                     isCompressed));
       }
-      if (!isCompressed) {
-        /* Write chunk to disk */
-        Files.write(path, data);
-      }
+
+      /* Write chunk to disk */
+      Files.write(path, isCompressed ? Compressor.compress(data) : data);
     } catch (IOException | NoSuchAlgorithmException ioe) {
       logger.info("Could not write file/sha1sum not computed properly");
     }

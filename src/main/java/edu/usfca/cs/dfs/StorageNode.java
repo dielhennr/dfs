@@ -12,6 +12,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.zip.DeflaterOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -763,8 +765,19 @@ public class StorageNode implements DFSNode {
                   + message.getStoreChunk().getChunkId()
                   + "#"
                   + checksum);
-
-      logger.info("Entropy of " + path + " ->" + Entropy.entropy(data));
+      /* If the maximum compression is greater than 60% we will compress the chunk */
+      boolean isCompressed = false;
+      if ((1 - (Entropy.entropy(data) / 8)) > 0.6) {
+        isCompressed = true;
+        logger.info("Compressing chunk and writing to disk");
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        DeflaterOutputStream deflater = new DeflaterOutputStream(outputStream);
+        deflater.write(data);
+        deflater.flush();
+        deflater.close();
+        Files.write(path, outputStream.toByteArray());
+        outputStream.close();
+      }
 
       /*
        * Add this path to the mapping of hosts to thier paths, we will use this to
@@ -776,7 +789,8 @@ public class StorageNode implements DFSNode {
               fileName,
               message.getStoreChunk().getChunkId(),
               message.getStoreChunk().getTotalChunks(),
-              checksum);
+              checksum,
+              isCompressed);
       synchronized (hostnameToChunks) {
         hostnameToChunks.get(message.getStoreChunk().getOriginHost()).add(chunk);
       }
@@ -791,11 +805,13 @@ public class StorageNode implements DFSNode {
                     fileName,
                     message.getStoreChunk().getChunkId(),
                     message.getStoreChunk().getTotalChunks(),
-                    checksum));
+                    checksum,
+                    isCompressed));
       }
-
-      /* Write chunk to disk */
-      Files.write(path, data);
+      if (!isCompressed) {
+        /* Write chunk to disk */
+        Files.write(path, data);
+      }
     } catch (IOException | NoSuchAlgorithmException ioe) {
       logger.info("Could not write file/sha1sum not computed properly");
     }

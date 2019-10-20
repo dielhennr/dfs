@@ -9,14 +9,22 @@ public class ChunkWrapper {
   long chunkID;
   long totalChunks;
   String checksum;
+  boolean isCompressed;
 
   public ChunkWrapper(
-      Path pathToChunk, String fileName, long chunkID, long totalChunks, String checksum) {
+      Path pathToChunk,
+      String fileName,
+      long chunkID,
+      long totalChunks,
+      String checksum,
+      boolean isCompressed) {
+
     this.pathToChunk = pathToChunk;
     this.fileName = fileName;
     this.chunkID = chunkID;
     this.totalChunks = totalChunks;
     this.checksum = checksum;
+    this.isCompressed = isCompressed;
   }
 
   public Path getPath() {

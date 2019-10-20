@@ -44,9 +44,7 @@ public class Entropy {
 
       double freq = (double) charCounts[i] / input.length;
       entropy -= freq * (Math.log(freq) / Math.log(2));
-      System.out.println(entropy);
     }
-
     return entropy;
   }
 }

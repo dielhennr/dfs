@@ -783,6 +783,7 @@ public class StorageNode implements DFSNode {
                   + message.getStoreChunk().getChunkId()
                   + "#"
                   + checksum);
+
       /* If the maximum compression is greater than 60% we will compress the chunk */
       boolean isCompressed = false;
       if ((1 - (Entropy.entropy(data) / 8)) > 0.6) {

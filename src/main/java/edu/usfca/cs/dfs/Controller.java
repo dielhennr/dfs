@@ -119,6 +119,10 @@ public class Controller implements DFSNode {
                   + thisRequest.replicaAssignment1.getHostName()
                   + " and "
                   + thisRequest.replicaAssignment2.getHostName());
+
+          storageNodes.add(first);
+          storageNodes.add(second);
+
         } else if (storageNodes.size() > 2) {
           /* Find assignments and remove them from the queue */
           Iterator<StorageNodeContext> iter = storageNodes.iterator();
@@ -145,13 +149,12 @@ public class Controller implements DFSNode {
                   + thisRequest.replicaAssignment2.getHostName());
 
           /* Put assignments back in the queue */
+          storageNodes.add(thisRequest.replicaAssignment1);
+          storageNodes.add(thisRequest.replicaAssignment2);
         } else {
           logger.info("Need more nodes in the network to make replica assignments");
         }
 
-        /* Add new node and assignments to priority queue */
-        storageNodes.add(thisRequest.replicaAssignment1);
-        storageNodes.add(thisRequest.replicaAssignment2);
         storageNodes.add(thisRequest);
       }
 

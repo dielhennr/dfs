@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -553,6 +554,14 @@ public class StorageNode implements DFSNode {
         if (chunk.chunkID == chunkID) {
           try {
             byte[] data = Files.readAllBytes(chunk.getPath());
+            if (chunk.isCompressed) {
+              ByteArrayOutputStream out = new ByteArrayOutputStream();
+              InflaterOutputStream infl = new InflaterOutputStream(out);
+              infl.write(data);
+              infl.flush();
+              infl.close();
+              data = out.toByteArray();
+            }
             if (chunk.checksum.equals(Checksum.SHAsum(data))) {
               String passTo = healRequest.getInitialLocation();
 
@@ -608,6 +617,15 @@ public class StorageNode implements DFSNode {
               /* Read the chunk and compute it's checksum */
               try {
                 data = ByteString.copyFrom(Files.readAllBytes(chunkPath));
+                if (chunk.isCompressed) {
+                  ByteArrayOutputStream out = new ByteArrayOutputStream();
+                  InflaterOutputStream infl = new InflaterOutputStream(out);
+                  infl.write(data.toByteArray());
+                  infl.flush();
+                  infl.close();
+                  data = ByteString.copyFrom(out.toByteArray());
+                }
+
                 checksumCheck = Checksum.SHAsum(data.toByteArray());
               } catch (IOException | NoSuchAlgorithmException ioe) {
                 logger.info("Could not read chunk to send to client");

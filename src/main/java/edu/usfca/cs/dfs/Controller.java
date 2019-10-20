@@ -56,7 +56,6 @@ public class Controller implements DFSNode {
       String storageHost = message.getJoinRequest().getNodeName();
       logger.info("Recieved join request from " + storageHost);
 
-      /* Add new node to priority queue */
       StorageNodeContext thisRequest = new StorageNodeContext(storageHost, ctx);
       synchronized (storageNodes) {
         if (storageNodes.size() == 2) {
@@ -65,16 +64,17 @@ public class Controller implements DFSNode {
            **/
           StorageNodeContext first = storageNodes.poll();
           StorageNodeContext second = storageNodes.poll();
+
+          /* Build and send assignments to first node */
           first.replicaAssignment1 = second;
           first.replicaAssignment2 = thisRequest;
 
-          first
-              .ctx
-              .pipeline()
-              .writeAndFlush(
-                  Builders.buildReplicaAssignments(
-                      first.replicaAssignment1.getHostName(),
-                      first.replicaAssignment2.getHostName()));
+          StorageMessages.StorageMessageWrapper firstAssignments =
+              Builders.buildReplicaAssignments(
+                  first.replicaAssignment1.getHostName(), first.replicaAssignment2.getHostName());
+
+          first.ctx.pipeline().writeAndFlush(firstAssignments);
+
           logger.info(
               "writing assignments "
                   + first.getHostName()
@@ -83,47 +83,35 @@ public class Controller implements DFSNode {
                   + " and "
                   + first.replicaAssignment2.getHostName());
 
+          /* And second */
           second.replicaAssignment1 = thisRequest;
           second.replicaAssignment2 = first;
 
-          /* And second */
-          second
-              .ctx
-              .pipeline()
-              .writeAndFlush(
-                  Builders.buildReplicaAssignments(
-                      second.replicaAssignment1.getHostName(),
-                      second.replicaAssignment2.getHostName()));
+          StorageMessages.StorageMessageWrapper secondAssignments =
+              Builders.buildReplicaAssignments(
+                  second.replicaAssignment1.getHostName(), second.replicaAssignment2.getHostName());
 
+          second.ctx.pipeline().writeAndFlush(secondAssignments);
+
+          logger.info(
+              "writing assignments "
+                  + second.getHostName()
+                  + " assigned to "
+                  + second.replicaAssignment1.getHostName()
+                  + " and "
+                  + second.replicaAssignment2.getHostName());
+
+          /* Build assignments for thisRequest */
           thisRequest.replicaAssignment1 = first;
           thisRequest.replicaAssignment2 = second;
 
-          /* Send thisRequest its assignments */
-          thisRequest
-              .ctx
-              .pipeline()
-              .writeAndFlush(
-                  Builders.buildReplicaAssignments(
-                      thisRequest.replicaAssignment1.getHostName(),
-                      thisRequest.replicaAssignment2.getHostName()));
+          StorageMessages.StorageMessageWrapper replicaAssignments =
+              Builders.buildReplicaAssignments(
+                  thisRequest.replicaAssignment1.getHostName(),
+                  thisRequest.replicaAssignment2.getHostName());
 
-          storageNodes.add(first);
-          storageNodes.add(second);
-        } else if (storageNodes.size() > 2) {
-          Iterator<StorageNodeContext> iter = storageNodes.iterator();
-          thisRequest.replicaAssignment1 = iter.next();
-          iter.remove();
-          thisRequest.replicaAssignment2 = iter.next();
-          iter.remove();
+          thisRequest.ctx.pipeline().writeAndFlush(replicaAssignments);
 
-          /* Send thisRequest its assignments */
-          thisRequest
-              .ctx
-              .pipeline()
-              .writeAndFlush(
-                  Builders.buildReplicaAssignments(
-                      thisRequest.replicaAssignment1.getHostName(),
-                      thisRequest.replicaAssignment2.getHostName()));
           logger.info(
               "writing assignments "
                   + thisRequest.getHostName()
@@ -131,11 +119,39 @@ public class Controller implements DFSNode {
                   + thisRequest.replicaAssignment1.getHostName()
                   + " and "
                   + thisRequest.replicaAssignment2.getHostName());
-          storageNodes.add(thisRequest.replicaAssignment1);
-          storageNodes.add(thisRequest.replicaAssignment2);
+        } else if (storageNodes.size() > 2) {
+          /* Find assignments and remove them from the queue */
+          Iterator<StorageNodeContext> iter = storageNodes.iterator();
+          thisRequest.replicaAssignment1 = iter.next();
+          iter.remove();
+          thisRequest.replicaAssignment2 = iter.next();
+          iter.remove();
+
+          /* Build assignments for thisRequest */
+          StorageMessages.StorageMessageWrapper replicaAssignments =
+              Builders.buildReplicaAssignments(
+                  thisRequest.replicaAssignment1.getHostName(),
+                  thisRequest.replicaAssignment2.getHostName());
+
+          /* Send thisRequest its assignments */
+          thisRequest.ctx.pipeline().writeAndFlush(replicaAssignments);
+
+          logger.info(
+              "writing assignments "
+                  + thisRequest.getHostName()
+                  + " assigned to "
+                  + thisRequest.replicaAssignment1.getHostName()
+                  + " and "
+                  + thisRequest.replicaAssignment2.getHostName());
+
+          /* Put assignments back in the queue */
         } else {
           logger.info("Need more nodes in the network to make replica assignments");
         }
+
+        /* Add new node and assignments to priority queue */
+        storageNodes.add(thisRequest.replicaAssignment1);
+        storageNodes.add(thisRequest.replicaAssignment2);
         storageNodes.add(thisRequest);
       }
 
@@ -332,15 +348,15 @@ public class Controller implements DFSNode {
        */
       for (StorageNodeContext node : nodesThatNeedNewReplicaAssignments) {
         String nodeName = node.getHostName();
-        /*
-            Here we iterate through the storagenode queue to find a new node that they can use
-            as a new replica assignment. The logic is such:
-            Find a node that that is not an assignment of the current
-            node we are iterating on, and also make sure that the current node
-            we are looking at is not the same node as the node we are trying to
-            find a new replica assignment for. Otherwise it is possible that the target
-            node (new node assignment) can be the same as the node we send the message to
-        */
+
+        /**
+         * Here we iterate through the storagenode queue to find a new node that they can use as a
+         * new replica assignment. The logic is such: Find a node that that is not an assignment of
+         * the current node we are iterating on, and also make sure that the current node we are
+         * looking at is not the same node as the node we are trying to find a new replica
+         * assignment for. Otherwise it is possible that the target node (new node assignment) can
+         * be the same as the node we send the message to
+         */
         iter = storageNodes.iterator();
         while (iter.hasNext()) {
           StorageNodeContext currNode = iter.next();
@@ -348,6 +364,11 @@ public class Controller implements DFSNode {
               && (currNode != node.replicaAssignment2)
               && (currNode != node)) {
             targetHost = currNode.getHostName();
+            if (node.replicaAssignment1 == downNode) {
+              node.replicaAssignment1 = currNode;
+            } else if (node.replicaAssignment2 == downNode) {
+              node.replicaAssignment2 = currNode;
+            }
             break;
           }
         }
@@ -362,40 +383,37 @@ public class Controller implements DFSNode {
         chan.close().syncUninterruptibly();
       }
 
-      /* Now we are done getting nodes that were replicating to down node's new assignments, but we are not done */
+      /* Now we are done getting nodes that were replicating to down node new assignments, but we are not done */
 
       /* We will sleep here for a second to ensure that all nodes recieve their new assignments, and then we will request a merge
        * of the down node's primary metadata into the new primary node
        * */
 
-      /* If this node had no assignments it means we do not need to merge anything because no primaries were stored here done (should never be false regardless)*/
-      if (downNodeReplicaAssignment1 != null && downNodeReplicaAssignment2 != null) {
-        /* We will pick the first replica assingment of the down node to be the new primary holder of the data */
-        String newPrimaryHolder = downNodeReplicaAssignment1.getHostName();
+      /* We will pick the first replica assingment of the down node to be the new primary holder of the data */
+      String newPrimaryHolder = downNodeReplicaAssignment1.getHostName();
 
-        /* Merge the down node's bloom filter into the new primarys for routing purposes */
-        downNodeReplicaAssignment1.getFilter().mergeFilter(downNode.getFilter());
+      /* Merge the down node's bloom filter into the new primarys for routing purposes */
+      downNodeReplicaAssignment1.getFilter().mergeFilter(downNode.getFilter());
 
-        /* Send message to the down node's first replica assignment, telling it which node went down and that nodes other assignment
-         * This node will merge the down nodes data with it's primary data. Then it will check if the down nodes second replica assignment
-         * is one of its own as well. If it is, it will ask downNodeReplicaAssignment2 to merge downNodes data with it's data and delete its
-         * key for downnode, and then send down nodes data to its other replica assignment under the new primary key. If they don't have the same assignments,
-         * the new primary holder sends the data of down node to both of it's assignments and then tells downNodeReplicaAssignment2 to delete it's data
-         * for down node
-         * */
-        String downNodeReplicaAssignment2Hostname = downNodeReplicaAssignment2.getHostName();
-        StorageMessages.StorageMessageWrapper replicaMergeRequest =
-            Builders.buildMergeReplicasOnFailure(downHost, downNodeReplicaAssignment2Hostname);
-        logger.info("New primary holder for merge of " + downNode + " -> " + newPrimaryHolder);
-        cf = bootstrap.connect(newPrimaryHolder, 13114);
-        cf.syncUninterruptibly();
+      /* Send message to the down node's first replica assignment, telling it which node went down and that nodes other assignment
+       * This node will merge the down nodes data with it's primary data. Then it will check if the down nodes second replica assignment
+       * is one of its own as well. If it is, it will ask downNodeReplicaAssignment2 to merge downNodes data with it's data and delete its
+       * key for downnode, and then send down nodes data to its other replica assignment under the new primary key. If they don't have the same assignments,
+       * the new primary holder sends the data of down node to both of it's assignments and then tells downNodeReplicaAssignment2 to delete it's data
+       * for down node
+       * */
+      String downNodeReplicaAssignment2Hostname = downNodeReplicaAssignment2.getHostName();
+      StorageMessages.StorageMessageWrapper replicaMergeRequest =
+          Builders.buildMergeReplicasOnFailure(downHost, downNodeReplicaAssignment2Hostname);
+      logger.info("New primary holder for merge of " + downNode + " -> " + newPrimaryHolder);
+      cf = bootstrap.connect(newPrimaryHolder, 13114);
+      cf.syncUninterruptibly();
 
-        chan = cf.channel();
-        ChannelFuture write = chan.writeAndFlush(replicaMergeRequest);
-        write.syncUninterruptibly();
+      chan = cf.channel();
+      ChannelFuture write = chan.writeAndFlush(replicaMergeRequest);
+      write.syncUninterruptibly();
 
-        chan.close().syncUninterruptibly();
-      }
+      chan.close().syncUninterruptibly();
     }
   }
 }

@@ -764,6 +764,8 @@ public class StorageNode implements DFSNode {
                   + "#"
                   + checksum);
 
+      logger.info("Entropy of " + path + " ->" + Entropy.entropy(data));
+
       /*
        * Add this path to the mapping of hosts to thier paths, we will use this to
        * handle node failures and re-replication

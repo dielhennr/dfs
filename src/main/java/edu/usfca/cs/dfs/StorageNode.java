@@ -624,8 +624,8 @@ public class StorageNode implements DFSNode {
                   infl.flush();
                   infl.close();
                   data = ByteString.copyFrom(out.toByteArray());
+                  logger.info("Decompressing chunk");
                 }
-
                 checksumCheck = Checksum.SHAsum(data.toByteArray());
               } catch (IOException | NoSuchAlgorithmException ioe) {
                 logger.info("Could not read chunk to send to client");

@@ -177,22 +177,8 @@ public class Controller implements DFSNode {
       } else {
 
         synchronized (storageNodes) {
-          StorageNodeContext found = null;
-          for (Iterator<StorageNodeContext> iter = storageNodes.iterator(); iter.hasNext(); ) {
-            StorageNodeContext snctx = iter.next();
-            if (snctx.mightBeThere(message.getStoreRequest().getFileName().getBytes())) {
-              found = snctx;
-              logger.info(
-                  "Found "
-                      + found.getHostName()
-                      + " might already have this file, send store request to overwrite");
-              iter.remove();
-              break;
-            }
-          }
-
-          /* StorageNode with least requests processed should be at the top if we do not need to overwrite */
-          StorageNodeContext storageNodePrimary = found == null ? storageNodes.poll() : found;
+          /* StorageNode with least requests processed should be at the top */
+          StorageNodeContext storageNodePrimary = storageNodes.poll();
 
           /* Bump requests of all assignments since we are about to send a file */
           storageNodePrimary.bumpRequests();

@@ -104,7 +104,7 @@ message StorageMessageWrapper {
         NodeState nodeState = 12;
         MergeReplicasOnFailure mergeReplicasOnFailure = 13;
         ReplicateToNewAssignment replicateToNewAssignment = 14;
-		DeleteData deleteData = 15;
+		    DeleteData deleteData = 15;
         SimplyMerge simplyMerge = 16;
     }
 }

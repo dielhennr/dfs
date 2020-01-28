@@ -12,3 +12,5 @@ Then start at least 3 storage nodes
 
 See the project spec here: https://www.cs.usfca.edu/~mmalensek/cs677/assignments/project-1.html
 
+[embed]report.pdf
+
